@@ -1,6 +1,6 @@
 # Deas
 
-TODO: Write a gem description
+Handler-based web framework powered by Sinatra.
 
 ## Usage
 
