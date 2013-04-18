@@ -1,9 +1,9 @@
 require 'ns-options'
 require 'pathname'
 
+require 'deas/version'
 require 'deas/server'
 require 'deas/sinatra_app'
-require 'deas/version'
 
 ENV['DEAS_ROUTES_FILE'] ||= 'config/routes'
 
@@ -24,7 +24,7 @@ module Deas
 
   def self.init
     require self.config.routes_file
-    @app = Deas::SinatraApp.new(Deas::Server)
+    @app = Deas::SinatraApp.new(Deas::Server.configuration)
   end
 
   module Config
