@@ -11,6 +11,7 @@ module Deas
     class Configuration
       include NsOptions::Proxy
 
+      # Sinatra based options
       option :env,  String,   :default => 'development'
       option :root, Pathname, :default => proc{ File.dirname(Deas.config.routes_file) }
 
@@ -23,7 +24,9 @@ module Deas
       option :sessions,        NsOptions::Boolean, :default => true
       option :static_files,    NsOptions::Boolean, :default => true
 
+      # Deas specific options
       option :init_proc, Proc,   :default => proc{ }
+      option :logger,            :default => proc{ Deas::NullLogger.new }
 
       def initialize
         super
@@ -79,12 +82,25 @@ module Deas
       self.configuration.init_proc = block
     end
 
+    def logger(*args)
+      self.configuration.logger *args
+    end
+
     def self.method_missing(method, *args, &block)
       self.instance.send(method, *args, &block)
     end
 
     def self.respond_to?(*args)
       super || self.instance.respond_to?(*args)
+    end
+
+  end
+
+  class NullLogger
+    require 'logger'
+
+    ::Logger::Severity.constants.each do |name|
+      define_method(name.downcase){|*args| } # no-op
     end
 
   end

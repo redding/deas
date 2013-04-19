@@ -43,6 +43,7 @@ module Deas::SinatraApp
         assert_equal false,                      settings.method_override
         assert_equal false,                      settings.sessions
         assert_equal true,                       settings.static_files
+        assert_equal @configuration.logger,      settings.deas_logger
       end
     end
 
