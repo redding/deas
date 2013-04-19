@@ -9,6 +9,7 @@ module Deas
 
       Class.new(Sinatra::Base).tap do |app|
 
+        # built-in settings
         app.set :environment, server_config.env
         app.set :root,        server_config.root
 
@@ -21,6 +22,9 @@ module Deas
         app.set :method_override, server_config.method_override
         app.set :sessions,        server_config.sessions
         app.set :static,          server_config.static_files
+
+        # custom settings
+        app.set :deas_logger, server_config.logger
 
       end
     end

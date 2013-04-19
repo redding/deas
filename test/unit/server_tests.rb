@@ -26,12 +26,39 @@ class Deas::Server
     end
 
     should "allow setting it's configuration options" do
+      config = subject.configuration
+
       subject.env 'staging'
-      assert_equal 'staging', subject.configuration.env
+      assert_equal 'staging', config.env
+
+      subject.root '/path/to/root'
+      assert_equal '/path/to/root', config.root.to_s
+
+      subject.public_folder '/path/to/public'
+      assert_equal '/path/to/public', config.public_folder.to_s
+
+      subject.views_folder '/path/to/views'
+      assert_equal '/path/to/views', config.views_folder.to_s
+
+      subject.dump_errors true
+      assert_equal true, config.dump_errors
+
+      subject.method_override false
+      assert_equal false, config.method_override
+
+      subject.sessions false
+      assert_equal false, config.sessions
+
+      subject.static_files false
+      assert_equal false, config.static_files
+
+      stdout_logger = Logger.new(STDOUT)
+      subject.logger stdout_logger
+      assert_equal stdout_logger, config.logger
 
       init_proc = proc{ }
       subject.init(&init_proc)
-      assert_equal init_proc, subject.configuration.init_proc
+      assert_equal init_proc, config.init_proc
     end
 
   end
@@ -45,7 +72,7 @@ class Deas::Server
 
     should have_instance_methods :env, :root, :app_file, :public_folder,
       :views_folder, :dump_errors, :method_override, :sessions, :static_files,
-      :init_proc
+      :init_proc, :logger
 
     should "default the env to 'development'" do
       assert_equal 'development', subject.env
@@ -77,6 +104,10 @@ class Deas::Server
       assert_equal true,  subject.method_override
       assert_equal true,  subject.sessions
       assert_equal true,  subject.static_files
+    end
+
+    should "default the logger to a NullLogger" do
+      assert_instance_of Deas::NullLogger, subject.logger
     end
 
   end
