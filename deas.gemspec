@@ -21,5 +21,6 @@ Gem::Specification.new do |gem|
   gem.add_dependency("sinatra",    ["~> 1.4"])
 
   gem.add_development_dependency("assert", ["~> 2.0"])
+  gem.add_development_dependency("assert-mocha",  ["~>1.0"])
 
 end

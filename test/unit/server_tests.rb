@@ -19,7 +19,8 @@ class Deas::Server
     end
     subject{ Deas::Server }
 
-    should have_instance_methods :configuration, :init
+    should have_instance_methods :configuration, :init, :view_handler_ns,
+      :get, :post, :put, :patch, :delete, :route
 
     should "be a singleton" do
       assert_includes Singleton, subject.included_modules
@@ -61,18 +62,94 @@ class Deas::Server
       assert_equal init_proc, config.init_proc
     end
 
+    should "add a GET route using #get" do
+      subject.get('/assets', 'ListAssets')
+
+      route = subject.configuration.routes[0]
+      assert_instance_of Deas::Route, route
+      assert_equal :get,         route.method
+      assert_equal '/assets',    route.path
+      assert_equal 'ListAssets', route.handler_class_name
+    end
+
+    should "add a POST route using #post" do
+      subject.post('/assets', 'CreateAsset')
+
+      route = subject.configuration.routes[0]
+      assert_instance_of Deas::Route, route
+      assert_equal :post,         route.method
+      assert_equal '/assets',     route.path
+      assert_equal 'CreateAsset', route.handler_class_name
+    end
+
+    should "add a PUT route using #put" do
+      subject.put('/assets/:id', 'UpdateAsset')
+
+      route = subject.configuration.routes[0]
+      assert_instance_of Deas::Route, route
+      assert_equal :put,          route.method
+      assert_equal '/assets/:id', route.path
+      assert_equal 'UpdateAsset', route.handler_class_name
+    end
+
+    should "add a PATCH route using #patch" do
+      subject.patch('/assets/:id', 'UpdateAsset')
+
+      route = subject.configuration.routes[0]
+      assert_instance_of Deas::Route, route
+      assert_equal :patch,        route.method
+      assert_equal '/assets/:id', route.path
+      assert_equal 'UpdateAsset', route.handler_class_name
+    end
+
+    should "add a DELETE route using #delete" do
+      subject.delete('/assets/:id', 'DeleteAsset')
+
+      route = subject.configuration.routes[0]
+      assert_instance_of Deas::Route, route
+      assert_equal :delete,       route.method
+      assert_equal '/assets/:id', route.path
+      assert_equal 'DeleteAsset', route.handler_class_name
+    end
+
+    should "allow defining any kind of route using #route" do
+      subject.route(:options, '/get_info', 'GetInfo')
+
+      route = subject.configuration.routes[0]
+      assert_instance_of Deas::Route, route
+      assert_equal :options,    route.method
+      assert_equal '/get_info', route.path
+      assert_equal 'GetInfo',   route.handler_class_name
+    end
+
+    should "set a namespace with #view_handler_ns and " \
+           "use it when defining routes" do
+      subject.view_handler_ns 'MyStuff'
+      assert_equal 'MyStuff', subject.configuration.view_handler_ns
+
+      # should use the ns
+      subject.route(:get, '/ns_test',     'NsTest')
+      route = subject.configuration.routes.last
+      assert_equal 'MyStuff::NsTest', route.handler_class_name
+
+      # should ignore the ns when the leading colons are present
+      subject.route(:post, '/no_ns_test', '::NoNsTest')
+      route = subject.configuration.routes.last
+      assert_equal '::NoNsTest', route.handler_class_name
+    end
+
   end
 
   class ConfigurationTests < BaseTests
     desc "Configuration"
     setup do
-      @configuration = Deas::Server.configuration
+      @configuration = Deas::Server::Configuration.new
     end
     subject{ @configuration }
 
     should have_instance_methods :env, :root, :app_file, :public_folder,
       :views_folder, :dump_errors, :method_override, :sessions, :static_files,
-      :init_proc, :logger
+      :init_proc, :logger, :routes, :view_handler_ns
 
     should "default the env to 'development'" do
       assert_equal 'development', subject.env
@@ -108,6 +185,10 @@ class Deas::Server
 
     should "default the logger to a NullLogger" do
       assert_instance_of Deas::NullLogger, subject.logger
+    end
+
+    should "default routes to an empty array" do
+      assert_equal [], subject.routes
     end
 
   end
