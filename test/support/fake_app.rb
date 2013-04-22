@@ -1,3 +1,4 @@
+require 'deas/logger'
 require 'ostruct'
 
 class FakeApp
@@ -8,7 +9,23 @@ class FakeApp
   attr_accessor :request, :response, :params, :halt, :settings
 
   def initialize
-    @settings = OpenStruct.new({})
+    @request  = FakeRequest.new({})
+    @params   = @request.params
+    @response = FakeResponse.new
+    @settings = OpenStruct.new({
+      :deas_logger => Deas::NullLogger.new
+    })
+  end
+
+  def halt(*args)
+    throw :halt, *args
+  end
+
+  def erb(template_name, *args)
+    "#{template_name} view"
   end
 
 end
+
+FakeRequest  = Struct.new(:params)
+FakeResponse = Struct.new(:code, :headers, :body)

@@ -2,6 +2,7 @@ require 'assert'
 require 'deas/route'
 require 'deas/server'
 require 'deas/sinatra_app'
+require 'sinatra/base'
 require 'test/support/view_handlers'
 
 module Deas::SinatraApp

@@ -4,6 +4,7 @@ require 'pathname'
 require 'deas/version'
 require 'deas/server'
 require 'deas/sinatra_app'
+require 'deas/view_handler'
 
 ENV['DEAS_ROUTES_FILE'] ||= 'config/routes'
 

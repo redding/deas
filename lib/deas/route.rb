@@ -1,4 +1,4 @@
-require 'deas/runner'
+require 'deas/sinatra_runner'
 
 module Deas
 
@@ -18,7 +18,7 @@ module Deas
     end
 
     def run(sinatra_call)
-      Deas::Runner.run(@handler_class, sinatra_call)
+      Deas::SinatraRunner.run(@handler_class, sinatra_call)
     end
 
     private
