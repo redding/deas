@@ -33,8 +33,10 @@ module Deas
     end
 
     # TODO expand this
-    def render(*args)
-      @sinatra_call.erb(*args)
+    def render(template_name, options = nil)
+      options ||= {}
+      options[:locals] = { :view => @handler }.merge(options[:locals] || {})
+      @sinatra_call.erb(template_name, options)
     end
 
     # TODO implement these
