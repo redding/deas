@@ -12,8 +12,10 @@ class MakingRequestsTests < Assert::Context
   should "return a 200 response with a GET to '/show'" do
     get '/show', 'message' => 'this is a test'
 
-    assert_equal 200,                           last_response.status
-    assert_equal "show page: this is a test\n", last_response.body
+    expected_body = "show page: this is a test\n" \
+                    "Stuff: Show Info\n"
+    assert_equal 200,           last_response.status
+    assert_equal expected_body, last_response.body
   end
 
   should "allow halting with a custom response" do

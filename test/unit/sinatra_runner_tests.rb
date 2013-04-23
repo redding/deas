@@ -1,5 +1,7 @@
 require 'assert'
 require 'deas/sinatra_runner'
+require 'deas/template'
+require 'test/support/fake_app'
 require 'test/support/view_handlers'
 
 class Deas::SinatraRunner
@@ -37,8 +39,15 @@ class Deas::SinatraRunner
     end
 
     should "call the sinatra_call's erb method with #render" do
-      return_value = subject.render(:index)
-      assert_equal 'index view', return_value
+      return_value = subject.render('index')
+
+      assert_equal :index, return_value[0]
+
+      expected_options = return_value[1]
+      assert_instance_of Deas::Template::RenderScope, expected_options[:scope]
+
+      expected_locals = { :view => subject.instance_variable_get("@handler") }
+      assert_equal(expected_locals, expected_options[:locals])
     end
 
   end
