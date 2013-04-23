@@ -31,6 +31,27 @@ class Deas::Template
 
   end
 
+  class WithLayoutsTests < BaseTests
+    desc "with layouts"
+    setup do
+      @template = Deas::Template.new(@fake_sinatra_call, 'users/index', {
+        :layout => [ 'layouts/web', 'layouts/search' ]
+      })
+    end
+
+    should "call the engine's `erb` method for each layout, " \
+           "in the `layout` option" do
+      return_value = subject.render
+
+      # the return_value is a one-dimensional array of all the render args
+      # used in order. Thus the, 0, 2, 4 nature of the indexes.
+      assert_equal :"layouts/web",    return_value[0]
+      assert_equal :"layouts/search", return_value[2]
+      assert_equal :"users/index",    return_value[4]
+    end
+
+  end
+
   class RenderScopeTests < Assert::Context
     desc "Deas::Template::RenderScope"
     setup do

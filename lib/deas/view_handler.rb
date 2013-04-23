@@ -48,8 +48,8 @@ module Deas
 
     # Helpers
 
-    def halt(*args);   @deas_runner.halt(*args);   end
-    def render(*args); @deas_runner.render(*args); end
+    def halt(*args);           @deas_runner.halt(*args);           end
+    def render(*args, &block); @deas_runner.render(*args, &block); end
 
     def logger;   @deas_runner.logger;   end
     def request;  @deas_runner.request;  end
@@ -77,6 +77,12 @@ module Deas
       def after_callbacks
         @after_callbacks ||= []
       end
+
+      def layout(*args)
+        @layouts = args unless args.empty?
+        @layouts
+      end
+      alias :layouts :layout
 
     end
 
