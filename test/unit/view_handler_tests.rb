@@ -15,7 +15,8 @@ module Deas::ViewHandler
     subject{ @handler }
 
     should have_instance_methods :init, :init!, :run, :run!
-    should have_class_methods :before, :before_callbacks, :after, :after_callbacks
+    should have_class_methods :before, :before_callbacks, :after,
+      :after_callbacks
 
     should "raise a NotImplementedError if run! is not overwritten" do
       assert_raises(NotImplementedError){ subject.run! }

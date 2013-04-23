@@ -21,8 +21,8 @@ class FakeApp
     throw :halt, *args
   end
 
-  def erb(template_name, *args)
-    "#{template_name} view"
+  def erb(*args)
+    args
   end
 
 end

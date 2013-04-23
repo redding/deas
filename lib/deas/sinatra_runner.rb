@@ -1,4 +1,5 @@
 require 'deas/runner'
+require 'deas/template'
 
 module Deas
 
@@ -32,11 +33,10 @@ module Deas
       @sinatra_call.halt(*args)
     end
 
-    # TODO expand this
-    def render(template_name, options = nil)
+    def render(name, options = nil)
       options ||= {}
       options[:locals] = { :view => @handler }.merge(options[:locals] || {})
-      @sinatra_call.erb(template_name.to_sym, options)
+      Deas::Template.new(@sinatra_call, name, options).render
     end
 
     # TODO implement these
