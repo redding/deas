@@ -1,5 +1,6 @@
 require 'assert'
 require 'deas/route'
+require 'deas/sinatra_runner'
 require 'test/support/fake_app'
 require 'test/support/view_handlers'
 
@@ -40,10 +41,10 @@ class Deas::Route
       @route.constantize!
 
       @fake_app = FakeApp.new
-      Deas::Runner.stubs(:run).with(TestViewHandler, @fake_app).returns('test')
+      Deas::SinatraRunner.stubs(:run).with(TestViewHandler, @fake_app).returns('test')
     end
     teardown do
-      Deas::Runner.unstub(:run)
+      Deas::SinatraRunner.unstub(:run)
     end
 
     should "run the view handler and set a status code, headers and body" do
