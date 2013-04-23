@@ -3,6 +3,9 @@ require 'ns-options/boolean'
 require 'pathname'
 require 'singleton'
 
+require 'deas/logger'
+require 'deas/route'
+
 module Deas
 
   class Server
@@ -28,14 +31,18 @@ module Deas
       option :init_proc, Proc,   :default => proc{ }
       option :logger,            :default => proc{ Deas::NullLogger.new }
 
+      option :routes,          Array, :default => []
+      option :view_handler_ns, String
+
       def initialize
-        super
         # these are defaulted here because we want to use the Configuration
         # instance `root`. If we define a proc above, we will be using the
         # Configuration class `root`, which will not update these options as
         # expected.
-        self.public_folder = proc{ self.root.join('public') }
-        self.views_folder  = proc{ self.root.join('views') }
+        super({
+          :public_folder => proc{ self.root.join('public') },
+          :views_folder  => proc{ self.root.join('views') }
+        })
       end
 
     end
@@ -86,21 +93,45 @@ module Deas
       self.configuration.logger *args
     end
 
+    def view_handler_ns(*args)
+      self.configuration.view_handler_ns *args
+    end
+
+    def get(path, handler_class_name)
+      self.route(:get, path, handler_class_name)
+    end
+
+    def post(path, handler_class_name)
+      self.route(:post, path, handler_class_name)
+    end
+
+    def put(path, handler_class_name)
+      self.route(:put, path, handler_class_name)
+    end
+
+    def patch(path, handler_class_name)
+      self.route(:patch, path, handler_class_name)
+    end
+
+    def delete(path, handler_class_name)
+      self.route(:delete, path, handler_class_name)
+    end
+
+    def route(http_method, path, handler_class_name)
+      if self.view_handler_ns && !(handler_class_name =~ /^::/)
+        handler_class_name = "#{self.view_handler_ns}::#{handler_class_name}"
+      end
+      Deas::Route.new(http_method, path, handler_class_name).tap do |route|
+        self.configuration.routes.push(route)
+      end
+    end
+
     def self.method_missing(method, *args, &block)
       self.instance.send(method, *args, &block)
     end
 
     def self.respond_to?(*args)
       super || self.instance.respond_to?(*args)
-    end
-
-  end
-
-  class NullLogger
-    require 'logger'
-
-    ::Logger::Severity.constants.each do |name|
-      define_method(name.downcase){|*args| } # no-op
     end
 
   end

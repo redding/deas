@@ -7,6 +7,7 @@ $LOAD_PATH.unshift(ROOT)
 
 # require pry for debugging (`binding.pry`)
 require 'pry'
+require 'assert-mocha' if defined?(Assert)
 
 require 'deas'
 Deas.configure do |config|

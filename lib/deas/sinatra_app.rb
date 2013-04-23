@@ -6,6 +6,7 @@ module Deas
 
     def self.new(server_config)
       server_config.init_proc.call
+      server_config.routes.each(&:constantize!)
 
       Class.new(Sinatra::Base).tap do |app|
 
@@ -25,6 +26,13 @@ module Deas
 
         # custom settings
         app.set :deas_logger, server_config.logger
+
+        # routes
+        server_config.routes.each do |route|
+          # defines Sinatra routes like:
+          #   get('/'){ ... }
+          app.send(route.method, route.path){ route.run(self) }
+        end
 
       end
     end
