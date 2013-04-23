@@ -36,7 +36,7 @@ module Deas
     def render(template_name, options = nil)
       options ||= {}
       options[:locals] = { :view => @handler }.merge(options[:locals] || {})
-      @sinatra_call.erb(template_name, options)
+      @sinatra_call.erb(template_name.to_sym, options)
     end
 
     # TODO implement these
