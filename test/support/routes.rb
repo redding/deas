@@ -20,7 +20,7 @@ class ShowTest
   end
 
   def run!
-    render :show
+    render 'show'
   end
 
 end
