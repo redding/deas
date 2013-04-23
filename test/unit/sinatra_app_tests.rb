@@ -1,12 +1,15 @@
 require 'assert'
+require 'deas/route'
 require 'deas/server'
 require 'deas/sinatra_app'
+require 'test/support/view_handlers'
 
 module Deas::SinatraApp
 
   class BaseTests < Assert::Context
     desc "Deas::SinatraApp"
     setup do
+      @route = Deas::Route.new(:get, '/something', 'TestViewHandler')
       @configuration = Deas::Server::Configuration.new.tap do |c|
         c.env             = 'staging'
         c.root            = 'path/to/somewhere'
@@ -14,6 +17,7 @@ module Deas::SinatraApp
         c.method_override = false
         c.sessions        = false
         c.static          = true
+        c.routes          = [ @route ]
       end
       @sinatra_app = Deas::SinatraApp.new(@configuration)
     end
@@ -31,6 +35,10 @@ module Deas::SinatraApp
       assert_equal true, initialized
     end
 
+    should "call constantize! on all routes" do
+      assert_equal TestViewHandler, @route.handler_class
+    end
+
     should "have it's configuration set based on the server configuration" do
       subject.settings do |settings|
         assert_equal 'staging',                  settings.env
@@ -45,6 +53,13 @@ module Deas::SinatraApp
         assert_equal true,                       settings.static_files
         assert_equal @configuration.logger,      settings.deas_logger
       end
+    end
+
+    should "define Sinatra routes for every route in the configuration" do
+      get_routes = subject.routes[@route.method.to_s.upcase] || []
+      sinatra_route = get_routes.detect{|route| route[0].match(@route.path) }
+
+      assert_not_nil sinatra_route
     end
 
   end
