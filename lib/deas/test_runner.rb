@@ -31,7 +31,7 @@ module Deas
     end
 
     def render(*args)
-      "test runner render: #{args.inspect}"
+      "test runner render"
     end
 
   end
