@@ -9,10 +9,25 @@ module Deas
 
       @sinatra_call = sinatra_call
       @name         = name.to_sym
+      (@options.delete(:layout) || @options.delete(:layouts) || []).tap do |l|
+        @layouts = l.compact.map(&:to_sym)
+      end
     end
 
-    def render
-      @sinatra_call.erb(@name, @options)
+    # builds Sinatra render-blocks like:
+    #
+    #   erb :main_layout do
+    #     erb :second_layout do
+    #       erb :user_index
+    #     end
+    #   end
+    #
+    def render(&block)
+      template_names = [ @layouts, @name ].flatten.reverse
+      top_render_proc = template_names.inject(block) do |render_proc, name|
+        proc{ @sinatra_call.erb(name, @options, &render_proc) }
+      end
+      top_render_proc.call
     end
 
     class RenderScope

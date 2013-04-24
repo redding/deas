@@ -16,7 +16,7 @@ module Deas::ViewHandler
 
     should have_instance_methods :init, :init!, :run, :run!
     should have_class_methods :before, :before_callbacks, :after,
-      :after_callbacks
+      :after_callbacks, :layout, :layouts
 
     should "raise a NotImplementedError if run! is not overwritten" do
       assert_raises(NotImplementedError){ subject.run! }
@@ -34,6 +34,16 @@ module Deas::ViewHandler
       TestViewHandler.after(&after_proc)
 
       assert_includes after_proc, TestViewHandler.after_callbacks
+    end
+
+    should "allow specifying the layouts using #layout or #layouts" do
+      handler_class = Class.new{ include Deas::ViewHandler }
+
+      handler_class.layout 'layouts/app'
+      assert_equal [ 'layouts/app' ], handler_class.layouts
+
+      handler_class.layouts 'layouts/web', 'layouts/search'
+      assert_equal [ 'layouts/web', 'layouts/search' ], handler_class.layouts
     end
 
   end
