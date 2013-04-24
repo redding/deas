@@ -9,6 +9,7 @@ class FlagViewHandler
   include Deas::ViewHandler
   before{ @before_hook_called = true }
   after{  @after_hook_called  = true }
+  layout 'web'
 
   attr_reader :before_init_called, :init_bang_called, :after_init_called,
     :before_run_called, :run_bang_called, :after_run_called,

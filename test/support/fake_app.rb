@@ -21,8 +21,12 @@ class FakeApp
     throw :halt, *args
   end
 
-  def erb(*args)
-    args
+  def erb(*args, &block)
+    if block
+      [ args, block.call ].flatten
+    else
+      args
+    end
   end
 
 end

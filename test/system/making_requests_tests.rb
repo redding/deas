@@ -36,6 +36,19 @@ class MakingRequestsTests < Assert::Context
     assert_equal 500, last_response.status
   end
 
+  should "work" do
+    get '/with_layout'
+
+    expected_body = "Layout 1\nLayout 2\nLayout 3\nWith Layout\n"
+    assert_equal 200,           last_response.status
+    assert_equal expected_body, last_response.body
+
+    get '/alt_with_layout'
+
+    assert_equal 200,           last_response.status
+    assert_equal expected_body, last_response.body
+  end
+
   def app
     @app
   end
