@@ -60,6 +60,8 @@ class Deas::Template
     end
     subject{ @render_scope }
 
+    should have_instance_methods :partial, :escape_html, :h, :escape_url, :u
+
     should "call the sinatra_call's erb method with #partial" do
       return_value = subject.partial('part', :something => true)
 
@@ -70,6 +72,22 @@ class Deas::Template
 
       expected_locals = { :something => true }
       assert_equal(expected_locals, expected_options[:locals])
+    end
+
+    should "escape html with #h or #escape_html" do
+      return_value = subject.escape_html("<strong></strong>")
+      assert_equal "&lt;strong&gt;&lt;&#x2F;strong&gt;", return_value
+
+      return_value = subject.h("<strong></strong>")
+      assert_equal "&lt;strong&gt;&lt;&#x2F;strong&gt;", return_value
+    end
+
+    should "escape urls with #u or #escape_url" do
+      return_value = subject.escape_url("/path/to/somewhere")
+      assert_equal "%2Fpath%2Fto%2Fsomewhere", return_value
+
+      return_value = subject.u("/path/to/somewhere")
+      assert_equal "%2Fpath%2Fto%2Fsomewhere", return_value
     end
 
   end

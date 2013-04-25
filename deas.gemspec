@@ -18,6 +18,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_dependency("ns-options", ["~> 1.0"])
+  gem.add_dependency("rack",       ["~> 1.5"])
   gem.add_dependency("sinatra",    ["~> 1.4"])
 
   gem.add_development_dependency("assert",       ["~> 2.0"])

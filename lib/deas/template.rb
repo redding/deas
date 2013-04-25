@@ -1,3 +1,5 @@
+require 'rack'
+
 module Deas
 
   class Template
@@ -38,6 +40,17 @@ module Deas
       def partial(name, locals = nil)
         Deas::Partial.new(@sinatra_call, name, locals || {}).render
       end
+
+      def escape_html(html)
+        Rack::Utils.escape_html(html)
+      end
+      alias :h :escape_html
+
+      def escape_url(path)
+        Rack::Utils.escape_path(path)
+      end
+      alias :u :escape_url
+
     end
 
   end
