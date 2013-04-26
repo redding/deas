@@ -25,6 +25,7 @@ module Deas
       option :dump_errors,     NsOptions::Boolean, :default => false
       option :method_override, NsOptions::Boolean, :default => true
       option :sessions,        NsOptions::Boolean, :default => true
+      option :show_exceptions, NsOptions::Boolean, :default => false
       option :static_files,    NsOptions::Boolean, :default => true
 
       # Deas specific options
@@ -79,6 +80,10 @@ module Deas
 
     def sessions(*args)
       self.configuration.sessions *args
+    end
+
+    def show_exceptions(*args)
+      self.configuration.show_exceptions *args
     end
 
     def static_files(*args)

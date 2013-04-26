@@ -17,6 +17,7 @@ module Deas::SinatraApp
         c.dump_errors     = true
         c.method_override = false
         c.sessions        = false
+        c.show_exceptions = true
         c.static          = true
         c.routes          = [ @route ]
       end
@@ -51,6 +52,7 @@ module Deas::SinatraApp
         assert_equal false,                      settings.logging
         assert_equal false,                      settings.method_override
         assert_equal false,                      settings.sessions
+        assert_equal true,                       settings.show_exceptions
         assert_equal true,                       settings.static_files
         assert_equal @configuration.logger,      settings.deas_logger
       end

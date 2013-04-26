@@ -53,6 +53,9 @@ class Deas::Server
       subject.sessions false
       assert_equal false, config.sessions
 
+      subject.show_exceptions true
+      assert_equal true, config.show_exceptions
+
       subject.static_files false
       assert_equal false, config.static_files
 
@@ -152,7 +155,7 @@ class Deas::Server
 
     should have_instance_methods :env, :root, :app_file, :public_folder,
       :views_folder, :dump_errors, :method_override, :sessions, :static_files,
-      :init_proc, :logger, :routes, :view_handler_ns
+      :init_proc, :logger, :routes, :view_handler_ns, :show_exceptions
 
     should "default the env to 'development'" do
       assert_equal 'development', subject.env
@@ -182,6 +185,7 @@ class Deas::Server
     should "default the Sinatra flags" do
       assert_equal false, subject.dump_errors
       assert_equal true,  subject.method_override
+      assert_equal false, subject.show_exceptions
       assert_equal true,  subject.sessions
       assert_equal true,  subject.static_files
     end
