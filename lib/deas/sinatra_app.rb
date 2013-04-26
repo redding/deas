@@ -22,6 +22,7 @@ module Deas
         app.set :logging,         false
         app.set :method_override, server_config.method_override
         app.set :sessions,        server_config.sessions
+        app.set :show_exceptions, server_config.show_exceptions
         app.set :static,          server_config.static_files
 
         # custom settings
