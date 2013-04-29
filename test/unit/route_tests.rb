@@ -14,7 +14,7 @@ class Deas::Route
     subject{ @route }
 
     should have_instance_methods :method, :path, :handler_class_name,
-      :handler_class, :run
+      :handler_class, :runner
 
     should "constantize the handler class with #constantize!" do
       assert_nil subject.handler_class
@@ -33,26 +33,11 @@ class Deas::Route
       end
     end
 
-  end
-
-  class RunTests < BaseTests
-    desc "run"
-    setup do
-      @route.constantize!
-
-      @fake_app = FakeApp.new
-      Deas::SinatraRunner.stubs(:run).with(TestViewHandler, @fake_app).returns('test')
+    should "return an instance of the Runner class with supplied variables" do
+      subject.constantize!
+      returned = subject.runner(FakeApp.new)
+      assert_instance_of Deas::SinatraRunner, returned
     end
-    teardown do
-      Deas::SinatraRunner.unstub(:run)
-    end
-
-    should "run the view handler and set a status code, headers and body" do
-      return_value = subject.run(@fake_app)
-
-      assert_equal 'test', return_value
-    end
-
   end
 
 end

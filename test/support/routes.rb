@@ -4,6 +4,11 @@ class Deas::Server
 
   root File.expand_path("..", __FILE__)
 
+  log_file_path = File.expand_path("../../../log/test.log", __FILE__)
+
+  logger Logger.new(File.open(log_file_path, 'w'))
+  verbose_logging true
+
   get '/show',            'ShowTest'
   get '/halt',            'HaltTest'
   get '/error',           'ErrorTest'

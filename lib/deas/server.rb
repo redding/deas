@@ -31,6 +31,7 @@ module Deas
       # Deas specific options
       option :init_proc, Proc,   :default => proc{ }
       option :logger,            :default => proc{ Deas::NullLogger.new }
+      option :verbose_logging,   :default => true
 
       option :routes,          Array, :default => []
       option :view_handler_ns, String
@@ -46,6 +47,9 @@ module Deas
         })
       end
 
+      def runner_logger
+        Deas::RunnerLogger.new(self.logger, self.verbose_logging)
+      end
     end
 
     attr_reader :configuration
@@ -96,6 +100,10 @@ module Deas
 
     def logger(*args)
       self.configuration.logger *args
+    end
+
+    def verbose_logging(*args)
+      self.configuration.verbose_logging *args
     end
 
     def view_handler_ns(*args)
