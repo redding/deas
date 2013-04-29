@@ -9,11 +9,11 @@ class FakeApp
   attr_accessor :request, :response, :params, :halt, :settings
 
   def initialize
-    @request  = FakeRequest.new({})
+    @request = FakeRequest.new('GET','/something', {})
     @params   = @request.params
     @response = FakeResponse.new
     @settings = OpenStruct.new({
-      :deas_logger => Deas::NullLogger.new
+      :runner_logger => Deas::RunnerLogger.new(Deas::NullLogger.new, false)
     })
   end
 
@@ -31,5 +31,7 @@ class FakeApp
 
 end
 
-FakeRequest  = Struct.new(:params)
-FakeResponse = Struct.new(:code, :headers, :body)
+class FakeRequest < Struct.new(:http_method, :path, :params)
+  alias :request_method :http_method
+end
+FakeResponse = Struct.new(:status, :headers, :body)

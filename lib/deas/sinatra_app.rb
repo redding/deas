@@ -26,13 +26,24 @@ module Deas
         app.set :static,          server_config.static_files
 
         # custom settings
-        app.set :deas_logger, server_config.logger
+        app.set :logger,        server_config.logger
+        app.set :runner_logger, server_config.runner_logger
 
         # routes
         server_config.routes.each do |route|
           # defines Sinatra routes like:
+          #   before('/'){ ... }
           #   get('/'){ ... }
-          app.send(route.method, route.path){ route.run(self) }
+          #   after('/'){ ... }
+          app.before(route.path) do
+            @runner = route.runner(self).setup
+          end
+          app.send(route.method, route.path) do
+            @runner.run
+          end
+          app.after(route.path) do
+            @runner.teardown
+          end
         end
 
       end
