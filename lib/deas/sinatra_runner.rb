@@ -13,6 +13,7 @@ module Deas
       @params        = @sinatra_call.params
       @request       = @sinatra_call.request
       @response      = @sinatra_call.response
+      @session       = @sinatra_call.session
       @time_taken    = nil
       @started_at    = nil
       super(handler_class)
@@ -72,7 +73,6 @@ module Deas
       @runner_logger.summary.send(level, "[Deas] #{message}")
     end
 
-
     # Helpers
 
     def halt(*args)
@@ -86,10 +86,13 @@ module Deas
       Deas::Template.new(@sinatra_call, name, options).render(&block)
     end
 
-    # TODO implement these
-    # redirect
-    # redirect_to
-    # session
+    def redirect(*args)
+      @sinatra_call.redirect(*args)
+    end
+
+    def redirect_to(path, *args)
+      @sinatra_call.redirect(@sinatra_call.to(path), *args)
+    end
 
     private
 
