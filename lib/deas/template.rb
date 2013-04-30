@@ -37,6 +37,10 @@ module Deas
         @sinatra_call = sinatra_call
       end
 
+      def render(name, options = nil, &block)
+        Deas::Template.new(@sinatra_call, name, options || {}).render(&block)
+      end
+
       def partial(name, locals = nil)
         Deas::Partial.new(@sinatra_call, name, locals || {}).render
       end
