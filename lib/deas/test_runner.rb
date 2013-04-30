@@ -8,7 +8,7 @@ module Deas
     attr_reader :handler, :return_value
 
     def initialize(handler_class, args = nil)
-      args ||= {}
+      args = (args || {}).dup
       @logger   = args.delete(:logger) || Deas::NullLogger.new
       @params   = args.delete(:params) || {}
       @request  = args.delete(:request)

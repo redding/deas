@@ -60,12 +60,30 @@ class Deas::Template
     end
     subject{ @render_scope }
 
-    should have_instance_methods :partial, :escape_html, :h, :escape_url, :u
+    should have_instance_methods :partial, :escape_html, :h, :escape_url, :u,
+      :render
 
     should "call the sinatra_call's erb method with #partial" do
       return_value = subject.partial('part', :something => true)
 
       assert_equal :_part, return_value[0]
+
+      expected_options = return_value[1]
+      assert_instance_of Deas::Template::RenderScope, expected_options[:scope]
+
+      expected_locals = { :something => true }
+      assert_equal(expected_locals, expected_options[:locals])
+    end
+
+    should "call the sinatra_call's erb method with #render" do
+      return_value = subject.render('my_template', {
+        :views  => '/path/to/templates',
+        :locals => {
+          :something => true
+        }
+      })
+
+      assert_equal :my_template, return_value[0]
 
       expected_options = return_value[1]
       assert_instance_of Deas::Template::RenderScope, expected_options[:scope]
