@@ -9,15 +9,19 @@ class Deas::Server
   logger Logger.new(File.open(log_file_path, 'w'))
   verbose_logging true
 
-  get '/show',            'ShowTest'
-  get '/halt',            'HaltTest'
-  get '/error',           'ErrorTest'
-  get '/with_layout',     'WithLayoutTest'
-  get '/alt_with_layout', 'AlternateWithLayoutTest'
+  get '/show',            'ShowHandler'
+  get '/halt',            'HaltHandler'
+  get '/error',           'ErrorHandler'
+  get '/with_layout',     'WithLayoutHandler'
+  get '/alt_with_layout', 'AlternateWithLayoutHandler'
+  get '/redirect',        'RedirectHandler'
+  get '/redirect_to',     'RedirectToHandler'
+  get '/set_session',     'SetSessionHandler'
+  get '/use_session',     'UseSessionHandler'
 
 end
 
-class ShowTest
+class ShowHandler
   include Deas::ViewHandler
 
   attr_reader :message
@@ -32,7 +36,7 @@ class ShowTest
 
 end
 
-class HaltTest
+class HaltHandler
   include Deas::ViewHandler
 
   def init!
@@ -41,7 +45,7 @@ class HaltTest
 
 end
 
-class ErrorTest
+class ErrorHandler
   include Deas::ViewHandler
 
   def run!
@@ -50,7 +54,7 @@ class ErrorTest
 
 end
 
-class WithLayoutTest
+class WithLayoutHandler
   include Deas::ViewHandler
   layouts 'layout1', 'layout2', 'layout3'
 
@@ -60,7 +64,7 @@ class WithLayoutTest
 
 end
 
-class AlternateWithLayoutTest
+class AlternateWithLayoutHandler
   include Deas::ViewHandler
 
   def run!
@@ -71,6 +75,43 @@ class AlternateWithLayoutTest
         end
       end
     end
+  end
+
+end
+
+class RedirectHandler
+  include Deas::ViewHandler
+
+  def run!
+    redirect 'http://google.com', 'wrong place, buddy'
+  end
+
+end
+
+class RedirectToHandler
+  include Deas::ViewHandler
+
+  def run!
+    redirect_to '/somewhere'
+  end
+
+end
+
+class SetSessionHandler
+  include Deas::ViewHandler
+
+  def run!
+    session[:secret] = 'session_secret'
+    redirect_to '/use_session'
+  end
+
+end
+
+class UseSessionHandler
+  include Deas::ViewHandler
+
+  def run!
+    session[:secret]
   end
 
 end

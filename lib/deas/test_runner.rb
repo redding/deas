@@ -13,6 +13,7 @@ module Deas
       @params   = args.delete(:params) || {}
       @request  = args.delete(:request)
       @response = args.delete(:response)
+      @session  = args.delete(:session)
 
       super(handler_class)
       args.each{|key, value| @handler.send("#{key}=", value) }

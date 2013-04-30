@@ -36,7 +36,7 @@ class MakingRequestsTests < Assert::Context
     assert_equal 500, last_response.status
   end
 
-  should "work" do
+  should "return a 200 response and use all the layouts" do
     get '/with_layout'
 
     expected_body = "Layout 1\nLayout 2\nLayout 3\nWith Layout\n"
@@ -47,6 +47,28 @@ class MakingRequestsTests < Assert::Context
 
     assert_equal 200,           last_response.status
     assert_equal expected_body, last_response.body
+  end
+
+  should "return a 302 redirecting to the expected locations" do
+    get '/redirect'
+    expected_location = 'http://google.com'
+
+    assert_equal 302,               last_response.status
+    assert_equal expected_location, last_response.headers['Location']
+
+    get '/redirect_to'
+    expected_location = 'http://example.org/somewhere'
+
+    assert_equal 302,               last_response.status
+    assert_equal expected_location, last_response.headers['Location']
+  end
+
+  should "return a 200 response and the session value" do
+    get '/set_session'
+    follow_redirect!
+
+    assert_equal 200,              last_response.status
+    assert_equal 'session_secret', last_response.body
   end
 
   def app

@@ -15,7 +15,7 @@ class Deas::SinatraRunner
     subject{ @runner }
 
     should have_instance_methods :run, :request, :response, :params, :logger,
-      :halt, :render
+      :halt, :render, :session, :redirect, :redirect_to
 
     should "return the sinatra_call's request with #request" do
       assert_equal @fake_sinatra_call.request, subject.request
@@ -29,13 +29,17 @@ class Deas::SinatraRunner
       assert_equal @fake_sinatra_call.params, subject.params
     end
 
+    should "return the sinatra_call's session with #session" do
+      assert_equal @fake_sinatra_call.session, subject.session
+    end
+
     should "return the sinatra_call's settings logger with #logger" do
       assert_equal @fake_sinatra_call.settings.deas_logger, subject.logger
     end
 
     should "call the sinatra_call's halt with #halt" do
       return_value = catch(:halt){ subject.halt('test') }
-      assert_equal 'test', return_value
+      assert_equal [ 'test' ], return_value
     end
 
     should "call the sinatra_call's erb method with #render" do
@@ -51,10 +55,25 @@ class Deas::SinatraRunner
       assert_equal(expected_locals, options[:locals])
     end
 
-    should "not throw an exception with the setup or teardown methods" do
-      assert_nothing_raised  {subject.setup}
-      assert_nothing_raised {subject.teardown}
+    should "call the sinatra_call's redirect method with #redirect" do
+      return_value = catch(:halt){ subject.redirect('http://google.com') }
+      expected = [ 302, { 'Location' => 'http://google.com' } ]
+
+      assert_equal expected, return_value
     end
+
+    should "call the sinatra_call's redirect and to methods with #redirect_to" do
+      return_value = catch(:halt){ subject.redirect_to('/somewhere') }
+      expected = [ 302, { 'Location' => "http://test.local/somewhere" } ]
+
+      assert_equal expected, return_value
+    end
+
+    should "not throw an exception with the setup or teardown methods" do
+      assert_nothing_raised{ subject.setup }
+      assert_nothing_raised{ subject.teardown }
+    end
+
   end
 
   class RunTests < BaseTests
