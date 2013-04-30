@@ -11,7 +11,7 @@ class Deas::Runner
     end
     subject{ @runner }
 
-    should have_instance_methods :request, :response, :params, :logger
+    should have_instance_methods :request, :response, :params, :logger, :session
 
     should "raise NotImplementedError with #halt" do
       assert_raises(NotImplementedError){ subject.halt }
@@ -19,6 +19,14 @@ class Deas::Runner
 
     should "raise NotImplementedError with #render" do
       assert_raises(NotImplementedError){ subject.render }
+    end
+
+    should "raise NotImplementedError with #redirect" do
+      assert_raises(NotImplementedError){ subject.redirect }
+    end
+
+    should "raise NotImplementedError with #redirect_to" do
+      assert_raises(NotImplementedError){ subject.redirect_to }
     end
 
   end
