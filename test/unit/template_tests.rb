@@ -13,6 +13,7 @@ class Deas::Template
     subject{ @template }
 
     should have_instance_methods :name, :options, :render
+    should have_class_methods :helpers
 
     should "symbolize it's name" do
       assert_equal :"users/index", subject.name
@@ -27,6 +28,14 @@ class Deas::Template
 
       assert_equal subject.name,    return_value[0]
       assert_equal subject.options, return_value[1]
+    end
+
+    should "include modules on the RenderScope using helpers class method" do
+      helper_module = Module.new
+      Deas::Template.helpers(helper_module)
+
+      included_modules = Deas::Template::RenderScope.included_modules
+      assert_includes helper_module, included_modules
     end
 
   end
