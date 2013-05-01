@@ -3,6 +3,11 @@ require 'rack'
 module Deas
 
   class Template
+
+    def self.helpers(*helper_modules)
+      Deas::Template::RenderScope.class_eval{ include *helper_modules }
+    end
+
     attr_reader :name, :options
 
     def initialize(sinatra_call, name, options = nil)
