@@ -29,9 +29,10 @@ module Deas
       option :static_files,    NsOptions::Boolean, :default => true
 
       # Deas specific options
-      option :init_proc, Proc,   :default => proc{ }
-      option :logger,            :default => proc{ Deas::NullLogger.new }
-      option :verbose_logging,   :default => true
+      option :init_proc,       Proc,  :default => proc{ }
+      option :logger,                 :default => proc{ Deas::NullLogger.new }
+      option :middlewares,     Array, :default => []
+      option :verbose_logging,        :default => true
 
       option :routes,          Array, :default => []
       option :view_handler_ns, String
@@ -100,6 +101,10 @@ module Deas
 
     def logger(*args)
       self.configuration.logger *args
+    end
+
+    def use(*args)
+      self.configuration.middlewares << args
     end
 
     def verbose_logging(*args)
