@@ -6,6 +6,9 @@ require 'deas/server'
 require 'deas/sinatra_app'
 require 'deas/view_handler'
 
+# TODO - remove with future version of Rack (> v1.5.2)
+require 'deas/rack_request_fix'
+
 ENV['DEAS_ROUTES_FILE'] ||= 'config/routes'
 
 module Deas
