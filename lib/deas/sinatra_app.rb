@@ -8,29 +8,29 @@ module Deas
       server_config.init_proc.call
       server_config.routes.each(&:constantize!)
 
-      Class.new(Sinatra::Base).tap do |app|
+      Sinatra.new do
 
         # built-in settings
-        app.set :environment, server_config.env
-        app.set :root,        server_config.root
+        set :environment, server_config.env
+        set :root,        server_config.root
 
-        app.set :app_file,      server_config.app_file
-        app.set :public_folder, server_config.public_folder
-        app.set :views,         server_config.views_folder
+        set :app_file,      server_config.app_file
+        set :public_folder, server_config.public_folder
+        set :views,         server_config.views_folder
 
-        app.set :dump_errors,     server_config.dump_errors
-        app.set :logging,         false
-        app.set :method_override, server_config.method_override
-        app.set :sessions,        server_config.sessions
-        app.set :show_exceptions, server_config.show_exceptions
-        app.set :static,          server_config.static_files
+        set :dump_errors,     server_config.dump_errors
+        set :logging,         false
+        set :method_override, server_config.method_override
+        set :sessions,        server_config.sessions
+        set :show_exceptions, server_config.show_exceptions
+        set :static,          server_config.static_files
 
         # custom settings
-        app.set :logger,        server_config.logger
-        app.set :runner_logger, server_config.runner_logger
+        set :logger,        server_config.logger
+        set :runner_logger, server_config.runner_logger
 
         server_config.middlewares.each do |middleware_args|
-          app.use *middleware_args
+          use *middleware_args
         end
 
         # routes
@@ -39,13 +39,13 @@ module Deas
           #   before('/'){ ... }
           #   get('/'){ ... }
           #   after('/'){ ... }
-          app.before(route.path) do
+          before(route.path) do
             @runner = route.runner(self).setup
           end
-          app.send(route.method, route.path) do
+          send(route.method, route.path) do
             @runner.run
           end
-          app.after(route.path) do
+          after(route.path) do
             @runner.teardown
           end
         end
