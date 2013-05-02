@@ -23,7 +23,7 @@ class Deas::Server
     subject{ Deas::Server }
 
     should have_instance_methods :configuration, :init, :view_handler_ns,
-      :get, :post, :put, :patch, :delete, :route
+      :get, :post, :put, :patch, :delete, :route, :use
 
     should "be a singleton" do
       assert_includes Singleton, subject.included_modules
@@ -58,6 +58,9 @@ class Deas::Server
 
       subject.static_files false
       assert_equal false, config.static_files
+
+      subject.use 'MyMiddleware'
+      assert_equal [ ['MyMiddleware'] ], config.middlewares
 
       stdout_logger = Logger.new(STDOUT)
       subject.logger stdout_logger
@@ -155,7 +158,8 @@ class Deas::Server
 
     should have_instance_methods :env, :root, :app_file, :public_folder,
       :views_folder, :dump_errors, :method_override, :sessions, :static_files,
-      :init_proc, :logger, :routes, :view_handler_ns, :show_exceptions
+      :init_proc, :logger, :routes, :view_handler_ns, :show_exceptions,
+      :middlewares
 
     should "default the env to 'development'" do
       assert_equal 'development', subject.env
@@ -196,6 +200,10 @@ class Deas::Server
 
     should "default routes to an empty array" do
       assert_equal [], subject.routes
+    end
+
+    should "default middlewares to an empty array" do
+      assert_equal [], subject.middlewares
     end
 
   end

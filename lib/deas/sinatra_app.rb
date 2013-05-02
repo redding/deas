@@ -29,6 +29,10 @@ module Deas
         app.set :logger,        server_config.logger
         app.set :runner_logger, server_config.runner_logger
 
+        server_config.middlewares.each do |middleware_args|
+          app.use *middleware_args
+        end
+
         # routes
         server_config.routes.each do |route|
           # defines Sinatra routes like:
