@@ -30,7 +30,7 @@ module Deas
         set :runner_logger, server_config.runner_logger
 
         server_config.middlewares.each do |middleware_args|
-          app.use *middleware_args
+          use *middleware_args
         end
 
         # routes
