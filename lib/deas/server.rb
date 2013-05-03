@@ -3,7 +3,6 @@ require 'ns-options/boolean'
 require 'pathname'
 require 'singleton'
 
-require 'deas/logger'
 require 'deas/route'
 
 module Deas
@@ -48,9 +47,6 @@ module Deas
         })
       end
 
-      def runner_logger
-        Deas::RunnerLogger.new(self.logger, self.verbose_logging)
-      end
     end
 
     attr_reader :configuration

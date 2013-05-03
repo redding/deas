@@ -17,8 +17,12 @@ module Deas
       raise(NoHandlerClassError.new(handler_class_name)) if !@handler_class
     end
 
-    def runner(sinatra_call)
-      Deas::SinatraRunner.new(@handler_class, sinatra_call)
+    def run(sinatra_call)
+      sinatra_call.request.env.tap do |env|
+        env['sinatra.params']     = sinatra_call.params
+        env['deas.handler_class'] = @handler_class
+      end
+      Deas::SinatraRunner.run(@handler_class, sinatra_call)
     end
 
     private
