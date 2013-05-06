@@ -36,4 +36,12 @@ module Deas
     option :routes_file,  Pathname, :default => ENV['DEAS_ROUTES_FILE']
   end
 
+  class NullLogger
+    require 'logger'
+
+    ::Logger::Severity.constants.each do |name|
+      define_method(name.downcase){|*args| } # no-op
+    end
+  end
+
 end

@@ -69,11 +69,6 @@ class Deas::SinatraRunner
       assert_equal expected, return_value
     end
 
-    should "not throw an exception with the setup or teardown methods" do
-      assert_nothing_raised{ subject.setup }
-      assert_nothing_raised{ subject.teardown }
-    end
-
   end
 
   class RunTests < BaseTests

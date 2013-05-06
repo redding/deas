@@ -64,7 +64,7 @@ class MakingRequestsTests < Assert::Context
   end
 
   should "return a 200 response and the session value" do
-    get '/set_session'
+    post '/session'
     follow_redirect!
 
     assert_equal 200,              last_response.status

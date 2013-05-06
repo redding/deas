@@ -1,4 +1,4 @@
-require 'deas/logger'
+require 'deas'
 require 'ostruct'
 
 class FakeApp
@@ -13,9 +13,7 @@ class FakeApp
     @params   = @request.params
     @session  = @request.session
     @response = FakeResponse.new
-    @settings = OpenStruct.new({
-      :runner_logger => Deas::RunnerLogger.new(Deas::NullLogger.new, false)
-    })
+    @settings = OpenStruct.new({ })
   end
 
   def halt(*args)

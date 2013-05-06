@@ -9,15 +9,15 @@ class Deas::Server
   logger Logger.new(File.open(log_file_path, 'w'))
   verbose_logging true
 
-  get '/show',            'ShowHandler'
-  get '/halt',            'HaltHandler'
-  get '/error',           'ErrorHandler'
-  get '/with_layout',     'WithLayoutHandler'
-  get '/alt_with_layout', 'AlternateWithLayoutHandler'
-  get '/redirect',        'RedirectHandler'
-  get '/redirect_to',     'RedirectToHandler'
-  get '/set_session',     'SetSessionHandler'
-  get '/use_session',     'UseSessionHandler'
+  get  '/show',            'ShowHandler'
+  get  '/halt',            'HaltHandler'
+  get  '/error',           'ErrorHandler'
+  get  '/with_layout',     'WithLayoutHandler'
+  get  '/alt_with_layout', 'AlternateWithLayoutHandler'
+  get  '/redirect',        'RedirectHandler'
+  get  '/redirect_to',     'RedirectToHandler'
+  post '/session',         'SetSessionHandler'
+  get  '/session',         'UseSessionHandler'
 
 end
 
@@ -102,7 +102,7 @@ class SetSessionHandler
 
   def run!
     session[:secret] = 'session_secret'
-    redirect_to '/use_session'
+    redirect_to '/session'
   end
 
 end

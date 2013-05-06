@@ -54,7 +54,6 @@ module Deas::SinatraApp
         assert_equal false,                      settings.sessions
         assert_equal true,                       settings.show_exceptions
         assert_equal true,                       settings.static
-        assert_instance_of Deas::RunnerLogger,   settings.runner_logger
         assert_instance_of Deas::NullLogger,     settings.logger
       end
     end
