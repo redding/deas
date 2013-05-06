@@ -1,4 +1,3 @@
-require 'deas/logger'
 require 'deas/runner'
 
 module Deas

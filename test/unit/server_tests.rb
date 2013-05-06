@@ -1,5 +1,4 @@
 require 'assert'
-require 'deas/logger'
 require 'deas/route'
 require 'deas/server'
 require 'logger'

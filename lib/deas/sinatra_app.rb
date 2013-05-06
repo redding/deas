@@ -1,5 +1,7 @@
 require 'sinatra/base'
 
+require 'deas/logging'
+
 module Deas
 
   module SinatraApp
@@ -27,27 +29,17 @@ module Deas
 
         # custom settings
         set :logger,        server_config.logger
-        set :runner_logger, server_config.runner_logger
 
         server_config.middlewares.each do |middleware_args|
           use *middleware_args
         end
+        use Deas::Logging.middleware(server_config.verbose_logging)
 
         # routes
         server_config.routes.each do |route|
           # defines Sinatra routes like:
-          #   before('/'){ ... }
           #   get('/'){ ... }
-          #   after('/'){ ... }
-          before(route.path) do
-            @runner = route.runner(self).setup
-          end
-          send(route.method, route.path) do
-            @runner.run
-          end
-          after(route.path) do
-            @runner.teardown
-          end
+          send(route.method, route.path){ route.run(self) }
         end
 
       end

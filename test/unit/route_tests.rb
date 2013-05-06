@@ -14,7 +14,7 @@ class Deas::Route
     subject{ @route }
 
     should have_instance_methods :method, :path, :handler_class_name,
-      :handler_class, :runner
+      :handler_class, :run
 
     should "constantize the handler class with #constantize!" do
       assert_nil subject.handler_class
@@ -33,11 +33,6 @@ class Deas::Route
       end
     end
 
-    should "return an instance of the Runner class with supplied variables" do
-      subject.constantize!
-      returned = subject.runner(FakeApp.new)
-      assert_instance_of Deas::SinatraRunner, returned
-    end
   end
 
 end
