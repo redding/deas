@@ -26,7 +26,7 @@ class Deas::Server
     # DSL for sinatra settings
     should have_imeths :env, :root, :public_folder, :views_folder
     should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
-    should have_imeths :static_files
+    should have_imeths :static_files, :reload_templates
 
     # DSL for server handling
     should have_imeths :init, :logger, :use, :view_handler_ns, :use
@@ -65,6 +65,9 @@ class Deas::Server
 
       subject.static_files false
       assert_equal false, config.static_files
+
+      subject.reload_templates true
+      assert_equal true, config.reload_templates
 
       subject.use 'MyMiddleware'
       assert_equal [ ['MyMiddleware'] ], config.middlewares
@@ -166,7 +169,7 @@ class Deas::Server
     # sinatra related options
     should have_imeths :env, :root, :app_file, :public_folder, :views_folder
     should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
-    should have_imeths :static_files
+    should have_imeths :static_files, :reload_templates
 
     # server handling options
     should have_imeths :init_proc, :logger, :verbose_logging, :middlewares
@@ -203,6 +206,7 @@ class Deas::Server
       assert_equal true,  subject.sessions
       assert_equal false, subject.show_exceptions
       assert_equal true,  subject.static_files
+      assert_equal false, subject.reload_templates
     end
 
     should "default the logger to a NullLogger" do

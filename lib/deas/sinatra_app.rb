@@ -24,6 +24,7 @@ module Deas
         set :sessions,         server_config.sessions
         set :show_exceptions,  server_config.show_exceptions
         set :static,           server_config.static_files
+        set :reload_templates, server_config.reload_templates
         set :logging,         false
 
         # custom settings

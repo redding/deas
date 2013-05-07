@@ -19,6 +19,7 @@ module Deas::SinatraApp
         c.sessions         = false
         c.show_exceptions  = true
         c.static           = true
+        c.reload_templates = true
         c.routes           = [ @route ]
       end
       @sinatra_app = Deas::SinatraApp.new(@configuration)
@@ -54,6 +55,7 @@ module Deas::SinatraApp
         assert_equal false,                      settings.sessions
         assert_equal true,                       settings.show_exceptions
         assert_equal true,                       settings.static
+        assert_equal true,                       settings.reload_templates
         assert_instance_of Deas::NullLogger,     settings.logger
       end
     end

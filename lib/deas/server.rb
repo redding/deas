@@ -25,6 +25,7 @@ module Deas
       option :sessions,         NsOptions::Boolean, :default => true
       option :show_exceptions,  NsOptions::Boolean, :default => false
       option :static_files,     NsOptions::Boolean, :default => true
+      option :reload_templates, NsOptions::Boolean, :default => false
 
       # server handling options
       option :init_proc,       Proc,  :default => proc{ }
@@ -90,6 +91,10 @@ module Deas
 
     def static_files(*args)
       self.configuration.static_files *args
+    end
+
+    def reload_templates(*args)
+      self.configuration.reload_templates *args
     end
 
     # Server handling DSL
