@@ -21,8 +21,16 @@ class Deas::Server
     end
     subject{ Deas::Server }
 
-    should have_instance_methods :configuration, :init, :view_handler_ns,
-      :get, :post, :put, :patch, :delete, :route, :use
+    should have_reader :configuration
+
+    # DSL for sinatra settings
+    should have_imeths :env, :root, :public_folder, :views_folder
+    should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
+    should have_imeths :static_files, :reload_templates
+
+    # DSL for server handling
+    should have_imeths :init, :logger, :use, :view_handler_ns, :use
+    should have_imeths :get, :post, :put, :patch, :delete, :route
 
     should "be a singleton" do
       assert_includes Singleton, subject.included_modules
@@ -57,6 +65,9 @@ class Deas::Server
 
       subject.static_files false
       assert_equal false, config.static_files
+
+      subject.reload_templates true
+      assert_equal true, config.reload_templates
 
       subject.use 'MyMiddleware'
       assert_equal [ ['MyMiddleware'] ], config.middlewares
@@ -155,10 +166,14 @@ class Deas::Server
     end
     subject{ @configuration }
 
-    should have_instance_methods :env, :root, :app_file, :public_folder,
-      :views_folder, :dump_errors, :method_override, :sessions, :static_files,
-      :init_proc, :logger, :routes, :view_handler_ns, :show_exceptions,
-      :middlewares
+    # sinatra related options
+    should have_imeths :env, :root, :app_file, :public_folder, :views_folder
+    should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
+    should have_imeths :static_files, :reload_templates
+
+    # server handling options
+    should have_imeths :init_proc, :logger, :verbose_logging, :middlewares
+    should have_imeths :routes, :view_handler_ns
 
     should "default the env to 'development'" do
       assert_equal 'development', subject.env
@@ -188,9 +203,10 @@ class Deas::Server
     should "default the Sinatra flags" do
       assert_equal false, subject.dump_errors
       assert_equal true,  subject.method_override
-      assert_equal false, subject.show_exceptions
       assert_equal true,  subject.sessions
+      assert_equal false, subject.show_exceptions
       assert_equal true,  subject.static_files
+      assert_equal false, subject.reload_templates
     end
 
     should "default the logger to a NullLogger" do
