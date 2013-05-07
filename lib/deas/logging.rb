@@ -21,7 +21,6 @@ module Deas
     # set in the environment. Ripped from:
     # http://github.com/rtomayko/rack-cache/blob/master/lib/rack/cache/context.rb
     def call(env)
-      @logger.info env.keys.inspect
       if env['rack.run_once']
         call! env
       else
