@@ -96,8 +96,8 @@ module Deas
       log SummaryLine.new({
         'method'  => request.request_method,
         'path'    => request.path,
-        'params'  => env['sinatra.params'],
         'handler' => env['deas.handler_class'],
+        'params'  => env['sinatra.params'],
         'time'    => env['deas.time_taken'],
         'status'  => status
       })
