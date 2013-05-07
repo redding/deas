@@ -98,7 +98,7 @@ module Deas
         'path'    => request.path,
         'params'  => env['sinatra.params'],
         'handler' => env['deas.handler_class'],
-        'time'    => @time_taken,
+        'time'    => env['deas.time_taken'],
         'status'  => status
       })
       [ status, headers, body ]
