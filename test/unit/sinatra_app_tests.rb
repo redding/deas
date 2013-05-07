@@ -12,14 +12,15 @@ module Deas::SinatraApp
     setup do
       @route = Deas::Route.new(:get, '/something', 'TestViewHandler')
       @configuration = Deas::Server::Configuration.new.tap do |c|
-        c.env             = 'staging'
-        c.root            = 'path/to/somewhere'
-        c.dump_errors     = true
-        c.method_override = false
-        c.sessions        = false
-        c.show_exceptions = true
-        c.static          = true
-        c.routes          = [ @route ]
+        c.env              = 'staging'
+        c.root             = 'path/to/somewhere'
+        c.dump_errors      = true
+        c.method_override  = false
+        c.sessions         = false
+        c.show_exceptions  = true
+        c.static           = true
+        c.reload_templates = true
+        c.routes           = [ @route ]
       end
       @sinatra_app = Deas::SinatraApp.new(@configuration)
     end
@@ -54,6 +55,7 @@ module Deas::SinatraApp
         assert_equal false,                      settings.sessions
         assert_equal true,                       settings.show_exceptions
         assert_equal true,                       settings.static
+        assert_equal true,                       settings.reload_templates
         assert_instance_of Deas::NullLogger,     settings.logger
       end
     end
