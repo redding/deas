@@ -22,7 +22,7 @@ module Deas
 
       option :dump_errors,      NsOptions::Boolean, :default => false
       option :method_override,  NsOptions::Boolean, :default => true
-      option :sessions,         NsOptions::Boolean, :default => true
+      option :sessions,         NsOptions::Boolean, :default => false
       option :show_exceptions,  NsOptions::Boolean, :default => false
       option :static_files,     NsOptions::Boolean, :default => true
       option :reload_templates, NsOptions::Boolean, :default => false
