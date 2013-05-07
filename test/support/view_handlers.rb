@@ -13,21 +13,24 @@ class FlagViewHandler
 
   attr_reader :before_init_called, :init_bang_called, :after_init_called,
     :before_run_called, :run_bang_called, :after_run_called,
-    :before_hook_called, :after_hook_called
+    :before_hook_called, :after_hook_called, :second_before_init_called
 
-  def before_init
+  before_init do
     @before_init_called = true
+  end
+  before_init do
+    @second_before_init_called = true
   end
 
   def init!
     @init_bang_called = true
   end
 
-  def after_init
+  after_init do
     @after_init_called = true
   end
 
-  def before_run
+  before_run do
     @before_run_called = true
   end
 
@@ -35,7 +38,7 @@ class FlagViewHandler
     @run_bang_called = true
   end
 
-  def after_run
+  after_run do
     @after_run_called = true
   end
 

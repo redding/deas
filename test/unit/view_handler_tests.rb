@@ -15,8 +15,13 @@ module Deas::ViewHandler
     subject{ @handler }
 
     should have_instance_methods :init, :init!, :run, :run!
-    should have_class_methods :before, :before_callbacks, :after,
-      :after_callbacks, :layout, :layouts
+    should have_class_methods :before,      :before_callbacks
+    should have_class_methods :after,       :after_callbacks
+    should have_class_methods :before_init, :before_init_callbacks
+    should have_class_methods :after_init,  :after_init_callbacks
+    should have_class_methods :before_run,  :before_run_callbacks
+    should have_class_methods :after_run,   :after_run_callbacks
+    should have_class_methods :layout, :layouts
 
     should "raise a NotImplementedError if run! is not overwritten" do
       assert_raises(NotImplementedError){ subject.run! }
@@ -34,6 +39,34 @@ module Deas::ViewHandler
       TestViewHandler.after(&after_proc)
 
       assert_includes after_proc, TestViewHandler.after_callbacks
+    end
+
+    should "store procs in #before_init_callbacks with #before_init" do
+      before_init_proc = proc{ }
+      TestViewHandler.before_init(&before_init_proc)
+
+      assert_includes before_init_proc, TestViewHandler.before_init_callbacks
+    end
+
+    should "store procs in #after_init_callbacks with #after_init" do
+      after_init_proc = proc{ }
+      TestViewHandler.after_init(&after_init_proc)
+
+      assert_includes after_init_proc, TestViewHandler.after_init_callbacks
+    end
+
+    should "store procs in #before_run_callbacks with #before_run" do
+      before_run_proc = proc{ }
+      TestViewHandler.before_run(&before_run_proc)
+
+      assert_includes before_run_proc, TestViewHandler.before_run_callbacks
+    end
+
+    should "store procs in #after_run_callbacks with #after_run" do
+      after_run_proc = proc{ }
+      TestViewHandler.after_run(&after_run_proc)
+
+      assert_includes after_run_proc, TestViewHandler.after_run_callbacks
     end
 
     should "allow specifying the layouts using #layout or #layouts" do
@@ -55,6 +88,7 @@ module Deas::ViewHandler
 
     should "have called `init!` and it's callbacks" do
       assert_equal true, subject.before_init_called
+      assert_equal true, subject.second_before_init_called
       assert_equal true, subject.init_bang_called
       assert_equal true, subject.after_init_called
     end
