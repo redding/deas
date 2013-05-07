@@ -41,11 +41,6 @@ module Deas
 
     protected
 
-    def before_init; end
-    def after_init;  end
-    def before_run;  end
-    def after_run;   end
-
     # Helpers
 
     def halt(*args);        @deas_runner.halt(*args);        end
@@ -63,7 +58,9 @@ module Deas
     def session;  @deas_runner.session;  end
 
     def run_callback(callback)
-      self.send(callback.to_s)
+      (self.class.send("#{callback}_callbacks") || []).each do |callback|
+        self.instance_eval(&callback)
+      end
     end
 
     module ClassMethods
@@ -82,6 +79,38 @@ module Deas
 
       def after_callbacks
         @after_callbacks ||= []
+      end
+
+      def before_init(&block)
+        self.before_init_callbacks << block
+      end
+
+      def before_init_callbacks
+        @before_init_callbacks ||= []
+      end
+
+      def after_init(&block)
+        self.after_init_callbacks << block
+      end
+
+      def after_init_callbacks
+        @after_init_callbacks ||= []
+      end
+
+      def before_run(&block)
+        self.before_run_callbacks << block
+      end
+
+      def before_run_callbacks
+        @before_run_callbacks ||= []
+      end
+
+      def after_run(&block)
+        self.after_run_callbacks << block
+      end
+
+      def after_run_callbacks
+        @after_run_callbacks ||= []
       end
 
       def layout(*args)
