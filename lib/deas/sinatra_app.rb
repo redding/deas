@@ -1,4 +1,5 @@
 require 'sinatra/base'
+require 'deas/error_handler'
 require 'deas/logging'
 
 module Deas
@@ -28,7 +29,8 @@ module Deas
         set :logging,         false
 
         # custom settings
-        set :logger,        server_config.logger
+        set :deas_error_procs, server_config.error_procs
+        set :logger,           server_config.logger
 
         server_config.middlewares.each do |middleware_args|
           use *middleware_args
@@ -40,6 +42,15 @@ module Deas
           # defines Sinatra routes like:
           #   get('/'){ ... }
           send(route.method, route.path){ route.run(self) }
+        end
+
+        # error handling
+        not_found do
+          env['sinatra.error'] ||= Sinatra::NotFound.new
+          ErrorHandler.run(env['sinatra.error'], self, settings.deas_error_procs)
+        end
+        error do
+          ErrorHandler.run(env['sinatra.error'], self, settings.deas_error_procs)
         end
 
       end
