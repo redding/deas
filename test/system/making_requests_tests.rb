@@ -24,16 +24,20 @@ class MakingRequestsTests < Assert::Context
     assert_equal 234, last_response.status
   end
 
-  should "return a 404 response with an undefined route" do
+  should "return a 404 response with an undefined route and " \
+         "run the defined error procs" do
     get '/not_defined'
 
     assert_equal 404, last_response.status
+    assert_equal "Couldn't be found", last_response.body
   end
 
-  should "return a 500 response with an error route" do
+  should "return a 500 response with an error route and " \
+         "run the defined error procs" do
     get '/error'
 
     assert_equal 500, last_response.status
+    assert_equal "Oops, something went wrong", last_response.body
   end
 
   should "return a 200 response and use all the layouts" do

@@ -28,6 +28,7 @@ module Deas
       option :reload_templates, NsOptions::Boolean, :default => false
 
       # server handling options
+      option :error_procs,     Array, :default => []
       option :init_proc,       Proc,  :default => proc{ }
       option :logger,                 :default => proc{ Deas::NullLogger.new }
       option :middlewares,     Array, :default => []
@@ -98,6 +99,10 @@ module Deas
     end
 
     # Server handling DSL
+
+    def error(&block)
+      self.configuration.error_procs << block
+    end
 
     def init(&block)
       self.configuration.init_proc = block

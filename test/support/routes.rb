@@ -9,6 +9,15 @@ class Deas::Server
   logger Logger.new(File.open(log_file_path, 'w'))
   verbose_logging true
 
+  error do |exception|
+    case exception
+    when Sinatra::NotFound
+      halt 404, "Couldn't be found"
+    when Exception
+      halt 500, "Oops, something went wrong"
+    end
+  end
+
   get  '/show',            'ShowHandler'
   get  '/halt',            'HaltHandler'
   get  '/error',           'ErrorHandler'
