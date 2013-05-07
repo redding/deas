@@ -70,7 +70,7 @@ module Deas
       log "  Params:  #{env['sinatra.params'].inspect}"
       log "  Handler: #{env['deas.handler_class']}"
       log_error(env['sinatra.error'])
-      log "===== Completed in #{env['deas.time_taken']}ms #{response_display(status)} ====="
+      log "===== Completed in #{env['deas.time_taken']}ms (#{response_display(status)}) ====="
       [ status, headers, body ]
     end
 
