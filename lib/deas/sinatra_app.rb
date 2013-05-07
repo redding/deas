@@ -7,7 +7,10 @@ module Deas
   module SinatraApp
 
     def self.new(server_config)
-      server_config.init_proc.call
+      # the reason this is done here is b/c the below sinatra configuration is
+      # not considered valid until the init procs have been run and the routes
+      # have been constantized.
+      server_config.init_procs.each{ |p| p.call }
       server_config.routes.each(&:constantize!)
 
       Sinatra.new do

@@ -29,7 +29,7 @@ module Deas
 
       # server handling options
       option :error_procs,     Array, :default => []
-      option :init_proc,       Proc,  :default => proc{ }
+      option :init_procs,      Array, :default => []
       option :logger,                 :default => proc{ Deas::NullLogger.new }
       option :middlewares,     Array, :default => []
       option :verbose_logging,        :default => true
@@ -105,7 +105,7 @@ module Deas
     end
 
     def init(&block)
-      self.configuration.init_proc = block
+      self.configuration.init_procs << block
     end
 
     def logger(*args)

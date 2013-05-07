@@ -32,10 +32,13 @@ module Deas::SinatraApp
 
     should "call init procs when initialized" do
       initialized = false
-      @configuration.init_proc = proc{ initialized = true }
+      other_initialized = false
+      @configuration.init_procs << proc{ initialized = true }
+      @configuration.init_procs << proc{ other_initialized = true }
       @sinatra_app = Deas::SinatraApp.new(@configuration)
 
       assert_equal true, initialized
+      assert_equal true, other_initialized
     end
 
     should "call constantize! on all routes" do
