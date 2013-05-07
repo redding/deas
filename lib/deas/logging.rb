@@ -66,9 +66,8 @@ module Deas
         log "  Method:  #{request.request_method.inspect}"
         log "  Path:    #{request.path.inspect}"
       end
+      env['deas.logging'] = Proc.new{ |msg| log(msg) }
       status, headers, body = super(env)
-      log "  Params:  #{env['sinatra.params'].inspect}"
-      log "  Handler: #{env['deas.handler_class']}"
       log_error(env['sinatra.error'])
       log "===== Completed in #{env['deas.time_taken']}ms (#{response_display(status)}) ====="
       [ status, headers, body ]
@@ -91,6 +90,7 @@ module Deas
     # This the real Rack call interface. It adds logging after super-ing to the
     # common logging behavior.
     def call!(env)
+      env['deas.logging'] = Proc.new{ |msg| } # no-op
       status, headers, body = super(env)
       request = Rack::Request.new(env)
       log SummaryLine.new({
