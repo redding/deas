@@ -203,7 +203,7 @@ class Deas::Server
     should "default the Sinatra flags" do
       assert_equal false, subject.dump_errors
       assert_equal true,  subject.method_override
-      assert_equal true,  subject.sessions
+      assert_equal false, subject.sessions
       assert_equal false, subject.show_exceptions
       assert_equal true,  subject.static_files
       assert_equal false, subject.reload_templates
