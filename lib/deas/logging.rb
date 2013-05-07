@@ -21,7 +21,6 @@ module Deas
     # set in the environment. Ripped from:
     # http://github.com/rtomayko/rack-cache/blob/master/lib/rack/cache/context.rb
     def call(env)
-      @logger.info env.keys.inspect
       if env['rack.run_once']
         call! env
       else
@@ -71,7 +70,7 @@ module Deas
       log "  Params:  #{env['sinatra.params'].inspect}"
       log "  Handler: #{env['deas.handler_class']}"
       log_error(env['sinatra.error'])
-      log "===== Completed in #{env['deas.time_taken']}ms #{response_display(status)} ====="
+      log "===== Completed in #{env['deas.time_taken']}ms (#{response_display(status)}) ====="
       [ status, headers, body ]
     end
 
@@ -97,9 +96,9 @@ module Deas
       log SummaryLine.new({
         'method'  => request.request_method,
         'path'    => request.path,
-        'params'  => env['sinatra.params'],
         'handler' => env['deas.handler_class'],
-        'time'    => @time_taken,
+        'params'  => env['sinatra.params'],
+        'time'    => env['deas.time_taken'],
         'status'  => status
       })
       [ status, headers, body ]
