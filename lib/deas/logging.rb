@@ -36,12 +36,19 @@ module Deas
       benchmark = Benchmark.measure do
         status, headers, body = @app.call(env)
       end
+      log_error(env['sinatra.error'])
       env['deas.time_taken'] = RoundedTime.new(benchmark.real)
       [ status, headers, body ]
     end
 
     def log(message)
       @logger.info "[Deas] #{message}"
+    end
+
+    def log_error(exception)
+      return if !exception || exception.kind_of?(Sinatra::NotFound)
+      log "#{exception.class}: #{exception.message}\n" \
+          "#{exception.backtrace.join("\n")}"
     end
 
   end
@@ -68,15 +75,8 @@ module Deas
       end
       env['deas.logging'] = Proc.new{ |msg| log(msg) }
       status, headers, body = super(env)
-      log_error(env['sinatra.error'])
       log "===== Completed in #{env['deas.time_taken']}ms (#{response_display(status)}) ====="
       [ status, headers, body ]
-    end
-
-    def log_error(exception)
-      return if !exception || exception.kind_of?(Sinatra::NotFound)
-      log "#{exception.class}: #{exception.message}\n" \
-          "#{exception.backtrace.join("\n")}"
     end
 
     def response_display(status)
