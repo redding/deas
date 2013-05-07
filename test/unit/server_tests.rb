@@ -76,9 +76,11 @@ class Deas::Server
       subject.logger stdout_logger
       assert_equal stdout_logger, config.logger
 
+      assert_equal 0, config.init_procs.size
       init_proc = proc{ }
       subject.init(&init_proc)
-      assert_equal init_proc, config.init_proc
+      assert_equal 1, config.init_procs.size
+      assert_equal init_proc, config.init_procs.first
     end
 
     should "add a GET route using #get" do
@@ -172,7 +174,7 @@ class Deas::Server
     should have_imeths :static_files, :reload_templates
 
     # server handling options
-    should have_imeths :init_proc, :logger, :verbose_logging, :middlewares
+    should have_imeths :init_procs, :logger, :verbose_logging, :middlewares
     should have_imeths :routes, :view_handler_ns
 
     should "default the env to 'development'" do
