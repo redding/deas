@@ -108,9 +108,11 @@ module Deas
   end
 
   module SummaryLine
+    def self.keys
+      %w{time status method path handler params}
+    end
     def self.new(line_attrs)
-      attr_keys = %w{time status handler method path params}
-      attr_keys.map{ |k| "#{k}=#{line_attrs[k].inspect}" }.join(' ')
+      self.keys.map{ |k| "#{k}=#{line_attrs[k].inspect}" }.join(' ')
     end
   end
 
