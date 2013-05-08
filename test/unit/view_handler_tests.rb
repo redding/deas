@@ -79,6 +79,12 @@ module Deas::ViewHandler
       assert_equal [ 'layouts/web', 'layouts/search' ], handler_class.layouts
     end
 
+    should "be able to render templates" do
+      return_value = test_runner(RenderViewHandler).run
+      assert_equal "my_template",        return_value[0]
+      assert_equal({ :some => :option }, return_value[1])
+    end
+
   end
 
   class WithMethodFlagsTests < BaseTests

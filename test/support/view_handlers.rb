@@ -5,6 +5,14 @@ class TestViewHandler
 
 end
 
+class RenderViewHandler
+  include Deas::ViewHandler
+
+  def run!
+    render "my_template", :some => :option
+  end
+end
+
 class FlagViewHandler
   include Deas::ViewHandler
   before{ @before_hook_called = true }
