@@ -30,8 +30,8 @@ module Deas
       throw(:halt, args)
     end
 
-    def render(*args)
-      "test runner render"
+    def render(*args, &block)
+      [ args, block ].compact.flatten
     end
 
   end
