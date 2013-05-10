@@ -8,6 +8,10 @@ module Deas
       Deas::Template::RenderScope.class_eval{ include *helper_modules }
     end
 
+    def self.helper?(helper_module)
+      Deas::Template::RenderScope.included_modules.include?(helper_module)
+    end
+
     attr_reader :name, :options
 
     def initialize(sinatra_call, name, options = nil)
