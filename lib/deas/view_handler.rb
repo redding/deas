@@ -65,59 +65,25 @@ module Deas
 
     module ClassMethods
 
-      def before(&block)
-        self.before_callbacks << block
-      end
-
-      def before_callbacks
-        @before_callbacks ||= []
-      end
-
-      def after(&block)
-        self.after_callbacks << block
-      end
-
-      def after_callbacks
-        @after_callbacks ||= []
-      end
-
-      def before_init(&block)
-        self.before_init_callbacks << block
-      end
-
-      def before_init_callbacks
-        @before_init_callbacks ||= []
-      end
-
-      def after_init(&block)
-        self.after_init_callbacks << block
-      end
-
-      def after_init_callbacks
-        @after_init_callbacks ||= []
-      end
-
-      def before_run(&block)
-        self.before_run_callbacks << block
-      end
-
-      def before_run_callbacks
-        @before_run_callbacks ||= []
-      end
-
-      def after_run(&block)
-        self.after_run_callbacks << block
-      end
-
-      def after_run_callbacks
-        @after_run_callbacks ||= []
-      end
-
       def layout(*args)
         @layouts = args unless args.empty?
         @layouts
       end
       alias :layouts :layout
+
+      def before_callbacks; @before_callbacks ||= []; end
+      def after_callbacks;  @after_callbacks  ||= []; end
+      def before_init_callbacks; @before_init_callbacks ||= []; end
+      def after_init_callbacks;  @after_init_callbacks  ||= []; end
+      def before_run_callbacks;  @before_run_callbacks  ||= []; end
+      def after_run_callbacks;   @after_run_callbacks   ||= []; end
+
+      def before(&block); self.before_callbacks << block; end
+      def after(&block);  self.after_callbacks  << block; end
+      def before_init(&block); self.before_init_callbacks << block; end
+      def after_init(&block);  self.after_init_callbacks  << block; end
+      def before_run(&block);  self.before_run_callbacks  << block; end
+      def after_run(&block);   self.after_run_callbacks   << block; end
 
     end
 
