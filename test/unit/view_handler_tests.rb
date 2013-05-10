@@ -16,12 +16,12 @@ module Deas::ViewHandler
 
     should have_imeths :init, :init!, :run, :run!
     should have_cmeths :layout, :layouts
-    should have_cmeths :before,      :before_callbacks
-    should have_cmeths :after,       :after_callbacks
-    should have_cmeths :before_init, :before_init_callbacks
-    should have_cmeths :after_init,  :after_init_callbacks
-    should have_cmeths :before_run,  :before_run_callbacks
-    should have_cmeths :after_run,   :after_run_callbacks
+    should have_cmeths :before, :prepend_before, :before_callbacks
+    should have_cmeths :after,  :prepend_after,  :after_callbacks
+    should have_cmeths :before_init, :prepend_before_init, :before_init_callbacks
+    should have_cmeths :after_init,  :prepend_after_init,  :after_init_callbacks
+    should have_cmeths :before_run,  :prepend_before_run,  :before_run_callbacks
+    should have_cmeths :after_run,   :prepend_after_run,   :after_run_callbacks
 
     should "raise a NotImplementedError if run! is not overwritten" do
       assert_raises(NotImplementedError){ subject.run! }
@@ -59,10 +59,22 @@ module Deas::ViewHandler
       assert_equal @proc2, @handler.before_callbacks.last
     end
 
+    should "prepend procs in #before_callbacks with #before" do
+      @handler.prepend_before(&@proc1); @handler.prepend_before(&@proc2)
+      assert_equal @proc2, @handler.before_callbacks.first
+      assert_equal @proc1, @handler.before_callbacks.last
+    end
+
     should "append procs in #after_callbacks with #after" do
       @handler.after(&@proc1); @handler.after(&@proc2)
       assert_equal @proc1, @handler.after_callbacks.first
       assert_equal @proc2, @handler.after_callbacks.last
+    end
+
+    should "prepend procs in #after_callbacks with #before" do
+      @handler.prepend_after(&@proc1); @handler.prepend_after(&@proc2)
+      assert_equal @proc2, @handler.after_callbacks.first
+      assert_equal @proc1, @handler.after_callbacks.last
     end
 
     should "append procs in #before_init_callbacks with #before_init" do
@@ -71,10 +83,22 @@ module Deas::ViewHandler
       assert_equal @proc2, @handler.before_init_callbacks.last
     end
 
+    should "prepend procs in #before_init_callbacks with #before" do
+      @handler.prepend_before_init(&@proc1); @handler.prepend_before_init(&@proc2)
+      assert_equal @proc2, @handler.before_init_callbacks.first
+      assert_equal @proc1, @handler.before_init_callbacks.last
+    end
+
     should "append procs in #after_init_callbacks with #after_init" do
       @handler.after_init(&@proc1); @handler.after_init(&@proc2)
       assert_equal @proc1, @handler.after_init_callbacks.first
       assert_equal @proc2, @handler.after_init_callbacks.last
+    end
+
+    should "prepend procs in #after_init_callbacks with #before" do
+      @handler.prepend_after_init(&@proc1); @handler.prepend_after_init(&@proc2)
+      assert_equal @proc2, @handler.after_init_callbacks.first
+      assert_equal @proc1, @handler.after_init_callbacks.last
     end
 
     should "append procs in #before_run_callbacks with #before_run" do
@@ -83,10 +107,22 @@ module Deas::ViewHandler
       assert_equal @proc2, @handler.before_run_callbacks.last
     end
 
+    should "prepend procs in #before_run_callbacks with #before" do
+      @handler.prepend_before_run(&@proc1); @handler.prepend_before_run(&@proc2)
+      assert_equal @proc2, @handler.before_run_callbacks.first
+      assert_equal @proc1, @handler.before_run_callbacks.last
+    end
+
     should "append procs in #after_run_callbacks with #after_run" do
       @handler.after_run(&@proc1); @handler.after_run(&@proc2)
       assert_equal @proc1, @handler.after_run_callbacks.first
       assert_equal @proc2, @handler.after_run_callbacks.last
+    end
+
+    should "prepend procs in #after_run_callbacks with #before" do
+      @handler.prepend_after_run(&@proc1); @handler.prepend_after_run(&@proc2)
+      assert_equal @proc2, @handler.after_run_callbacks.first
+      assert_equal @proc1, @handler.after_run_callbacks.last
     end
 
   end
