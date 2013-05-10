@@ -13,7 +13,7 @@ class Deas::Template
     subject{ @template }
 
     should have_instance_methods :name, :options, :render
-    should have_class_methods :helpers
+    should have_class_methods :helpers, :helper?
 
     should "symbolize it's name" do
       assert_equal :"users/index", subject.name
@@ -30,12 +30,15 @@ class Deas::Template
       assert_equal subject.options, return_value[1]
     end
 
-    should "include modules on the RenderScope using helpers class method" do
+    should "include modules on the RenderScope using `helpers` class method"\
+           " and know if a given modules has been included in the RenderScope" do
       helper_module = Module.new
       Deas::Template.helpers(helper_module)
 
       included_modules = Deas::Template::RenderScope.included_modules
       assert_includes helper_module, included_modules
+
+      assert Deas::Template.helper?(helper_module)
     end
 
   end
@@ -69,8 +72,7 @@ class Deas::Template
     end
     subject{ @render_scope }
 
-    should have_instance_methods :partial, :escape_html, :h, :escape_url, :u,
-      :render
+    should have_imeths :partial, :escape_html, :h, :escape_url, :u, :render
 
     should "call the sinatra_call's erb method with #partial" do
       return_value = subject.partial('part', :something => true)
