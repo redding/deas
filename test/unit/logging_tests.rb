@@ -1,20 +1,24 @@
 require 'assert'
+require 'test/support/fake_app'
 require 'deas/logging'
 
 module Deas::Logging
 
   class BaseTests < Assert::Context
     desc "Deas::Logging"
+    setup do
+      @app = FakeApp.new
+    end
     subject{ Deas::Logging }
 
     should have_imeths :middleware
 
   end
 
-  class VerboseLoggingTests < Assert::Context
+  class VerboseLoggingTests < BaseTests
     desc "Deas::VerboseLogging"
     setup do
-      @middleware = Deas::VerboseLogging.new('a rack app goes here')
+      @middleware = Deas::VerboseLogging.new(@app)
     end
     subject{ @middleware }
 
@@ -26,10 +30,10 @@ module Deas::Logging
 
   end
 
-  class SummaryLoggingTests < Assert::Context
+  class SummaryLoggingTests < BaseTests
     desc "Deas::SummaryLogging"
     setup do
-      @middleware = Deas::SummaryLogging.new('a rack app goes here')
+      @middleware = Deas::SummaryLogging.new(@app)
     end
     subject{ @middleware }
 
@@ -41,7 +45,7 @@ module Deas::Logging
 
   end
 
-  class SummaryLineTests < Assert::Context
+  class SummaryLineTests < BaseTests
     desc "Deas::SummaryLine"
     subject{ Deas::SummaryLine }
 
