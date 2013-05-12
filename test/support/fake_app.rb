@@ -13,18 +13,19 @@ class FakeApp
     @params   = @request.params
     @session  = @request.session
     @response = FakeResponse.new
-    @settings = OpenStruct.new({ })
+    @settings = OpenStruct.new(:deas_template_scope => Deas::Template::Scope)
   end
 
   def halt(*args)
     throw :halt, args
   end
 
-  def erb(*args, &block)
+  # return the template name for each nested calls
+  def erb(name, opts, &block)
     if block
-      [ args, block.call ].flatten
+      [ name, opts, block.call ].flatten
     else
-      args
+      [ name, opts ]
     end
   end
 

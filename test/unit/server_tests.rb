@@ -1,4 +1,5 @@
 require 'assert'
+require 'deas/template'
 require 'deas/route'
 require 'deas/server'
 require 'logger'
@@ -20,7 +21,8 @@ module Deas::Server
     should have_imeths :static_files, :reload_templates
 
     # DSL for server handling
-    should have_imeths :init, :logger, :use, :view_handler_ns, :use
+    should have_imeths :init, :template_helpers, :template_helper?, :error
+    should have_imeths :logger, :use, :view_handler_ns, :verbose_logging
     should have_imeths :get, :post, :put, :patch, :delete, :route
 
     should "allow setting it's configuration options" do
@@ -146,6 +148,11 @@ module Deas::Server
       assert_equal '::NoNsTest', route.handler_class_name
     end
 
+    should "add and query helper modules using #template_helpers and #template_helper?" do
+      subject.template_helpers (helper_module = Module.new)
+      assert subject.template_helper?(helper_module)
+    end
+
   end
 
   class ConfigurationTests < BaseTests
@@ -161,8 +168,10 @@ module Deas::Server
     should have_imeths :static_files, :reload_templates
 
     # server handling options
-    should have_imeths :init_procs, :logger, :verbose_logging, :middlewares
-    should have_imeths :routes, :view_handler_ns
+    should have_imeths :error_procs, :init_procs, :logger, :middlewares
+    should have_imeths :verbose_logging, :routes, :view_handler_ns
+
+    should have_reader :template_helpers
 
     should "default the env to 'development'" do
       assert_equal 'development', subject.env
@@ -184,16 +193,23 @@ module Deas::Server
       assert_equal false, subject.reload_templates
     end
 
-    should "default the logger to a NullLogger" do
+    should "default the handling options" do
+      assert_empty subject.error_procs
+      assert_empty subject.init_procs
       assert_instance_of Deas::NullLogger, subject.logger
+      assert_empty subject.middlewares
+      assert_equal true, subject.verbose_logging
+      assert_empty subject.routes
+      assert_nil   subject.view_handler_ns
+      assert_empty subject.template_helpers
     end
 
-    should "default routes to an empty array" do
-      assert_equal [], subject.routes
-    end
+    should "build a template scope including its template helpers" do
+      config = Deas::Server::Configuration.new
+      config.template_helpers << (helper_module = Module.new)
 
-    should "default middlewares to an empty array" do
-      assert_equal [], subject.middlewares
+      assert_includes Deas::Template::Scope, config.template_scope.ancestors
+      assert_includes helper_module, config.template_scope.included_modules
     end
 
   end

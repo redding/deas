@@ -39,6 +39,10 @@ module Deas
       "#<#{self.class}:#{reference} @request=#{self.request.inspect}>"
     end
 
+    def ==(other_handler)
+      self.class == other_handler.class
+    end
+
     protected
 
     # Helpers
