@@ -35,9 +35,9 @@ module Deas
         set :deas_error_procs,    server_config.error_procs
         set :logger,              server_config.logger
 
-        server_config.middlewares.each do |middleware_args|
-          use *middleware_args
-        end
+        server_config.settings.each{ |set_args| set *set_args }
+        server_config.middlewares.each{ |use_args| use *use_args }
+
         use Deas::Logging.middleware(server_config.verbose_logging)
 
         # routes

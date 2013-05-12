@@ -22,7 +22,7 @@ module Deas::Server
 
     # DSL for server handling
     should have_imeths :init, :template_helpers, :template_helper?, :error
-    should have_imeths :logger, :use, :view_handler_ns, :verbose_logging
+    should have_imeths :logger, :use, :set, :view_handler_ns, :verbose_logging
     should have_imeths :get, :post, :put, :patch, :delete, :route
 
     should "allow setting it's configuration options" do
@@ -60,6 +60,9 @@ module Deas::Server
 
       subject.use 'MyMiddleware'
       assert_equal [ ['MyMiddleware'] ], config.middlewares
+
+      subject.set :testing_set_meth, 'it works!'
+      assert_equal [ [:testing_set_meth, 'it works!'] ], config.settings
 
       stdout_logger = Logger.new(STDOUT)
       subject.logger stdout_logger
@@ -168,7 +171,7 @@ module Deas::Server
     should have_imeths :static_files, :reload_templates
 
     # server handling options
-    should have_imeths :error_procs, :init_procs, :logger, :middlewares
+    should have_imeths :error_procs, :init_procs, :logger, :middlewares, :settings
     should have_imeths :verbose_logging, :routes, :view_handler_ns
 
     should have_reader :template_helpers
@@ -198,6 +201,7 @@ module Deas::Server
       assert_empty subject.init_procs
       assert_instance_of Deas::NullLogger, subject.logger
       assert_empty subject.middlewares
+      assert_empty subject.settings
       assert_equal true, subject.verbose_logging
       assert_empty subject.routes
       assert_nil   subject.view_handler_ns
