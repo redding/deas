@@ -11,7 +11,8 @@ class Deas::Runner
     end
     subject{ @runner }
 
-    should have_instance_methods :request, :response, :params, :logger, :session
+    should have_reader  :app_settings
+    should have_readers :request, :response, :params, :logger, :session
 
     should "raise NotImplementedError with #halt" do
       assert_raises(NotImplementedError){ subject.halt }

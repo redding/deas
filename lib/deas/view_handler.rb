@@ -55,11 +55,12 @@ module Deas
       @deas_runner.render(*args, &block)
     end
 
-    def logger;   @deas_runner.logger;   end
-    def request;  @deas_runner.request;  end
-    def response; @deas_runner.response; end
-    def params;   @deas_runner.params;   end
-    def session;  @deas_runner.session;  end
+    def app_settings; @deas_runner.app_settings; end
+    def logger;       @deas_runner.logger;       end
+    def request;      @deas_runner.request;      end
+    def response;     @deas_runner.response;     end
+    def params;       @deas_runner.params;       end
+    def session;      @deas_runner.session;      end
 
     def run_callback(callback)
       (self.class.send("#{callback}_callbacks") || []).each do |callback|
