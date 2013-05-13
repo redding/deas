@@ -10,7 +10,7 @@ module Deas::ViewHandler
 
     desc "Deas::ViewHandler"
     setup do
-      @handler = test_runner(TestViewHandler).handler
+      @handler = test_handler(TestViewHandler)
     end
     subject{ @handler }
 
@@ -129,7 +129,7 @@ module Deas::ViewHandler
 
   class WithMethodFlagsTests < BaseTests
     setup do
-      @handler = test_runner(FlagViewHandler).handler
+      @handler = test_handler(FlagViewHandler)
     end
 
     should "have called `init!` and it's callbacks" do
