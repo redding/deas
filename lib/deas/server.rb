@@ -30,6 +30,7 @@ module Deas::Server
     option :init_procs,      Array, :default => []
     option :logger,                 :default => proc{ Deas::NullLogger.new }
     option :middlewares,     Array, :default => []
+    option :settings,        Array, :default => []
     option :verbose_logging,        :default => true
     option :routes,          Array, :default => []
     option :view_handler_ns, String
@@ -137,6 +138,10 @@ module Deas::Server
 
     def use(*args)
       self.configuration.middlewares << args
+    end
+
+    def set(*args)
+      self.configuration.settings << args
     end
 
     def view_handler_ns(*args)
