@@ -3,25 +3,16 @@ require 'deas/route'
 require 'deas/server'
 require 'logger'
 
-class Deas::Server
+module Deas::Server
 
   class BaseTests < Assert::Context
     desc "Deas::Server"
     setup do
-      @old_configuration = Deas::Server.configuration.dup
-      new_configuration = Deas::Server::Configuration.new
-      Deas::Server.instance.tap do |s|
-        s.instance_variable_set("@configuration", new_configuration)
-      end
+      @server_class = Class.new{ include Deas::Server }
     end
-    teardown do
-      Deas::Server.instance.tap do |s|
-        s.instance_variable_set("@configuration", @old_configuration)
-      end
-    end
-    subject{ Deas::Server }
+    subject{ @server_class }
 
-    should have_reader :configuration
+    should have_imeths :new, :configuration
 
     # DSL for sinatra settings
     should have_imeths :env, :root, :public_folder, :views_folder
@@ -31,10 +22,6 @@ class Deas::Server
     # DSL for server handling
     should have_imeths :init, :logger, :use, :view_handler_ns, :use
     should have_imeths :get, :post, :put, :patch, :delete, :route
-
-    should "be a singleton" do
-      assert_includes Singleton, subject.included_modules
-    end
 
     should "allow setting it's configuration options" do
       config = subject.configuration
@@ -169,7 +156,7 @@ class Deas::Server
     subject{ @configuration }
 
     # sinatra related options
-    should have_imeths :env, :root, :app_file, :public_folder, :views_folder
+    should have_imeths :env, :root, :public_folder, :views_folder
     should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
     should have_imeths :static_files, :reload_templates
 
@@ -181,25 +168,11 @@ class Deas::Server
       assert_equal 'development', subject.env
     end
 
-    should "default the root to the routes file's folder" do
-      expected_root = File.expand_path('..', Deas.config.routes_file)
-      assert_equal expected_root, subject.root.to_s
-    end
+    should "default the public and views folders based off the root" do
+      subject.root = TEST_SUPPORT_ROOT
 
-    should "default the app file to the routes file" do
-      assert_equal Deas.config.routes_file.to_s, subject.app_file.to_s
-    end
-
-    should "default the public folder based on the root" do
-      expected_root = File.expand_path('..', Deas.config.routes_file)
-      expected_public_folder = File.join(expected_root, 'public')
-      assert_equal expected_public_folder, subject.public_folder.to_s
-    end
-
-    should "default the views folder based on the root" do
-      expected_root = File.expand_path('..', Deas.config.routes_file)
-      expected_views_folder = File.join(expected_root, 'views')
-      assert_equal expected_views_folder, subject.views_folder.to_s
+      assert_equal subject.root.join('public'), subject.public_folder
+      assert_equal subject.root.join('views'), subject.views_folder
     end
 
     should "default the Sinatra flags" do

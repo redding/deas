@@ -1,12 +1,11 @@
 require 'deas'
 
-class Deas::Server
+class DeasTestServer
+  include Deas::Server
 
-  root File.expand_path("..", __FILE__)
+  root TEST_SUPPORT_ROOT
 
-  log_file_path = File.expand_path("../../../log/test.log", __FILE__)
-
-  logger Logger.new(File.open(log_file_path, 'w'))
+  logger TEST_LOGGER
   verbose_logging true
 
   error do |exception|

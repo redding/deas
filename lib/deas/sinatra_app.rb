@@ -19,7 +19,6 @@ module Deas
         set :environment, server_config.env
         set :root,        server_config.root
 
-        set :app_file,      server_config.app_file
         set :public_folder, server_config.public_folder
         set :views,         server_config.views_folder
 

@@ -1,59 +1,64 @@
 require 'ns-options'
 require 'ns-options/boolean'
 require 'pathname'
-require 'singleton'
 require 'deas/route'
+require 'deas/sinatra_app'
 
-module Deas
+module Deas; end
+module Deas::Server
 
-  class Server
-    include Singleton
+  class Configuration
+    include NsOptions::Proxy
 
-    class Configuration
-      include NsOptions::Proxy
+    # Sinatra based options
+    option :env,  String,   :default => 'development'
 
-      # Sinatra based options
-      option :env,  String,   :default => 'development'
-      option :root, Pathname, :default => proc{ File.dirname(Deas.config.routes_file) }
+    option :root,          Pathname
+    option :public_folder, Pathname
+    option :views_folder,  Pathname
 
-      option :app_file,      Pathname, :default => proc{ Deas.config.routes_file }
-      option :public_folder, Pathname
-      option :views_folder,  Pathname
+    option :dump_errors,      NsOptions::Boolean, :default => false
+    option :method_override,  NsOptions::Boolean, :default => true
+    option :sessions,         NsOptions::Boolean, :default => false
+    option :show_exceptions,  NsOptions::Boolean, :default => false
+    option :static_files,     NsOptions::Boolean, :default => true
+    option :reload_templates, NsOptions::Boolean, :default => false
 
-      option :dump_errors,      NsOptions::Boolean, :default => false
-      option :method_override,  NsOptions::Boolean, :default => true
-      option :sessions,         NsOptions::Boolean, :default => false
-      option :show_exceptions,  NsOptions::Boolean, :default => false
-      option :static_files,     NsOptions::Boolean, :default => true
-      option :reload_templates, NsOptions::Boolean, :default => false
+    # server handling options
+    option :error_procs,     Array, :default => []
+    option :init_procs,      Array, :default => []
+    option :logger,                 :default => proc{ Deas::NullLogger.new }
+    option :middlewares,     Array, :default => []
+    option :verbose_logging,        :default => true
 
-      # server handling options
-      option :error_procs,     Array, :default => []
-      option :init_procs,      Array, :default => []
-      option :logger,                 :default => proc{ Deas::NullLogger.new }
-      option :middlewares,     Array, :default => []
-      option :verbose_logging,        :default => true
-
-      option :routes,          Array, :default => []
-      option :view_handler_ns, String
-
-      def initialize
-        # these are defaulted here because we want to use the Configuration
-        # instance `root`. If we define a proc above, we will be using the
-        # Configuration class `root`, which will not update these options as
-        # expected.
-        super({
-          :public_folder => proc{ self.root.join('public') },
-          :views_folder  => proc{ self.root.join('views') }
-        })
-      end
-
-    end
-
-    attr_reader :configuration
+    option :routes,          Array, :default => []
+    option :view_handler_ns, String
 
     def initialize
-      @configuration = Configuration.new
+      # these are defaulted here because we want to use the Configuration
+      # instance `root`. If we define a proc above, we will be using the
+      # Configuration class `root`, which will not update these options as
+      # expected.
+      super({
+        :public_folder => proc{ self.root.join('public') },
+        :views_folder  => proc{ self.root.join('views') }
+      })
+    end
+
+  end
+
+  def self.included(receiver)
+    receiver.class_eval{ extend ClassMethods }
+  end
+
+  module ClassMethods
+
+    def new
+      Deas::SinatraApp.new(self.configuration)
+    end
+
+    def configuration
+      @configuration ||= Configuration.new
     end
 
     # sinatra settings DSL
@@ -151,14 +156,6 @@ module Deas
       Deas::Route.new(http_method, path, handler_class_name).tap do |route|
         self.configuration.routes.push(route)
       end
-    end
-
-    def self.method_missing(method, *args, &block)
-      self.instance.send(method, *args, &block)
-    end
-
-    def self.respond_to?(*args)
-      super || self.instance.respond_to?(*args)
     end
 
   end
