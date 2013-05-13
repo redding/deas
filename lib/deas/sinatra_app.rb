@@ -28,11 +28,12 @@ module Deas
         set :show_exceptions,  server_config.show_exceptions
         set :static,           server_config.static_files
         set :reload_templates, server_config.reload_templates
-        set :logging,         false
+        set :logging,          false
 
         # custom settings
-        set :deas_error_procs, server_config.error_procs
-        set :logger,           server_config.logger
+        set :deas_template_scope, server_config.template_scope
+        set :deas_error_procs,    server_config.error_procs
+        set :logger,              server_config.logger
 
         server_config.middlewares.each do |middleware_args|
           use *middleware_args
@@ -41,8 +42,6 @@ module Deas
 
         # routes
         server_config.routes.each do |route|
-          # defines Sinatra routes like:
-          #   get('/'){ ... }
           send(route.method, route.path){ route.run(self) }
         end
 
