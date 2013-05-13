@@ -4,35 +4,25 @@ module Deas
 
   class Template
 
-    def self.helpers(*helper_modules)
-      Deas::Template::RenderScope.class_eval{ include *helper_modules }
-    end
-
-    def self.helper?(helper_module)
-      Deas::Template::RenderScope.included_modules.include?(helper_module)
-    end
-
     attr_reader :name, :options
 
     def initialize(sinatra_call, name, options = nil)
-      @options = options || {}
-      @options[:scope] = RenderScope.new(sinatra_call)
+      @sinatra_call, @name, @options = sinatra_call, name.to_sym, (options || {})
+      @options[:scope] = @sinatra_call.settings.deas_template_scope.new(@sinatra_call)
 
-      @sinatra_call = sinatra_call
-      @name         = name.to_sym
       (@options.delete(:layout) || @options.delete(:layouts) || []).tap do |l|
         @layouts = l.compact.map(&:to_sym)
       end
     end
 
-    # builds Sinatra render-blocks like:
+    # builds render-blocks like:
     #
     #   erb :main_layout do
     #     erb :second_layout do
     #       erb :user_index
     #     end
     #   end
-    #
+
     def render(&block)
       template_names = [ @layouts, @name ].flatten.reverse
       top_render_proc = template_names.inject(block) do |render_proc, name|
@@ -41,17 +31,18 @@ module Deas
       top_render_proc.call
     end
 
-    class RenderScope
+    class Scope
+      attr_reader :sinatra_call
       def initialize(sinatra_call)
         @sinatra_call = sinatra_call
       end
 
       def render(name, options = nil, &block)
-        Deas::Template.new(@sinatra_call, name, options || {}).render(&block)
+        Template.new(@sinatra_call, name, options || {}).render(&block)
       end
 
       def partial(name, locals = nil)
-        Deas::Partial.new(@sinatra_call, name, locals || {}).render
+        Partial.new(@sinatra_call, name, locals || {}).render
       end
 
       def escape_html(html)
@@ -64,19 +55,23 @@ module Deas
       end
       alias :u :escape_url
 
+      def ==(other_scope)
+        self.sinatra_call == other_scope.sinatra_call
+        self.class.included_modules == other_scope.class.included_modules
+      end
     end
 
-  end
+    class Partial < Template
 
-  class Partial < Template
-
-    def initialize(sinatra_call, name, locals = nil)
-      options = { :locals => (locals || {}) }
-      name = begin
-        basename = File.basename(name.to_s)
-        name.to_s.sub(/#{basename}\Z/, "_#{basename}")
+      def initialize(sinatra_call, name, locals = nil)
+        options = { :locals => (locals || {}) }
+        name = begin
+          basename = File.basename(name.to_s)
+          name.to_s.sub(/#{basename}\Z/, "_#{basename}")
+        end
+        super sinatra_call, name, options
       end
-      super sinatra_call, name, options
+
     end
 
   end

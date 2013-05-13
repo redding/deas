@@ -42,17 +42,15 @@ class Deas::SinatraRunner
       assert_equal [ 'test' ], return_value
     end
 
-    should "call the sinatra_call's erb method with #render" do
-      return_value = subject.render('index')
+    should "render the template with a :view local and the handler layouts with #render" do
+      exp_handler = FlagViewHandler.new(subject)
+      exp_layouts = FlagViewHandler.layouts
+      exp_result = Deas::Template.new(@fake_sinatra_call, 'index', {
+        :locals => { :view => exp_handler },
+        :layout => exp_layouts
+      }).render
 
-      assert_equal :web,   return_value[0]
-      assert_equal :index, return_value[2]
-
-      options = return_value[3]
-      assert_instance_of Deas::Template::RenderScope, options[:scope]
-
-      expected_locals = { :view => subject.instance_variable_get("@handler") }
-      assert_equal(expected_locals, options[:locals])
+      assert_equal exp_result, subject.render('index')
     end
 
     should "call the sinatra_call's redirect method with #redirect" do

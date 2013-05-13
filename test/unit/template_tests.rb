@@ -13,14 +13,13 @@ class Deas::Template
     subject{ @template }
 
     should have_instance_methods :name, :options, :render
-    should have_class_methods :helpers, :helper?
 
     should "symbolize it's name" do
       assert_equal :"users/index", subject.name
     end
 
-    should "set it's scope option to a empty Module" do
-      assert_instance_of Deas::Template::RenderScope, subject.options[:scope]
+    should "set it's scope option" do
+      assert_instance_of Deas::Template::Scope, subject.options[:scope]
     end
 
     should "call the sinatra_call's `erb` method with #render" do
@@ -28,17 +27,6 @@ class Deas::Template
 
       assert_equal subject.name,    return_value[0]
       assert_equal subject.options, return_value[1]
-    end
-
-    should "include modules on the RenderScope using `helpers` class method"\
-           " and know if a given modules has been included in the RenderScope" do
-      helper_module = Module.new
-      Deas::Template.helpers(helper_module)
-
-      included_modules = Deas::Template::RenderScope.included_modules
-      assert_includes helper_module, included_modules
-
-      assert Deas::Template.helper?(helper_module)
     end
 
   end
@@ -64,13 +52,12 @@ class Deas::Template
 
   end
 
-  class RenderScopeTests < Assert::Context
+  class ScopeTests < BaseTests
     desc "Deas::Template::RenderScope"
     setup do
-      @fake_sinatra_call = FakeApp.new
-      @render_scope = Deas::Template::RenderScope.new(@fake_sinatra_call)
+      @scope = Deas::Template::Scope.new(@fake_sinatra_call)
     end
-    subject{ @render_scope }
+    subject{ @scope }
 
     should have_imeths :partial, :escape_html, :h, :escape_url, :u, :render
 
@@ -80,7 +67,7 @@ class Deas::Template
       assert_equal :_part, return_value[0]
 
       expected_options = return_value[1]
-      assert_instance_of Deas::Template::RenderScope, expected_options[:scope]
+      assert_instance_of Deas::Template::Scope, expected_options[:scope]
 
       expected_locals = { :something => true }
       assert_equal(expected_locals, expected_options[:locals])
@@ -89,15 +76,13 @@ class Deas::Template
     should "call the sinatra_call's erb method with #render" do
       return_value = subject.render('my_template', {
         :views  => '/path/to/templates',
-        :locals => {
-          :something => true
-        }
+        :locals => { :something => true }
       })
 
       assert_equal :my_template, return_value[0]
 
       expected_options = return_value[1]
-      assert_instance_of Deas::Template::RenderScope, expected_options[:scope]
+      assert_instance_of Deas::Template::Scope, expected_options[:scope]
 
       expected_locals = { :something => true }
       assert_equal(expected_locals, expected_options[:locals])
@@ -121,15 +106,10 @@ class Deas::Template
 
   end
 
-end
-
-class Deas::Partial
-
-  class BaseTests < Assert::Context
-    desc "Deas::Partial"
+  class PartialTests < BaseTests
+    desc "Partial"
     setup do
-      @fake_sinatra_call = FakeApp.new
-      @partial = Deas::Partial.new(@fake_sinatra_call, 'users/index/listing', {
+      @partial = Deas::Template::Partial.new(@fake_sinatra_call, 'users/index/listing', {
         :user => 'Joe Test'
       })
     end

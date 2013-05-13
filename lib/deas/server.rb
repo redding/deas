@@ -1,6 +1,7 @@
 require 'ns-options'
 require 'ns-options/boolean'
 require 'pathname'
+require 'deas/template'
 require 'deas/route'
 require 'deas/sinatra_app'
 
@@ -30,9 +31,10 @@ module Deas::Server
     option :logger,                 :default => proc{ Deas::NullLogger.new }
     option :middlewares,     Array, :default => []
     option :verbose_logging,        :default => true
-
     option :routes,          Array, :default => []
     option :view_handler_ns, String
+
+    attr_reader :template_helpers
 
     def initialize
       # these are defaulted here because we want to use the Configuration
@@ -43,6 +45,13 @@ module Deas::Server
         :public_folder => proc{ self.root.join('public') },
         :views_folder  => proc{ self.root.join('views') }
       })
+      @template_helpers = []
+    end
+
+    def template_scope
+      Class.new(Deas::Template::Scope).tap do |klass|
+        klass.send(:include, *self.template_helpers)
+      end
     end
 
   end
@@ -105,28 +114,37 @@ module Deas::Server
 
     # Server handling DSL
 
-    def error(&block)
-      self.configuration.error_procs << block
-    end
-
     def init(&block)
       self.configuration.init_procs << block
+    end
+
+    def template_helpers(*helper_modules)
+      helper_modules.each{ |m| self.configuration.template_helpers << m }
+      self.configuration.template_helpers
+    end
+
+    def template_helper?(helper_module)
+      self.configuration.template_helpers.include?(helper_module)
+    end
+
+    def error(&block)
+      self.configuration.error_procs << block
     end
 
     def logger(*args)
       self.configuration.logger *args
     end
 
-    def verbose_logging(*args)
-      self.configuration.verbose_logging *args
+    def use(*args)
+      self.configuration.middlewares << args
     end
 
     def view_handler_ns(*args)
       self.configuration.view_handler_ns *args
     end
 
-    def use(*args)
-      self.configuration.middlewares << args
+    def verbose_logging(*args)
+      self.configuration.verbose_logging *args
     end
 
     def get(path, handler_class_name)
