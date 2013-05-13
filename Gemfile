@@ -4,3 +4,5 @@ gemspec
 
 gem 'rake'
 gem 'pry'
+gem 'multi_json'
+gem 'yajl-ruby'

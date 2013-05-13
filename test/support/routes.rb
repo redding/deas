@@ -8,6 +8,8 @@ class DeasTestServer
   logger TEST_LOGGER
   verbose_logging true
 
+  set :a_setting, 'something'
+
   error do |exception|
     case exception
     when Sinatra::NotFound
@@ -26,6 +28,8 @@ class DeasTestServer
   get  '/redirect_to',     'RedirectToHandler'
   post '/session',         'SetSessionHandler'
   get  '/session',         'UseSessionHandler'
+
+  get '/handler/tests.json', 'HandlerTestsHandler'
 
 end
 
@@ -120,6 +124,33 @@ class UseSessionHandler
 
   def run!
     session[:secret]
+  end
+
+end
+
+class HandlerTestsHandler
+  include Deas::ViewHandler
+
+  def init!
+    @data = {}
+    set_data('app_settings_a_setting'){ self.app_settings.a_setting }
+    set_data('logger_class_name'){ self.logger.class.name }
+    set_data('request_method'){ self.request.request_method.to_s }
+    set_data('response_firstheaderval'){ self.response.headers.sort.first.to_s }
+    set_data('params_a_param'){ self.params['a-param'] }
+    set_data('session_inspect'){ self.session.inspect }
+  end
+
+  def set_data(a, &block)
+    begin
+      @data[a] = block.call
+    rescue Exception => e
+    end
+  end
+
+  def run!
+    require 'multi_json'
+    [200, {}, MultiJson.encode(@data)]
   end
 
 end
