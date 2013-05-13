@@ -13,7 +13,7 @@ module Deas
 
     def initialize(app)
       @app    = app
-      @logger = Deas.app.settings.logger
+      @logger = @app.settings.logger
     end
 
     # The Rack call interface. The receiver acts as a prototype and runs

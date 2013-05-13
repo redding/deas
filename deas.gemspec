@@ -21,8 +21,8 @@ Gem::Specification.new do |gem|
   gem.add_dependency("rack",       ["~> 1.5"])
   gem.add_dependency("sinatra",    ["~> 1.4"])
 
-  gem.add_development_dependency("assert",       ["~> 2.0"])
-  gem.add_development_dependency("assert-mocha", ["~> 1.0"])
-  gem.add_development_dependency("rack-test",    ["~> 0.6"])
+  gem.add_development_dependency("assert")
+  gem.add_development_dependency("assert-mocha")
+  gem.add_development_dependency("assert-rack-test")
 
 end

@@ -1,14 +1,15 @@
 require 'assert'
-require 'rack/test'
+require 'assert-rack-test'
+require 'deas'
 
 module Deas
 
   class RackTests < Assert::Context
-    include Rack::Test::Methods
+    include Assert::Rack::Test
 
-    desc "Deas' the rack app"
+    desc "a Deas server rack app"
     setup do
-      @app = Deas.app.new
+      @app = DeasTestServer.new
     end
 
     def app; @app; end
@@ -76,10 +77,11 @@ module Deas
   class SessionTests < RackTests
     desc "with sessions enabled"
     setup do
-      orig_sessions = Deas.app.settings.sessions
-      Deas.app.set :sessions, true
-      @app = Deas.app.new
-      Deas.app.set :sessions, orig_sessions
+      @orig_sessions = @app.settings.sessions
+      @app.set :sessions, true
+    end
+    teardown do
+      @app.set :sessions, @orig_sessions
     end
 
     should "return a 200 response and the session value" do

@@ -49,7 +49,6 @@ module Deas::SinatraApp
       subject.settings.tap do |settings|
         assert_equal 'staging',                  settings.environment
         assert_equal 'path/to/somewhere',        settings.root.to_s
-        assert_equal @configuration.app_file,    settings.app_file
         assert_equal 'path/to/somewhere/public', settings.public_folder.to_s
         assert_equal 'path/to/somewhere/views',  settings.views.to_s
         assert_equal true,                       settings.dump_errors

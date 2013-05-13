@@ -4,7 +4,30 @@ Handler-based web framework powered by Sinatra.
 
 ## Usage
 
-TODO: Write code samples and usage instructions here
+```ruby
+# in your rackup file (or whatever)
+
+require 'deas'
+
+class MyApp
+  include Deas::Server
+
+  get '/', 'HelloWorldHandler'
+
+end
+
+class HellowWorldHandler
+  include Deas::ViewHandler
+
+  def run!
+    "<h1>Hello World</h1>"
+  end
+
+end
+
+app = MyApp.new
+run app
+```
 
 ## Installation
 
