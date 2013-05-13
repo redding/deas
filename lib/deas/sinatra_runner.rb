@@ -11,7 +11,7 @@ module Deas
 
     def initialize(handler_class, sinatra_call)
       @sinatra_call  = sinatra_call
-      @handler_class = handler_class
+      @app_settings  = @sinatra_call.settings
       @logger        = @sinatra_call.settings.logger
       @params        = @sinatra_call.params
       @request       = @sinatra_call.request
