@@ -94,4 +94,24 @@ module Deas
 
   end
 
+  class HandlerTests < RackTests
+    desc "handler"
+    setup do
+      get 'handler/tests.json?a-param=something'
+
+      require 'multi_json'
+      @data = MultiJson.decode(last_response.body || "")
+    end
+
+    should "be able to access sinatra call data" do
+      assert_equal 'something',    @data['app_settings_a_setting']
+      assert_equal 'Logger',       @data['logger_class_name']
+      assert_equal 'GET',          @data['request_method']
+      assert_equal 'Content-Type', @data['response_firstheaderval']
+      assert_equal 'something',    @data['params_a_param']
+      assert_equal '{}',           @data['session_inspect']
+    end
+
+  end
+
 end
