@@ -34,11 +34,11 @@ module Deas
       @sinatra_call.halt(*args)
     end
 
-    def render(name, options = nil, &block)
+    def render(template_name, options = nil, &block)
       options ||= {}
       options[:locals] = { :view => @handler }.merge(options[:locals] || {})
       options[:layout] ||= @handler_class.layouts
-      Deas::Template.new(@sinatra_call, name, options).render(&block)
+      Deas::Template.new(@sinatra_call, template_name, options).render(&block)
     end
 
     def redirect(*args)
