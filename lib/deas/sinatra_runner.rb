@@ -45,10 +45,6 @@ module Deas
       @sinatra_call.redirect(*args)
     end
 
-    def redirect_to(path, *args)
-      @sinatra_call.redirect(@sinatra_call.to(path), *args)
-    end
-
     private
 
     def run_callbacks(callbacks)

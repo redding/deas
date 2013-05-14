@@ -2,6 +2,7 @@ require 'ns-options'
 require 'ns-options/boolean'
 require 'pathname'
 require 'deas/template'
+require 'deas/redirect_handler'
 require 'deas/route'
 require 'deas/sinatra_app'
 
@@ -170,6 +171,14 @@ module Deas::Server
 
     def delete(path, handler_class_name)
       self.route(:delete, path, handler_class_name)
+    end
+
+    def redirect(http_method, path, to_path = nil, &block)
+      name          = 'Deas::RedirectHandler'
+      handler_class = Deas::RedirectHandler.new(to_path, &block)
+      Deas::Route.new(http_method, path, name, handler_class).tap do |route|
+        self.configuration.routes.push(route)
+      end
     end
 
     def route(http_method, path, handler_class_name)

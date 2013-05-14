@@ -22,10 +22,6 @@ module Deas
       raise NotImplementedError
     end
 
-    def redirect_to(*args)
-      raise NotImplementedError
-    end
-
   end
 
 end

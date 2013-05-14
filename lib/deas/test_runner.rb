@@ -36,6 +36,10 @@ module Deas
       [ args, block ].compact.flatten
     end
 
+    def redirect(*args)
+      [ :redirect, args ].compact.flatten
+    end
+
   end
 
 end
