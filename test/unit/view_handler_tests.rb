@@ -28,9 +28,9 @@ module Deas::ViewHandler
     end
 
     should "be able to render templates" do
-      return_value = test_runner(RenderViewHandler).run
-      assert_equal "my_template",        return_value[0]
-      assert_equal({ :some => :option }, return_value[1])
+      render_args = test_runner(RenderViewHandler).run
+      assert_equal "my_template",        render_args.template_name
+      assert_equal({ :some => :option }, render_args.options)
     end
 
     should "allow specifying the layouts using #layout or #layouts" do
