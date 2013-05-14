@@ -64,9 +64,18 @@ module Deas
 
       assert_equal 302,               last_response.status
       assert_equal expected_location, last_response.headers['Location']
+    end
 
-      get '/redirect_to'
+    should "return a 302 redirect to the expected location " \
+           "when using a route redirect" do
+      get '/route_redirect'
       expected_location = 'http://example.org/somewhere'
+
+      assert_equal 302,               last_response.status
+      assert_equal expected_location, last_response.headers['Location']
+
+      get '/my_prefix/redirect'
+      expected_location = 'http://example.org/my_prefix/somewhere'
 
       assert_equal 302,               last_response.status
       assert_equal expected_location, last_response.headers['Location']

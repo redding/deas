@@ -25,11 +25,13 @@ class DeasTestServer
   get  '/with_layout',     'WithLayoutHandler'
   get  '/alt_with_layout', 'AlternateWithLayoutHandler'
   get  '/redirect',        'RedirectHandler'
-  get  '/redirect_to',     'RedirectToHandler'
   post '/session',         'SetSessionHandler'
   get  '/session',         'UseSessionHandler'
 
   get '/handler/tests.json', 'HandlerTestsHandler'
+
+  redirect :get, '/route_redirect',   '/somewhere'
+  redirect(:get, '/:prefix/redirect'){ "/#{params['prefix']}/somewhere" }
 
 end
 
@@ -100,21 +102,12 @@ class RedirectHandler
 
 end
 
-class RedirectToHandler
-  include Deas::ViewHandler
-
-  def run!
-    redirect_to '/somewhere'
-  end
-
-end
-
 class SetSessionHandler
   include Deas::ViewHandler
 
   def run!
     session[:secret] = 'session_secret'
-    redirect_to '/session'
+    redirect '/session'
   end
 
 end

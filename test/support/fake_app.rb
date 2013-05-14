@@ -29,10 +29,6 @@ class FakeApp
     end
   end
 
-  def to(relative_path)
-    File.join("http://test.local", relative_path)
-  end
-
   def redirect(*args)
     halt 302, { 'Location' => args[0] }
   end

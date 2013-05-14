@@ -26,10 +26,6 @@ class Deas::Runner
       assert_raises(NotImplementedError){ subject.redirect }
     end
 
-    should "raise NotImplementedError with #redirect_to" do
-      assert_raises(NotImplementedError){ subject.redirect_to }
-    end
-
   end
 
 end

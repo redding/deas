@@ -125,6 +125,17 @@ module Deas::Server
       assert_equal 'DeleteAsset', route.handler_class_name
     end
 
+    should "add a redirect route using #redirect" do
+      subject.redirect(:get, '/invalid', '/assets')
+
+      route = subject.configuration.routes[0]
+      assert_instance_of Deas::Route, route
+      assert_equal :get,       route.method
+      assert_equal '/invalid', route.path
+      assert_equal 'Deas::RedirectHandler', route.handler_class_name
+      assert_not_nil route.handler_class
+    end
+
     should "allow defining any kind of route using #route" do
       subject.route(:options, '/get_info', 'GetInfo')
 
@@ -152,7 +163,7 @@ module Deas::Server
     end
 
     should "add and query helper modules using #template_helpers and #template_helper?" do
-      subject.template_helpers (helper_module = Module.new)
+      subject.template_helpers(helper_module = Module.new)
       assert subject.template_helper?(helper_module)
     end
 
