@@ -14,8 +14,8 @@ class Deas::SinatraRunner
     end
     subject{ @runner }
 
-    should have_instance_methods :run, :request, :response, :params, :logger,
-      :halt, :render, :session, :redirect, :redirect_to
+    should have_imeths :run, :request, :response, :params, :logger, :halt
+    should have_imeths :render, :session, :redirect
 
     should "return the sinatra_call's request with #request" do
       assert_equal @fake_sinatra_call.request, subject.request
@@ -56,13 +56,6 @@ class Deas::SinatraRunner
     should "call the sinatra_call's redirect method with #redirect" do
       return_value = catch(:halt){ subject.redirect('http://google.com') }
       expected = [ 302, { 'Location' => 'http://google.com' } ]
-
-      assert_equal expected, return_value
-    end
-
-    should "call the sinatra_call's redirect and to methods with #redirect_to" do
-      return_value = catch(:halt){ subject.redirect_to('/somewhere') }
-      expected = [ 302, { 'Location' => "http://test.local/somewhere" } ]
 
       assert_equal expected, return_value
     end

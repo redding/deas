@@ -16,6 +16,13 @@ class Deas::Route
     should have_instance_methods :method, :path, :handler_class_name,
       :handler_class, :run
 
+    should "allow passing a constantized handler when initialized" do
+      route = Deas::Route.new(:get, '/test', 'TestViewHandler', TestViewHandler)
+
+      # handler class is set without calling constantize
+      assert_equal TestViewHandler, route.handler_class
+    end
+
     should "constantize the handler class with #constantize!" do
       assert_nil subject.handler_class
 
