@@ -38,18 +38,20 @@ module Deas::RedirectHandler
     desc "when run"
 
     should "redirect to the path that it was build with" do
-      @response = test_runner(@handler_class).run
-      assert_equal [ :redirect, "/somewhere" ], @response
+      render_args = test_runner(@handler_class).run
+      assert_equal true,         render_args.redirect?
+      assert_equal '/somewhere', render_args.path
     end
 
     should "redirect to the path returned from instance evaling the proc" do
       path_proc = proc{ params['redirect_to'] }
       handler_class = Deas::RedirectHandler.new(&path_proc)
 
-      @response = test_runner(handler_class, {
+      render_args = test_runner(handler_class, {
         :params => { 'redirect_to' => '/go_here' }
       }).run
-      assert_equal [ :redirect, "/go_here" ], @response
+      assert_equal true,       render_args.redirect?
+      assert_equal '/go_here', render_args.path
     end
 
   end
