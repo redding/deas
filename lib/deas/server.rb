@@ -2,6 +2,7 @@ require 'ns-options'
 require 'ns-options/boolean'
 require 'pathname'
 require 'deas/template'
+require 'deas/exceptions'
 require 'deas/redirect_handler'
 require 'deas/route'
 require 'deas/sinatra_app'
@@ -15,7 +16,7 @@ module Deas::Server
     # Sinatra based options
     option :env,  String,   :default => 'development'
 
-    option :root,          Pathname
+    option :root,          Pathname, :required => true
     option :public_folder, Pathname
     option :views_folder,  Pathname
 
@@ -65,6 +66,7 @@ module Deas::Server
   module ClassMethods
 
     def new
+      raise Deas::ServerRootError if self.configuration.root.nil?
       Deas::SinatraApp.new(self.configuration)
     end
 
