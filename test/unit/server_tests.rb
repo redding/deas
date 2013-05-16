@@ -69,7 +69,7 @@ module Deas::Server
       assert_equal Set.new([ ['MyMiddleware'] ]), config.middlewares
 
       subject.set :testing_set_meth, 'it works!'
-      assert_equal [ [:testing_set_meth, 'it works!'] ], config.settings
+      assert_equal({ :testing_set_meth => 'it works!'}, config.settings)
 
       stdout_logger = Logger.new(STDOUT)
       subject.logger stdout_logger
