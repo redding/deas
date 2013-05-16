@@ -2,6 +2,7 @@ require 'ns-options'
 require 'pathname'
 
 require 'deas/version'
+require 'deas/exceptions'
 require 'deas/server'
 require 'deas/view_handler'
 
