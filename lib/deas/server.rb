@@ -1,6 +1,7 @@
 require 'ns-options'
 require 'ns-options/boolean'
 require 'pathname'
+require 'set'
 require 'deas/template'
 require 'deas/exceptions'
 require 'deas/redirect_handler'
@@ -31,7 +32,7 @@ module Deas::Server
     option :error_procs,     Array, :default => []
     option :init_procs,      Array, :default => []
     option :logger,                 :default => proc{ Deas::NullLogger.new }
-    option :middlewares,     Array, :default => []
+    option :middlewares,     Set,   :default => []
     option :settings,        Array, :default => []
     option :verbose_logging,        :default => true
     option :routes,          Array, :default => []
