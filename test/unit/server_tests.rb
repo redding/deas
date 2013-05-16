@@ -27,11 +27,6 @@ module Deas::Server
     should have_imeths :logger, :use, :set, :view_handler_ns, :verbose_logging
     should have_imeths :get, :post, :put, :patch, :delete, :route
 
-    should "complain if creating a new server with setting the `root`" do
-      assert_raises(Deas::ServerRootError){ subject.new }
-      assert_nothing_raised{ subject.root '/path/to/root'; subject.new }
-    end
-
     should "allow setting it's configuration options" do
       config = subject.configuration
 
@@ -169,9 +164,19 @@ module Deas::Server
       assert_equal '::NoNsTest', route.handler_class_name
     end
 
-    should "add and query helper modules using #template_helpers and #template_helper?" do
+    should "add and query helper modules" do
       subject.template_helpers(helper_module = Module.new)
       assert subject.template_helper?(helper_module)
+    end
+
+    should "complain if creating a new server with setting the `root`" do
+      assert_raises(Deas::ServerRootError){ subject.new }
+      assert_nothing_raised{ subject.root '/path/to/root'; subject.new }
+    end
+
+    should "default the :erb :outvar setting in the SinatraApp it creates" do
+      subject.root '/path/to/root'
+      assert_equal '@_out_buf', subject.new.settings.erb[:outvar]
     end
 
   end
