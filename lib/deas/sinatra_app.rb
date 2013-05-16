@@ -13,6 +13,13 @@ module Deas
       server_config.init_procs.each{ |p| p.call }
       server_config.routes.each(&:constantize!)
 
+      # add the logging middleware args last.  This ensures that the logging
+      # happens just before the app gets the request and just after the app
+      # sends a response.
+      [*Deas::Logging.middleware(server_config.verbose_logging)].tap do |mw_args|
+        server_config.middlewares << mw_args
+      end
+
       Sinatra.new do
 
         # built-in settings
@@ -37,8 +44,6 @@ module Deas
 
         server_config.settings.each{ |set_args| set *set_args }
         server_config.middlewares.each{ |use_args| use *use_args }
-
-        use Deas::Logging.middleware(server_config.verbose_logging)
 
         # routes
         server_config.routes.each do |route|

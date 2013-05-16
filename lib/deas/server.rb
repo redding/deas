@@ -40,15 +40,15 @@ module Deas::Server
 
     attr_reader :template_helpers
 
-    def initialize
+    def initialize(values=nil)
       # these are defaulted here because we want to use the Configuration
       # instance `root`. If we define a proc above, we will be using the
       # Configuration class `root`, which will not update these options as
       # expected.
-      super({
+      super((values || {}).merge({
         :public_folder => proc{ self.root.join('public') },
         :views_folder  => proc{ self.root.join('views') }
-      })
+      }))
       @template_helpers = []
     end
 
@@ -68,7 +68,10 @@ module Deas::Server
 
     def new
       raise Deas::ServerRootError if self.configuration.root.nil?
-      Deas::SinatraApp.new(self.configuration)
+
+      # create the sinatra app with a 'fresh' configuration each time
+      # this ensures that the init procs are only called once per configuration
+      Deas::SinatraApp.new(Configuration.new(self.configuration.to_hash))
     end
 
     def configuration
