@@ -1,4 +1,5 @@
 require 'assert'
+require 'set'
 require 'deas/exceptions'
 require 'deas/template'
 require 'deas/route'
@@ -65,7 +66,7 @@ module Deas::Server
       assert_equal true, config.reload_templates
 
       subject.use 'MyMiddleware'
-      assert_equal [ ['MyMiddleware'] ], config.middlewares
+      assert_equal Set.new([ ['MyMiddleware'] ]), config.middlewares
 
       subject.set :testing_set_meth, 'it works!'
       assert_equal [ [:testing_set_meth, 'it works!'] ], config.settings
