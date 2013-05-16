@@ -1,4 +1,5 @@
 require 'assert'
+require 'deas/exceptions'
 require 'deas/template'
 require 'deas/route'
 require 'deas/server'
@@ -24,6 +25,11 @@ module Deas::Server
     should have_imeths :init, :template_helpers, :template_helper?, :error
     should have_imeths :logger, :use, :set, :view_handler_ns, :verbose_logging
     should have_imeths :get, :post, :put, :patch, :delete, :route
+
+    should "complain if creating a new server with setting the `root`" do
+      assert_raises(Deas::ServerRootError){ subject.new }
+      assert_nothing_raised{ subject.root '/path/to/root'; subject.new }
+    end
 
     should "allow setting it's configuration options" do
       config = subject.configuration
