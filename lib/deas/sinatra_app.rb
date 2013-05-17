@@ -1,30 +1,11 @@
 require 'sinatra/base'
 require 'deas/error_handler'
-require 'deas/logging'
 
 module Deas
-
   module SinatraApp
 
     def self.new(server_config)
-      # the reason this is done here is b/c the below sinatra configuration is
-      # not considered valid until the init procs have been run and the routes
-      # have been constantized.
-      server_config.init_procs.each{ |p| p.call }
-      server_config.routes.each(&:constantize!)
-
-      # set the :erb :outvar setting if it hasn't been set.  this is used
-      # by template helpers and plugins and needs to be queryable.  the actual
-      # value doesn't matter - it just needs to be set
-      server_config.settings[:erb] ||= {}
-      server_config.settings[:erb][:outvar] ||= '@_out_buf'
-
-      # add the logging middleware args last.  This ensures that the logging
-      # happens just before the app gets the request and just after the app
-      # sends a response.
-      [*Deas::Logging.middleware(server_config.verbose_logging)].tap do |mw_args|
-        server_config.middlewares << mw_args
-      end
+      server_config.validate!
 
       Sinatra.new do
 
@@ -69,5 +50,4 @@ module Deas
     end
 
   end
-
 end

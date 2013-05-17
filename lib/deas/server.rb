@@ -2,8 +2,9 @@ require 'ns-options'
 require 'ns-options/boolean'
 require 'pathname'
 require 'set'
-require 'deas/template'
 require 'deas/exceptions'
+require 'deas/template'
+require 'deas/logging'
 require 'deas/redirect_handler'
 require 'deas/route'
 require 'deas/sinatra_app'
@@ -32,7 +33,7 @@ module Deas::Server
     option :error_procs,     Array, :default => []
     option :init_procs,      Array, :default => []
     option :logger,                 :default => proc{ Deas::NullLogger.new }
-    option :middlewares,     Set,   :default => []
+    option :middlewares,     Array, :default => []
     option :settings,        Hash,  :default => {}
     option :verbose_logging,        :default => true
     option :routes,          Array, :default => []
@@ -50,6 +51,40 @@ module Deas::Server
         :views_folder  => proc{ self.root.join('views') }
       }))
       @template_helpers = []
+      @valid = nil
+    end
+
+    def valid?
+      !!@valid
+    end
+
+    # for the config to be considered "valid", a few things need to happen.  The
+    # key here is that this only needs to be done _once_ for each config.
+
+    def validate!
+      return @valid if !@valid.nil?  # only need to run this once per config
+
+      # ensure all user and plugin configs/settings are applied
+      self.init_procs.each{ |p| p.call }
+      raise Deas::ServerRootError if self.root.nil?
+
+      # constantize the routes to ensure they are available
+      self.routes.each(&:constantize!)
+
+      # set the :erb :outvar setting if it hasn't been set.  this is used
+      # by template helpers and plugins and needs to be queryable.  the actual
+      # value doesn't matter - it just needs to be set
+      self.settings[:erb] ||= {}
+      self.settings[:erb][:outvar] ||= '@_out_buf'
+
+      # add the logging middleware args last.  This ensures that the logging
+      # happens just before the app gets the request and just after the app
+      # sends a response.
+      [*Deas::Logging.middleware(self.verbose_logging)].tap do |mw_args|
+        self.middlewares << mw_args
+      end
+
+      @valid = true  # if it made it this far, its valid!
     end
 
     def template_scope
@@ -67,11 +102,7 @@ module Deas::Server
   module ClassMethods
 
     def new
-      raise Deas::ServerRootError if self.configuration.root.nil?
-
-      # create the sinatra app with a 'fresh' configuration each time
-      # this ensures that the init procs are only called once per configuration
-      Deas::SinatraApp.new(Configuration.new(self.configuration.to_hash))
+      Deas::SinatraApp.new(self.configuration)
     end
 
     def configuration
