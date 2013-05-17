@@ -26,23 +26,12 @@ module Deas::SinatraApp
     end
     subject{ @sinatra_app }
 
+    should "ensure its config is valid" do
+      assert @configuration.valid?
+    end
+
     should "be a kind of Sinatra::Base" do
       assert_equal Sinatra::Base, subject.superclass
-    end
-
-    should "call init procs when initialized" do
-      initialized = false
-      other_initialized = false
-      @configuration.init_procs << proc{ initialized = true }
-      @configuration.init_procs << proc{ other_initialized = true }
-      @sinatra_app = Deas::SinatraApp.new(@configuration)
-
-      assert_equal true, initialized
-      assert_equal true, other_initialized
-    end
-
-    should "call constantize! on all routes" do
-      assert_equal TestViewHandler, @route.handler_class
     end
 
     should "have it's configuration set based on the server configuration" do

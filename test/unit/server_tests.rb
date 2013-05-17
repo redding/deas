@@ -1,10 +1,8 @@
 require 'assert'
 require 'set'
-require 'deas/exceptions'
-require 'deas/template'
+require 'logger'
 require 'deas/route'
 require 'deas/server'
-require 'logger'
 
 module Deas::Server
 
@@ -61,7 +59,7 @@ module Deas::Server
       assert_equal true, config.reload_templates
 
       subject.use 'MyMiddleware'
-      assert_equal Set.new([ ['MyMiddleware'] ]), config.middlewares
+      assert_equal [ ['MyMiddleware'] ], config.middlewares
 
       subject.set :testing_set_meth, 'it works!'
       assert_equal({ :testing_set_meth => 'it works!'}, config.settings)
@@ -167,76 +165,6 @@ module Deas::Server
     should "add and query helper modules" do
       subject.template_helpers(helper_module = Module.new)
       assert subject.template_helper?(helper_module)
-    end
-
-    should "complain if creating a new server with setting the `root`" do
-      assert_raises(Deas::ServerRootError){ subject.new }
-      assert_nothing_raised{ subject.root '/path/to/root'; subject.new }
-    end
-
-    should "default the :erb :outvar setting in the SinatraApp it creates" do
-      subject.root '/path/to/root'
-      assert_equal '@_out_buf', subject.new.settings.erb[:outvar]
-    end
-
-  end
-
-  class ConfigurationTests < BaseTests
-    desc "Configuration"
-    setup do
-      @configuration = Deas::Server::Configuration.new
-    end
-    subject{ @configuration }
-
-    # sinatra related options
-    should have_imeths :env, :root, :public_folder, :views_folder
-    should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
-    should have_imeths :static_files, :reload_templates
-
-    # server handling options
-    should have_imeths :error_procs, :init_procs, :logger, :middlewares, :settings
-    should have_imeths :verbose_logging, :routes, :view_handler_ns
-
-    should have_reader :template_helpers
-
-    should "default the env to 'development'" do
-      assert_equal 'development', subject.env
-    end
-
-    should "default the public and views folders based off the root" do
-      subject.root = TEST_SUPPORT_ROOT
-
-      assert_equal subject.root.join('public'), subject.public_folder
-      assert_equal subject.root.join('views'), subject.views_folder
-    end
-
-    should "default the Sinatra flags" do
-      assert_equal false, subject.dump_errors
-      assert_equal true,  subject.method_override
-      assert_equal false, subject.sessions
-      assert_equal false, subject.show_exceptions
-      assert_equal true,  subject.static_files
-      assert_equal false, subject.reload_templates
-    end
-
-    should "default the handling options" do
-      assert_empty subject.error_procs
-      assert_empty subject.init_procs
-      assert_instance_of Deas::NullLogger, subject.logger
-      assert_empty subject.middlewares
-      assert_empty subject.settings
-      assert_equal true, subject.verbose_logging
-      assert_empty subject.routes
-      assert_nil   subject.view_handler_ns
-      assert_empty subject.template_helpers
-    end
-
-    should "build a template scope including its template helpers" do
-      config = Deas::Server::Configuration.new
-      config.template_helpers << (helper_module = Module.new)
-
-      assert_includes Deas::Template::Scope, config.template_scope.ancestors
-      assert_includes helper_module, config.template_scope.included_modules
     end
 
   end
