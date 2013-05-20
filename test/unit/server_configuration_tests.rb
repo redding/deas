@@ -130,15 +130,17 @@ class Deas::Server::Configuration
       assert_equal '@_out_buf', subject.settings[:erb][:outvar]
     end
 
-    should "add the Deas::Logging middleware to the end of the middlewares" do
+    should "add the Logging and ShowExceptions middleware to the end" do
+      num_middlewares = subject.middlewares.size
       assert subject.verbose_logging
-      assert_equal 1, subject.middlewares.size
-      assert_not_equal [Deas::VerboseLogging], subject.middlewares.last
+      assert_not_equal [Deas::ShowExceptions], subject.middlewares[-2]
+      assert_not_equal [Deas::VerboseLogging], subject.middlewares[-1]
 
       subject.validate!
 
-      assert_equal 2, subject.middlewares.size
-      assert_equal [Deas::VerboseLogging], subject.middlewares.last
+      assert_equal (num_middlewares+2), subject.middlewares.size
+      assert_equal [Deas::ShowExceptions], subject.middlewares[-2]
+      assert_equal [Deas::VerboseLogging], subject.middlewares[-1]
     end
 
   end

@@ -35,6 +35,23 @@ class DeasTestServer
 
 end
 
+class DeasDevServer
+  include Deas::Server
+
+  # this server mimics a server in a "development" mode, that is, it has
+  # show_exceptions set to true
+
+  root TEST_SUPPORT_ROOT
+
+  logger TEST_LOGGER
+  verbose_logging true
+
+  show_exceptions true
+
+  get  '/error', 'ErrorHandler'
+
+end
+
 class ShowHandler
   include Deas::ViewHandler
 

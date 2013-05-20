@@ -7,6 +7,7 @@ require 'deas/template'
 require 'deas/logging'
 require 'deas/redirect_handler'
 require 'deas/route'
+require 'deas/show_exceptions'
 require 'deas/sinatra_app'
 
 module Deas; end
@@ -77,9 +78,10 @@ module Deas::Server
       self.settings[:erb] ||= {}
       self.settings[:erb][:outvar] ||= '@_out_buf'
 
-      # add the logging middleware args last.  This ensures that the logging
-      # happens just before the app gets the request and just after the app
-      # sends a response.
+      # append the show exceptions and loggine middlewares last.  This ensures
+      # that the logging and exception showing happens just before the app gets
+      # the request and just after the app sends a response.
+      self.middlewares << [Deas::ShowExceptions] if self.show_exceptions
       [*Deas::Logging.middleware(self.verbose_logging)].tap do |mw_args|
         self.middlewares << mw_args
       end
