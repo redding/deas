@@ -4,15 +4,17 @@ require 'deas'
 
 module Deas
 
-  class RackTests < Assert::Context
+  class RackTestContext < Assert::Context
     include Assert::Rack::Test
 
+    def app; @app; end
+  end
+
+  class RackTests < RackTestContext
     desc "a Deas server rack app"
     setup do
       @app = DeasTestServer.new
     end
-
-    def app; @app; end
 
     should "return a 200 response with a GET to '/show'" do
       get '/show', 'message' => 'this is a test'
@@ -119,6 +121,30 @@ module Deas
       assert_equal 'Content-Type', @data['response_firstheaderval']
       assert_equal 'something',    @data['params_a_param']
       assert_equal '{}',           @data['session_inspect']
+    end
+
+  end
+
+  class ShowExceptionsTests < RackTestContext
+    desc "a Deas server rack app with show exceptions enabled"
+    setup do
+      @app = DeasDevServer.new
+    end
+
+    should "return a text/plain body when a 404 occurs" do
+      get '/not_defined'
+
+      assert_equal 404, last_response.status
+      assert_equal "text/plain", last_response.headers['Content-Type']
+      assert_match "Sinatra::NotFound: Sinatra::NotFound", last_response.body
+    end
+
+    should "return a text/plain body when an exception occurs" do
+      get '/error'
+
+      assert_equal 500, last_response.status
+      assert_equal "text/plain", last_response.headers['Content-Type']
+      assert_match "RuntimeError: test", last_response.body
     end
 
   end
