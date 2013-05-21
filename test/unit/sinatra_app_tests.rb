@@ -41,13 +41,16 @@ module Deas::SinatraApp
         assert_equal 'path/to/somewhere/public', settings.public_folder.to_s
         assert_equal 'path/to/somewhere/views',  settings.views.to_s
         assert_equal true,                       settings.dump_errors
-        assert_equal false,                      settings.logging
         assert_equal false,                      settings.method_override
         assert_equal false,                      settings.sessions
-        assert_equal true,                       settings.show_exceptions
         assert_equal true,                       settings.static
         assert_equal true,                       settings.reload_templates
         assert_instance_of Deas::NullLogger,     settings.logger
+
+        # settings that are set but can't be changed
+        assert_equal false, settings.logging
+        assert_equal false, settings.raise_errors
+        assert_equal false, settings.show_exceptions
       end
     end
 

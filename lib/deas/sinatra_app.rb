@@ -19,10 +19,15 @@ module Deas
         set :dump_errors,      server_config.dump_errors
         set :method_override,  server_config.method_override
         set :sessions,         server_config.sessions
-        set :show_exceptions,  server_config.show_exceptions
         set :static,           server_config.static_files
         set :reload_templates, server_config.reload_templates
         set :logging,          false
+
+        # raise_errors and show_exceptions prevent Deas error handlers from
+        # being called and Deas' logging doesn't finish. They should always be
+        # false.
+        set :raise_errors,     false
+        set :show_exceptions,  false
 
         # custom settings
         set :deas_template_scope, server_config.template_scope
