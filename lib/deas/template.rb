@@ -15,6 +15,14 @@ module Deas
       end
     end
 
+    def engine(template_name)
+      return 'erb' if @sinatra_call.settings.views.nil?
+
+      views_path = Pathname.new(@sinatra_call.settings.views)
+      template = Dir.glob("#{views_path.join(template_name.to_s)}.*").first.to_s
+      File.extname(template)[1..-1] || 'erb'
+    end
+
     # builds render-blocks like:
     #
     #   erb :main_layout do
@@ -26,7 +34,7 @@ module Deas
     def render(&block)
       template_names = [ @layouts, @name ].flatten.reverse
       top_render_proc = template_names.inject(block) do |render_proc, name|
-        proc{ @sinatra_call.erb(name, @options, &render_proc) }
+        proc{ @sinatra_call.send(engine(name), name, @options, &render_proc) }
       end
       top_render_proc.call
     end

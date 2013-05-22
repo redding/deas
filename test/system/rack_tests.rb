@@ -47,15 +47,30 @@ module Deas
       assert_equal "Oops, something went wrong", last_response.body
     end
 
-    should "return a 200 response and use all the layouts" do
-      get '/with_layout'
-
+    should "render erb templates using layouts" do
       expected_body = "Layout 1\nLayout 2\nLayout 3\nWith Layout\n"
+
+      get '/with_layout'
       assert_equal 200,           last_response.status
       assert_equal expected_body, last_response.body
 
       get '/alt_with_layout'
+      assert_equal 200,           last_response.status
+      assert_equal expected_body, last_response.body
+    end
 
+    should "render mixed (erb and other) templates using layouts" do
+      expected_body = "Layout 1\nWith Layout\n"
+
+      get '/haml_with_layout'
+      assert_equal 200,           last_response.status
+      assert_equal expected_body, last_response.body
+
+      get '/with_haml_layout'
+      assert_equal 200,           last_response.status
+      assert_equal expected_body, last_response.body
+
+      get '/haml_with_haml_layout'
       assert_equal 200,           last_response.status
       assert_equal expected_body, last_response.body
     end

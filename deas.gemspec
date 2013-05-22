@@ -24,5 +24,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency("assert")
   gem.add_development_dependency("assert-mocha")
   gem.add_development_dependency("assert-rack-test")
+  gem.add_development_dependency('haml')
 
 end

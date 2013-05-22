@@ -8,12 +8,14 @@ class FakeApp
 
   attr_accessor :request, :response, :params, :settings, :session
 
-  def initialize
+  def initialize(settings={})
     @request = FakeRequest.new('GET','/something', {}, OpenStruct.new)
     @params   = @request.params
     @session  = @request.session
     @response = FakeResponse.new
-    @settings = OpenStruct.new(:deas_template_scope => Deas::Template::Scope)
+    @settings = OpenStruct.new(settings.merge({
+      :deas_template_scope => Deas::Template::Scope
+    }))
   end
 
   def halt(*args)

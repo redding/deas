@@ -12,7 +12,7 @@ class Deas::Template
     end
     subject{ @template }
 
-    should have_instance_methods :name, :options, :render
+    should have_instance_methods :name, :options, :render, :engine
 
     should "symbolize it's name" do
       assert_equal :"users/index", subject.name
@@ -20,6 +20,29 @@ class Deas::Template
 
     should "set it's scope option" do
       assert_instance_of Deas::Template::Scope, subject.options[:scope]
+    end
+
+    should "know a named template's render engine" do
+      views_exist = FakeApp.new(:views => TEST_SUPPORT_ROOT.join('views'))
+      template = Deas::Template.new(views_exist, 'whatever')
+
+      assert_equal 'erb',    template.engine('layout1')
+      assert_equal 'haml',   template.engine('haml_layout1')
+      assert_equal 'other',  template.engine('some.html.file')
+      assert_equal 'engine', template.engine('some_file')
+      assert_equal 'erb',    template.engine('some_no_engine_extension')
+      assert_equal 'erb',    template.engine('does_not_exist')
+
+      views_no_exist = FakeApp.new(:views => '/does/not/exist')
+      template_no_exist = Deas::Template.new(views_no_exist, 'whatever')
+
+      assert_equal 'erb', template_no_exist.engine('layout1')
+      assert_equal 'erb', template_no_exist.engine('haml_layout1')
+      assert_equal 'erb', template_no_exist.engine('some.html.file')
+      assert_equal 'erb', template_no_exist.engine('some_file')
+      assert_equal 'erb', template_no_exist.engine('some_no_engine_extension')
+      assert_equal 'erb', template_no_exist.engine('does_not_exist')
+
     end
 
     should "call the sinatra_call's `erb` method with #render" do
