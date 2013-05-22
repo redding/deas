@@ -22,11 +22,15 @@ class DeasTestServer
   get  '/show',            'ShowHandler'
   get  '/halt',            'HaltHandler'
   get  '/error',           'ErrorHandler'
-  get  '/with_layout',     'WithLayoutHandler'
-  get  '/alt_with_layout', 'AlternateWithLayoutHandler'
   get  '/redirect',        'RedirectHandler'
   post '/session',         'SetSessionHandler'
   get  '/session',         'UseSessionHandler'
+
+  get  '/with_layout',           'WithLayoutHandler'
+  get  '/alt_with_layout',       'AlternateWithLayoutHandler'
+  get  '/haml_with_layout',      'HamlWithLayoutHandler'
+  get  '/with_haml_layout',      'WithHamlLayoutHandler'
+  get  '/haml_with_haml_layout', 'HamlWithHamlLayoutHandler'
 
   get '/handler/tests.json', 'HandlerTestsHandler'
 
@@ -106,6 +110,36 @@ class AlternateWithLayoutHandler
         end
       end
     end
+  end
+
+end
+
+class HamlWithLayoutHandler
+  include Deas::ViewHandler
+  layouts 'layout1'
+
+  def run!
+    render 'haml_with_layout'
+  end
+
+end
+
+class WithHamlLayoutHandler
+  include Deas::ViewHandler
+  layouts 'haml_layout1'
+
+  def run!
+    render 'with_layout'
+  end
+
+end
+
+class HamlWithHamlLayoutHandler
+  include Deas::ViewHandler
+  layouts 'haml_layout1'
+
+  def run!
+    render 'haml_with_layout'
   end
 
 end
