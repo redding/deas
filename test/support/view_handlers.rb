@@ -61,3 +61,12 @@ class HaltViewHandler
   end
 
 end
+
+class ContentTypeViewHandler
+  include Deas::ViewHandler
+
+  def run!
+    content_type 'text/plain', :charset => 'latin1'
+  end
+
+end

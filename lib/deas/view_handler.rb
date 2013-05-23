@@ -47,8 +47,9 @@ module Deas
 
     # Helpers
 
-    def halt(*args);     @deas_runner.halt(*args);     end
-    def redirect(*args); @deas_runner.redirect(*args); end
+    def halt(*args);         @deas_runner.halt(*args);         end
+    def redirect(*args);     @deas_runner.redirect(*args);     end
+    def content_type(*args); @deas_runner.content_type(*args); end
 
     def render(*args, &block)
       @deas_runner.render(*args, &block)

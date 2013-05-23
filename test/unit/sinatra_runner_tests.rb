@@ -15,7 +15,7 @@ class Deas::SinatraRunner
     subject{ @runner }
 
     should have_imeths :run, :request, :response, :params, :logger, :session
-    should have_imeths :halt, :redirect, :render
+    should have_imeths :halt, :redirect, :content_type, :render
 
     should "return the sinatra_call's request with #request" do
       assert_equal @fake_sinatra_call.request, subject.request
@@ -42,6 +42,21 @@ class Deas::SinatraRunner
       assert_equal [ 'test' ], return_value
     end
 
+    should "call the sinatra_call's redirect method with #redirect" do
+      return_value = catch(:halt){ subject.redirect('http://google.com') }
+      expected = [ 302, { 'Location' => 'http://google.com' } ]
+
+      assert_equal expected, return_value
+    end
+
+    should "call the sinatra_call's content_type method using the default_charset" do
+      expected = @fake_sinatra_call.content_type('text/plain', :charset => 'utf-8')
+      assert_equal expected, subject.content_type('text/plain')
+
+      expected = @fake_sinatra_call.content_type('text/plain', :charset => 'latin1')
+      assert_equal expected, subject.content_type('text/plain', :charset => 'latin1')
+    end
+
     should "render the template with a :view local and the handler layouts with #render" do
       exp_handler = FlagViewHandler.new(subject)
       exp_layouts = FlagViewHandler.layouts
@@ -51,13 +66,6 @@ class Deas::SinatraRunner
       }).render
 
       assert_equal exp_result, subject.render('index')
-    end
-
-    should "call the sinatra_call's redirect method with #redirect" do
-      return_value = catch(:halt){ subject.redirect('http://google.com') }
-      expected = [ 302, { 'Location' => 'http://google.com' } ]
-
-      assert_equal expected, return_value
     end
 
   end

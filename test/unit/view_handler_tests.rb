@@ -173,4 +173,17 @@ module Deas::ViewHandler
 
   end
 
+  class ContentTypeTests < BaseTests
+    desc "content_type"
+
+    should "should set the response content_type/charset" do
+      runner = test_runner(ContentTypeViewHandler)
+      content_type_args = runner.run
+
+      assert_equal 'text/plain', content_type_args.value
+      assert_equal({:charset => 'latin1'}, content_type_args.opts)
+    end
+
+  end
+
 end

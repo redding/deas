@@ -22,7 +22,7 @@ class Deas::Server::Configuration
 
     # server handling options
     should have_imeths :error_procs, :init_procs, :logger, :middlewares, :settings
-    should have_imeths :verbose_logging, :routes, :view_handler_ns
+    should have_imeths :verbose_logging, :routes, :view_handler_ns, :default_charset
 
     should have_reader :template_helpers
     should have_imeths :valid?, :validate!
@@ -76,6 +76,10 @@ class Deas::Server::Configuration
       config = Deas::Server::Configuration.new
       assert_raises(Deas::ServerRootError){ config.validate! }
       assert_nothing_raised{ config.root '/path/to/root'; config.validate! }
+    end
+
+    should "use `utf-8` as the default_charset by default" do
+      assert_equal 'utf-8', subject.default_charset
     end
 
   end
