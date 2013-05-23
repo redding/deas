@@ -29,6 +29,7 @@ class FakeSinatraCall
 
   def content_type(*args); args; end
   def status(*args);       args; end
+  def headers(*args);      args; end
 
   # return the template name for each nested calls
   def erb(name, opts, &block)
