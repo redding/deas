@@ -61,6 +61,14 @@ class Deas::SinatraRunner
       assert_equal [422], subject.status(422)
     end
 
+    should "call the sinatra_call's status to set the response status" do
+      exp_headers = {
+        'a-header' => 'some value',
+        'other'    => 'other'
+      }
+      assert_equal [exp_headers], subject.headers(exp_headers)
+    end
+
     should "render the template with a :view local and the handler layouts with #render" do
       exp_handler = FlagViewHandler.new(subject)
       exp_layouts = FlagViewHandler.layouts

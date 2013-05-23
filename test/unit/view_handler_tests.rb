@@ -198,4 +198,20 @@ module Deas::ViewHandler
 
   end
 
+  class HeadersTests < BaseTests
+    desc "headers"
+
+    should "should set the response status" do
+      runner = test_runner(HeadersViewHandler)
+      headers_args = runner.run
+      exp_headers = {
+        'a-header' => 'some value',
+        'other'    => 'other'
+      }
+
+      assert_equal exp_headers, headers_args.value
+    end
+
+  end
+
 end

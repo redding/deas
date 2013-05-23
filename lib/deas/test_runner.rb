@@ -52,6 +52,12 @@ module Deas
 
     StatusArgs = Struct.new(:value)
 
+    def headers(value)
+      HeadersArgs.new(value)
+    end
+
+    HeadersArgs = Struct.new(:value)
+
     def render(template_name, options = nil, &block)
       RenderArgs.new(template_name, options, block)
     end

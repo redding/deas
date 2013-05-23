@@ -31,6 +31,10 @@ class Deas::Runner
       assert_raises(NotImplementedError){ subject.status }
     end
 
+    should "raise NotImplementedError with #headers" do
+      assert_raises(NotImplementedError){ subject.headers }
+    end
+
     should "raise NotImplementedError with #render" do
       assert_raises(NotImplementedError){ subject.render }
     end
