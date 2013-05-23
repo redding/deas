@@ -1,5 +1,5 @@
 require 'assert'
-require 'test/support/fake_app'
+require 'test/support/fake_sinatra_call'
 require 'deas/logging'
 
 module Deas::Logging
@@ -7,7 +7,7 @@ module Deas::Logging
   class BaseTests < Assert::Context
     desc "Deas::Logging"
     setup do
-      @app = FakeApp.new
+      @app = FakeSinatraCall.new
     end
     subject{ Deas::Logging }
 

@@ -1,7 +1,7 @@
 require 'assert'
 require 'deas/sinatra_runner'
 require 'deas/template'
-require 'test/support/fake_app'
+require 'test/support/fake_sinatra_call'
 require 'test/support/view_handlers'
 
 class Deas::SinatraRunner
@@ -9,7 +9,7 @@ class Deas::SinatraRunner
   class BaseTests < Assert::Context
     desc "Deas::SinatraRunner"
     setup do
-      @fake_sinatra_call = FakeApp.new
+      @fake_sinatra_call = FakeSinatraCall.new
       @runner = Deas::SinatraRunner.new(FlagViewHandler, @fake_sinatra_call)
     end
     subject{ @runner }

@@ -1,13 +1,13 @@
 require 'assert'
 require 'deas/template'
-require 'test/support/fake_app'
+require 'test/support/fake_sinatra_call'
 
 class Deas::Template
 
   class BaseTests < Assert::Context
     desc "Deas::Template"
     setup do
-      @fake_sinatra_call = FakeApp.new
+      @fake_sinatra_call = FakeSinatraCall.new
       @template = Deas::Template.new(@fake_sinatra_call, 'users/index')
     end
     subject{ @template }
@@ -23,9 +23,9 @@ class Deas::Template
     end
 
     should "know a named template's render engine" do
-      fake_app = FakeApp.new(:views => TEST_SUPPORT_ROOT.join('views'))
+      fake_sinatra_call = FakeSinatraCall.new(:views => TEST_SUPPORT_ROOT.join('views'))
 
-      views_exist = Deas::Template.new(fake_app, 'whatever')
+      views_exist = Deas::Template.new(fake_sinatra_call, 'whatever')
       assert_equal 'erb',    views_exist.engine('layout1')
       assert_equal 'haml',   views_exist.engine('haml_layout1')
       assert_equal 'other',  views_exist.engine('some.html.file')
@@ -33,7 +33,7 @@ class Deas::Template
       assert_equal 'erb',    views_exist.engine('some_no_engine_extension')
       assert_equal 'erb',    views_exist.engine('does_not_exist')
 
-      views_no_exist = Deas::Template.new(fake_app, 'whatever', {
+      views_no_exist = Deas::Template.new(fake_sinatra_call, 'whatever', {
         :views => '/does/not/exist'
       })
       assert_equal 'erb', views_no_exist.engine('layout1')

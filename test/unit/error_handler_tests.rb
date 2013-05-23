@@ -7,8 +7,8 @@ class Deas::ErrorHandler
     desc "Deas::ErrorHandler"
     setup do
       @exception = RuntimeError.new
-      @fake_app  = FakeApp.new
-      @error_handler = Deas::ErrorHandler.new(@exception, @fake_app, [])
+      @fake_sinatra_call  = FakeSinatraCall.new
+      @error_handler = Deas::ErrorHandler.new(@exception, @fake_sinatra_call, [])
     end
     subject{ @error_handler }
 
@@ -25,12 +25,12 @@ class Deas::ErrorHandler
         "my return value"
       end ]
 
-      @error_handler = Deas::ErrorHandler.new(@exception, @fake_app, @error_procs)
+      @error_handler = Deas::ErrorHandler.new(@exception, @fake_sinatra_call, @error_procs)
       @response = @error_handler.run
     end
 
     should "run the proc in the context of the app" do
-      assert_equal @exception, @fake_app.settings.exception_that_occurred
+      assert_equal @exception, @fake_sinatra_call.settings.exception_that_occurred
     end
 
     should "return whatever the proc returns" do
@@ -57,14 +57,14 @@ class Deas::ErrorHandler
         end
       ]
 
-      @error_handler = Deas::ErrorHandler.new(@exception, @fake_app, @error_procs)
+      @error_handler = Deas::ErrorHandler.new(@exception, @fake_sinatra_call, @error_procs)
       @response = @error_handler.run
     end
 
     should "run all the error procs" do
-      assert_equal true, @fake_app.settings.first_proc_run
-      assert_equal true, @fake_app.settings.second_proc_run
-      assert_equal true, @fake_app.settings.third_proc_run
+      assert_equal true, @fake_sinatra_call.settings.first_proc_run
+      assert_equal true, @fake_sinatra_call.settings.second_proc_run
+      assert_equal true, @fake_sinatra_call.settings.third_proc_run
     end
 
     should "return the last non-nil response" do
@@ -86,13 +86,13 @@ class Deas::ErrorHandler
         end
       ]
 
-      @error_handler = Deas::ErrorHandler.new(@exception, @fake_app, @error_procs)
+      @error_handler = Deas::ErrorHandler.new(@exception, @fake_sinatra_call, @error_procs)
       @response = catch(:halt){ @error_handler.run }
     end
 
     should "run error procs until one halts" do
-      assert_equal true, @fake_app.settings.first_proc_run
-      assert_nil @fake_app.settings.second_proc_run
+      assert_equal true, @fake_sinatra_call.settings.first_proc_run
+      assert_nil @fake_sinatra_call.settings.second_proc_run
     end
 
     should "return whatever was halted" do

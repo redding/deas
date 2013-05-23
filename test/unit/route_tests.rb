@@ -1,7 +1,7 @@
 require 'assert'
 require 'deas/route'
 require 'deas/sinatra_runner'
-require 'test/support/fake_app'
+require 'test/support/fake_sinatra_call'
 require 'test/support/view_handlers'
 
 class Deas::Route

@@ -1,7 +1,7 @@
 require 'deas'
 require 'ostruct'
 
-class FakeApp
+class FakeSinatraCall
 
   # Mimic's the context that is accessible in a Sinatra' route. Should provide
   # any methods needed to replace using an actual Sinatra app.
