@@ -40,6 +40,12 @@ module Deas
       def redirect?; true; end
     end
 
+    def content_type(value, opts={})
+      ContentTypeArgs.new(value, opts)
+    end
+
+    ContentTypeArgs = Struct.new(:value, :opts)
+
     def render(template_name, options = nil, &block)
       RenderArgs.new(template_name, options, block)
     end

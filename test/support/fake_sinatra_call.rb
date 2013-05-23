@@ -14,12 +14,21 @@ class FakeSinatraCall
     @session  = @request.session
     @response = FakeResponse.new
     @settings = OpenStruct.new(settings.merge({
-      :deas_template_scope => Deas::Template::Scope
+      :deas_template_scope => Deas::Template::Scope,
+      :deas_default_charset => 'utf-8'
     }))
   end
 
   def halt(*args)
     throw :halt, args
+  end
+
+  def redirect(*args)
+    halt 302, { 'Location' => args[0] }
+  end
+
+  def content_type(*args)
+    args
   end
 
   # return the template name for each nested calls
@@ -29,10 +38,6 @@ class FakeSinatraCall
     else
       [ name, opts ]
     end
-  end
-
-  def redirect(*args)
-    halt 302, { 'Location' => args[0] }
   end
 
 end

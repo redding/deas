@@ -38,6 +38,12 @@ module Deas
       @sinatra_call.redirect(*args)
     end
 
+    def content_type(value, opts=nil)
+      @sinatra_call.content_type(value, {
+        :charset => @sinatra_call.settings.deas_default_charset
+      }.merge(opts || {}))
+    end
+
     def render(template_name, options = nil, &block)
       options ||= {}
       options[:locals] = { :view => @handler }.merge(options[:locals] || {})

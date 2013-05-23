@@ -23,6 +23,7 @@ module Deas::Server
     # DSL for server handling
     should have_imeths :init, :error, :template_helpers, :template_helper?
     should have_imeths :use, :set, :view_handler_ns, :verbose_logging, :logger
+    should have_imeths :default_charset
     should have_imeths :get, :post, :put, :patch, :delete, :redirect, :route
 
     should "allow setting it's configuration options" do
@@ -79,6 +80,9 @@ module Deas::Server
       stdout_logger = Logger.new(STDOUT)
       subject.logger stdout_logger
       assert_equal stdout_logger, config.logger
+
+      subject.default_charset 'latin1'
+      assert_equal 'latin1', config.default_charset
     end
 
     should "add and query helper modules" do

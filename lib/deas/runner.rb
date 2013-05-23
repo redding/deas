@@ -18,6 +18,10 @@ module Deas
       raise NotImplementedError
     end
 
+    def content_type(*args)
+      raise NotImplementedError
+    end
+
     def render(*args)
       raise NotImplementedError
     end
