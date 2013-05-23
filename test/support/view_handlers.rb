@@ -70,3 +70,12 @@ class ContentTypeViewHandler
   end
 
 end
+
+class StatusViewHandler
+  include Deas::ViewHandler
+
+  def run!
+    status 422
+  end
+
+end

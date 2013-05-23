@@ -186,4 +186,16 @@ module Deas::ViewHandler
 
   end
 
+  class StatusTests < BaseTests
+    desc "status"
+
+    should "should set the response status" do
+      runner = test_runner(StatusViewHandler)
+      status_args = runner.run
+
+      assert_equal 422, status_args.value
+    end
+
+  end
+
 end
