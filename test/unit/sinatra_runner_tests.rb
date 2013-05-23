@@ -15,7 +15,7 @@ class Deas::SinatraRunner
     subject{ @runner }
 
     should have_imeths :run, :request, :response, :params, :logger, :session
-    should have_imeths :halt, :redirect, :content_type, :render
+    should have_imeths :halt, :redirect, :content_type, :status, :render
 
     should "return the sinatra_call's request with #request" do
       assert_equal @fake_sinatra_call.request, subject.request
@@ -55,6 +55,10 @@ class Deas::SinatraRunner
 
       expected = @fake_sinatra_call.content_type('text/plain', :charset => 'latin1')
       assert_equal expected, subject.content_type('text/plain', :charset => 'latin1')
+    end
+
+    should "call the sinatra_call's status to set the response status" do
+      assert_equal [422], subject.status(422)
     end
 
     should "render the template with a :view local and the handler layouts with #render" do

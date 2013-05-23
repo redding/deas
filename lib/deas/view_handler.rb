@@ -50,6 +50,7 @@ module Deas
     def halt(*args);         @deas_runner.halt(*args);         end
     def redirect(*args);     @deas_runner.redirect(*args);     end
     def content_type(*args); @deas_runner.content_type(*args); end
+    def status(*args);       @deas_runner.status(*args);       end
 
     def render(*args, &block)
       @deas_runner.render(*args, &block)
