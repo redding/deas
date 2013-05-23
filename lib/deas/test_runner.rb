@@ -32,21 +32,19 @@ module Deas
       throw(:halt, args)
     end
 
-    def render(template_name, options = nil, &block)
-      RenderArgs.new(template_name, options, block)
-    end
-
     def redirect(path, *halt_args)
       RedirectArgs.new(path, halt_args)
     end
 
-    RenderArgs = Struct.new(:template_name, :options, :block)
-
     class RedirectArgs < Struct.new(:path, :halt_args)
-      def redirect?
-        true
-      end
+      def redirect?; true; end
     end
+
+    def render(template_name, options = nil, &block)
+      RenderArgs.new(template_name, options, block)
+    end
+
+    RenderArgs = Struct.new(:template_name, :options, :block)
 
   end
 

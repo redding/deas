@@ -14,8 +14,8 @@ class Deas::SinatraRunner
     end
     subject{ @runner }
 
-    should have_imeths :run, :request, :response, :params, :logger, :halt
-    should have_imeths :render, :session, :redirect
+    should have_imeths :run, :request, :response, :params, :logger, :session
+    should have_imeths :halt, :redirect, :render
 
     should "return the sinatra_call's request with #request" do
       assert_equal @fake_sinatra_call.request, subject.request

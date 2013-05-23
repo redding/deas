@@ -14,11 +14,11 @@ module Deas
       raise NotImplementedError
     end
 
-    def render(*args)
+    def redirect(*args)
       raise NotImplementedError
     end
 
-    def redirect(*args)
+    def render(*args)
       raise NotImplementedError
     end
 
