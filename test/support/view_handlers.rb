@@ -79,3 +79,14 @@ class StatusViewHandler
   end
 
 end
+
+class HeadersViewHandler
+  include Deas::ViewHandler
+
+  def run!
+    headers \
+      'other' => "other",
+      'a-header' => 'some value'
+  end
+
+end

@@ -48,6 +48,10 @@ module Deas
       @sinatra_call.status(*args)
     end
 
+    def headers(*args)
+      @sinatra_call.headers(*args)
+    end
+
     def render(template_name, options = nil, &block)
       options ||= {}
       options[:locals] = { :view => @handler }.merge(options[:locals] || {})
