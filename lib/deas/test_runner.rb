@@ -46,6 +46,12 @@ module Deas
 
     ContentTypeArgs = Struct.new(:value, :opts)
 
+    def status(value)
+      StatusArgs.new(value)
+    end
+
+    StatusArgs = Struct.new(:value)
+
     def render(template_name, options = nil, &block)
       RenderArgs.new(template_name, options, block)
     end

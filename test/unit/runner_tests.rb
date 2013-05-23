@@ -13,7 +13,7 @@ class Deas::Runner
 
     should have_reader  :app_settings
     should have_readers :request, :response, :params, :logger, :session
-    should have_imeths :halt, :redirect, :content_type, :render
+    should have_imeths :halt, :redirect, :content_type, :status, :render
 
     should "raise NotImplementedError with #halt" do
       assert_raises(NotImplementedError){ subject.halt }
@@ -25,6 +25,10 @@ class Deas::Runner
 
     should "raise NotImplementedError with #content_type" do
       assert_raises(NotImplementedError){ subject.content_type }
+    end
+
+    should "raise NotImplementedError with #status" do
+      assert_raises(NotImplementedError){ subject.status }
     end
 
     should "raise NotImplementedError with #render" do

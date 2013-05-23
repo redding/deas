@@ -22,6 +22,10 @@ module Deas
       raise NotImplementedError
     end
 
+    def status(*args)
+      raise NotImplementedError
+    end
+
     def render(*args)
       raise NotImplementedError
     end

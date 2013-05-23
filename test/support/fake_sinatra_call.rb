@@ -27,9 +27,8 @@ class FakeSinatraCall
     halt 302, { 'Location' => args[0] }
   end
 
-  def content_type(*args)
-    args
-  end
+  def content_type(*args); args; end
+  def status(*args);       args; end
 
   # return the template name for each nested calls
   def erb(name, opts, &block)
