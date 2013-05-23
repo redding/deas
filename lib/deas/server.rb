@@ -159,6 +159,10 @@ module Deas::Server
       self.configuration.init_procs << block
     end
 
+    def error(&block)
+      self.configuration.error_procs << block
+    end
+
     def template_helpers(*helper_modules)
       helper_modules.each{ |m| self.configuration.template_helpers << m }
       self.configuration.template_helpers
@@ -166,14 +170,6 @@ module Deas::Server
 
     def template_helper?(helper_module)
       self.configuration.template_helpers.include?(helper_module)
-    end
-
-    def error(&block)
-      self.configuration.error_procs << block
-    end
-
-    def logger(*args)
-      self.configuration.logger *args
     end
 
     def use(*args)
@@ -190,6 +186,10 @@ module Deas::Server
 
     def verbose_logging(*args)
       self.configuration.verbose_logging *args
+    end
+
+    def logger(*args)
+      self.configuration.logger *args
     end
 
     def get(path, handler_class_name)

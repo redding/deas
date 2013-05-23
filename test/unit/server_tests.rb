@@ -21,9 +21,9 @@ module Deas::Server
     should have_imeths :static_files, :reload_templates
 
     # DSL for server handling
-    should have_imeths :init, :template_helpers, :template_helper?, :error
-    should have_imeths :logger, :use, :set, :view_handler_ns, :verbose_logging
-    should have_imeths :get, :post, :put, :patch, :delete, :route
+    should have_imeths :init, :error, :template_helpers, :template_helper?
+    should have_imeths :use, :set, :view_handler_ns, :verbose_logging, :logger
+    should have_imeths :get, :post, :put, :patch, :delete, :redirect, :route
 
     should "allow setting it's configuration options" do
       config = subject.configuration
@@ -58,6 +58,18 @@ module Deas::Server
       subject.reload_templates true
       assert_equal true, config.reload_templates
 
+      assert_equal 0, config.init_procs.size
+      init_proc = proc{ }
+      subject.init(&init_proc)
+      assert_equal 1, config.init_procs.size
+      assert_equal init_proc, config.init_procs.first
+
+      assert_equal 0, config.error_procs.size
+      error_proc = proc{ }
+      subject.error(&error_proc)
+      assert_equal 1, config.error_procs.size
+      assert_equal error_proc, config.error_procs.first
+
       subject.use 'MyMiddleware'
       assert_equal [ ['MyMiddleware'] ], config.middlewares
 
@@ -67,12 +79,26 @@ module Deas::Server
       stdout_logger = Logger.new(STDOUT)
       subject.logger stdout_logger
       assert_equal stdout_logger, config.logger
+    end
 
-      assert_equal 0, config.init_procs.size
-      init_proc = proc{ }
-      subject.init(&init_proc)
-      assert_equal 1, config.init_procs.size
-      assert_equal init_proc, config.init_procs.first
+    should "add and query helper modules" do
+      subject.template_helpers(helper_module = Module.new)
+      assert subject.template_helper?(helper_module)
+    end
+
+    should "set a namespace and use it when defining routes" do
+      subject.view_handler_ns 'MyStuff'
+      assert_equal 'MyStuff', subject.configuration.view_handler_ns
+
+      # should use the ns
+      subject.route(:get, '/ns_test',     'NsTest')
+      route = subject.configuration.routes.last
+      assert_equal 'MyStuff::NsTest', route.handler_class_name
+
+      # should ignore the ns when the leading colons are present
+      subject.route(:post, '/no_ns_test', '::NoNsTest')
+      route = subject.configuration.routes.last
+      assert_equal '::NoNsTest', route.handler_class_name
     end
 
     should "add a GET route using #get" do
@@ -144,27 +170,6 @@ module Deas::Server
       assert_equal :options,    route.method
       assert_equal '/get_info', route.path
       assert_equal 'GetInfo',   route.handler_class_name
-    end
-
-    should "set a namespace with #view_handler_ns and " \
-           "use it when defining routes" do
-      subject.view_handler_ns 'MyStuff'
-      assert_equal 'MyStuff', subject.configuration.view_handler_ns
-
-      # should use the ns
-      subject.route(:get, '/ns_test',     'NsTest')
-      route = subject.configuration.routes.last
-      assert_equal 'MyStuff::NsTest', route.handler_class_name
-
-      # should ignore the ns when the leading colons are present
-      subject.route(:post, '/no_ns_test', '::NoNsTest')
-      route = subject.configuration.routes.last
-      assert_equal '::NoNsTest', route.handler_class_name
-    end
-
-    should "add and query helper modules" do
-      subject.template_helpers(helper_module = Module.new)
-      assert subject.template_helper?(helper_module)
     end
 
   end
