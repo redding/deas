@@ -23,25 +23,25 @@ class Deas::Template
     end
 
     should "know a named template's render engine" do
-      views_exist = FakeApp.new(:views => TEST_SUPPORT_ROOT.join('views'))
-      template = Deas::Template.new(views_exist, 'whatever')
+      fake_app = FakeApp.new(:views => TEST_SUPPORT_ROOT.join('views'))
 
-      assert_equal 'erb',    template.engine('layout1')
-      assert_equal 'haml',   template.engine('haml_layout1')
-      assert_equal 'other',  template.engine('some.html.file')
-      assert_equal 'engine', template.engine('some_file')
-      assert_equal 'erb',    template.engine('some_no_engine_extension')
-      assert_equal 'erb',    template.engine('does_not_exist')
+      views_exist = Deas::Template.new(fake_app, 'whatever')
+      assert_equal 'erb',    views_exist.engine('layout1')
+      assert_equal 'haml',   views_exist.engine('haml_layout1')
+      assert_equal 'other',  views_exist.engine('some.html.file')
+      assert_equal 'engine', views_exist.engine('some_file')
+      assert_equal 'erb',    views_exist.engine('some_no_engine_extension')
+      assert_equal 'erb',    views_exist.engine('does_not_exist')
 
-      views_no_exist = FakeApp.new(:views => '/does/not/exist')
-      template_no_exist = Deas::Template.new(views_no_exist, 'whatever')
-
-      assert_equal 'erb', template_no_exist.engine('layout1')
-      assert_equal 'erb', template_no_exist.engine('haml_layout1')
-      assert_equal 'erb', template_no_exist.engine('some.html.file')
-      assert_equal 'erb', template_no_exist.engine('some_file')
-      assert_equal 'erb', template_no_exist.engine('some_no_engine_extension')
-      assert_equal 'erb', template_no_exist.engine('does_not_exist')
+      views_no_exist = Deas::Template.new(fake_app, 'whatever', {
+        :views => '/does/not/exist'
+      })
+      assert_equal 'erb', views_no_exist.engine('layout1')
+      assert_equal 'erb', views_no_exist.engine('haml_layout1')
+      assert_equal 'erb', views_no_exist.engine('some.html.file')
+      assert_equal 'erb', views_no_exist.engine('some_file')
+      assert_equal 'erb', views_no_exist.engine('some_no_engine_extension')
+      assert_equal 'erb', views_no_exist.engine('does_not_exist')
 
     end
 
