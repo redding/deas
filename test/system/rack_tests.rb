@@ -25,6 +25,26 @@ module Deas
       assert_equal expected_body, last_response.body
     end
 
+    should "set the content type appropriately" do
+      get '/show'
+      assert_equal 'text/html;charset=utf-8', last_response.headers['Content-Type']
+
+      get '/show.html'
+      assert_equal 'text/html;charset=utf-8', last_response.headers['Content-Type']
+
+      get '/show.json'
+      assert_equal 'application/json;charset=utf-8', last_response.headers['Content-Type']
+
+      get '/show-latin1-json'
+      assert_equal 'application/json;charset=latin1', last_response.headers['Content-Type']
+
+      get '/show-text'
+      assert_equal 'text/plain', last_response.headers['Content-Type']
+
+      get '/show-headers-text'
+      assert_equal 'text/plain', last_response.headers['Content-Type']
+    end
+
     should "allow halting with a custom response" do
       get '/halt', 'with' => 234
 
