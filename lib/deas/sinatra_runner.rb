@@ -38,7 +38,13 @@ module Deas
       @sinatra_call.redirect(*args)
     end
 
-    def content_type(value, opts=nil)
+    def content_type(*args)
+      return @sinatra_call.content_type if args.empty?
+
+      opts, value = [
+        args.last.kind_of?(::Hash) ? args.pop : {},
+        args.first
+      ]
       @sinatra_call.content_type(value, {
         :charset => @sinatra_call.settings.deas_default_charset
       }.merge(opts || {}))
@@ -56,6 +62,8 @@ module Deas
       options ||= {}
       options[:locals] = { :view => @handler }.merge(options[:locals] || {})
       options[:layout] ||= @handler_class.layouts
+
+      self.content_type(get_content_type(template_name)) if self.content_type.nil?
       Deas::Template.new(@sinatra_call, template_name, options).render(&block)
     end
 
@@ -63,6 +71,10 @@ module Deas
 
     def run_callbacks(callbacks)
       callbacks.each{|proc| @handler.instance_eval(&proc) }
+    end
+
+    def get_content_type(template_name)
+      File.extname(template_name)[1..-1] || 'html'
     end
 
   end

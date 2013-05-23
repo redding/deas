@@ -19,12 +19,18 @@ class DeasTestServer
     end
   end
 
-  get  '/show',            'ShowHandler'
-  get  '/halt',            'HaltHandler'
-  get  '/error',           'ErrorHandler'
-  get  '/redirect',        'RedirectHandler'
-  post '/session',         'SetSessionHandler'
-  get  '/session',         'UseSessionHandler'
+  get  '/show',              'ShowHandler'
+  get  '/show.html',         'ShowHtmlHandler'
+  get  '/show.json',         'ShowJsonHandler'
+  get  '/show-latin1-json',  'ShowLatinJsonHandler'
+  get  '/show-text',         'ShowTextHandler'
+  get  '/show-headers-text', 'ShowHeadersTextHandler'
+
+  get  '/halt',     'HaltHandler'
+  get  '/error',    'ErrorHandler'
+  get  '/redirect', 'RedirectHandler'
+  post '/session',  'SetSessionHandler'
+  get  '/session',  'UseSessionHandler'
 
   get  '/with_layout',           'WithLayoutHandler'
   get  '/alt_with_layout',       'AlternateWithLayoutHandler'
@@ -67,6 +73,50 @@ class ShowHandler
 
   def run!
     render 'show'
+  end
+
+end
+
+class ShowHtmlHandler
+  include Deas::ViewHandler
+
+  def run!; render 'show.html'; end
+
+end
+
+class ShowJsonHandler
+  include Deas::ViewHandler
+
+  def run!; render 'show.json'; end
+
+end
+
+class ShowLatinJsonHandler
+  include Deas::ViewHandler
+
+  def run!
+    content_type :json, :charset => 'latin1'
+    render 'show_json'
+  end
+
+end
+
+class ShowTextHandler
+  include Deas::ViewHandler
+
+  def run!
+    hdrs = {'Content-Type' => 'text/plain'}
+    halt 200, hdrs, render('show.json')
+  end
+
+end
+
+class ShowHeadersTextHandler
+  include Deas::ViewHandler
+
+  def run!
+    headers 'Content-Type' => 'text/plain'
+    render('show.json')
   end
 
 end
