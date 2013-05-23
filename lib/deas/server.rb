@@ -31,14 +31,15 @@ module Deas::Server
     option :reload_templates, NsOptions::Boolean, :default => false
 
     # server handling options
-    option :error_procs,     Array, :default => []
-    option :init_procs,      Array, :default => []
-    option :logger,                 :default => proc{ Deas::NullLogger.new }
-    option :middlewares,     Array, :default => []
-    option :settings,        Hash,  :default => {}
-    option :verbose_logging,        :default => true
-    option :routes,          Array, :default => []
+    option :error_procs,     Array,  :default => []
+    option :init_procs,      Array,  :default => []
+    option :logger,                  :default => proc{ Deas::NullLogger.new }
+    option :middlewares,     Array,  :default => []
+    option :settings,        Hash,   :default => {}
+    option :verbose_logging,         :default => true
+    option :routes,          Array,  :default => []
     option :view_handler_ns, String
+    option :default_charset, String, :default => 'utf-8'
 
     attr_reader :template_helpers
 
@@ -190,6 +191,10 @@ module Deas::Server
 
     def logger(*args)
       self.configuration.logger *args
+    end
+
+    def default_charset(*args)
+      self.configuration.default_charset *args
     end
 
     def get(path, handler_class_name)
