@@ -18,7 +18,7 @@ module Deas
     def engine(template_name)
       return 'erb' if @sinatra_call.settings.views.nil?
 
-      views_path = Pathname.new(@sinatra_call.settings.views)
+      views_path = Pathname.new(@options[:views] || @sinatra_call.settings.views)
       template = Dir.glob("#{views_path.join(template_name.to_s)}.*").first.to_s
       File.extname(template)[1..-1] || 'erb'
     end
