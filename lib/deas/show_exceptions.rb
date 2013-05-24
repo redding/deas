@@ -34,12 +34,9 @@ module Deas
     end
 
     class Body
-      def initialize(error)
-        @error = error
-      end
-
-      def content
-        @content ||= "#{@error.class}: #{@error.message}\n#{@error.backtrace.join("\n")}"
+      attr_reader :content
+      def initialize(e)
+        @content ||= "#{e.class}: #{e.message}\n#{(e.backtrace || []).join("\n")}"
       end
 
       def size

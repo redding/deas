@@ -7,11 +7,10 @@ class Deas::ShowExceptions
   class BaseTests < Assert::Context
     desc "Deas::ShowExceptions"
     setup do
-      exception = nil
-      begin; raise 'test'; rescue Exception => exception; end
+      exception = Sinatra::NotFound.new
       @app = proc do |env|
         env['sinatra.error'] = exception
-        [ 500, {}, [] ]
+        [ 404, {}, [] ]
       end
       @exception = exception
       @show_exceptions = Deas::ShowExceptions.new(@app)
@@ -23,7 +22,7 @@ class Deas::ShowExceptions
     should "return a body that contains details about the exception" do
       status, headers, body = subject.call({})
       expected_body = "#{@exception.class}: #{@exception.message}\n" \
-                      "#{@exception.backtrace.join("\n")}"
+                      "#{(@exception.backtrace || []).join("\n")}"
       expected_body_size = Rack::Utils.bytesize(expected_body).to_s
 
       assert_equal expected_body_size, headers['Content-Length']
