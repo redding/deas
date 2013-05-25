@@ -166,9 +166,9 @@ module Deas::ViewHandler
       })
       runner.run
 
-      assert_equal 200,                                runner.return_value[0]
-      assert_equal({ 'Content-Type' => 'text/plain' }, runner.return_value[1])
-      assert_equal 'test halting',                     runner.return_value[2]
+      assert_equal 200,                                runner.return_value.status
+      assert_equal({ 'Content-Type' => 'text/plain' }, runner.return_value.headers)
+      assert_equal 'test halting',                     runner.return_value.body
     end
 
   end
