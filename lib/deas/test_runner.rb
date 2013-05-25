@@ -29,7 +29,17 @@ module Deas
     # Helpers
 
     def halt(*args)
-      throw(:halt, args)
+      throw(:halt, HaltArgs.new(args))
+    end
+
+    class HaltArgs < Struct.new(:body, :headers, :status)
+      def initialize(args)
+        super(*[
+          !args.last.kind_of?(::Hash) && !args.last.kind_of?(::Integer) ? args.pop : nil,
+          args.last.kind_of?(::Hash) ? args.pop : nil,
+          args.first.kind_of?(::Integer) ? args.first : nil
+        ])
+      end
     end
 
     def redirect(path, *halt_args)
