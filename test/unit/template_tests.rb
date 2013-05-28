@@ -82,7 +82,9 @@ class Deas::Template
     end
     subject{ @scope }
 
-    should have_imeths :partial, :escape_html, :h, :escape_url, :u, :render
+    should have_reader :sinatra_call
+    should have_imeths :render, :partial, :escape_html, :h, :escape_url, :u
+    should have_imeths :logger
 
     should "call the sinatra_call's erb method with #partial" do
       return_value = subject.partial('part', :something => true)
@@ -125,6 +127,10 @@ class Deas::Template
 
       return_value = subject.u("/path/to/somewhere")
       assert_equal "%2Fpath%2Fto%2Fsomewhere", return_value
+    end
+
+    should "expose the sinatra call (and deas server) logger" do
+      assert_equal @fake_sinatra_call.logger, subject.logger
     end
 
   end
