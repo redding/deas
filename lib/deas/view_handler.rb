@@ -73,8 +73,7 @@ module Deas
     module ClassMethods
 
       def layout(*args)
-        @layouts = args unless args.empty?
-        @layouts
+        (@layouts ||= []).tap{ |l| l.push(*args) }
       end
       alias :layouts :layout
 

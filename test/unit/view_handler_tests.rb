@@ -37,10 +37,10 @@ module Deas::ViewHandler
       handler_class = Class.new{ include Deas::ViewHandler }
 
       handler_class.layout 'layouts/app'
-      assert_equal [ 'layouts/app' ], handler_class.layouts
+      assert_equal ['layouts/app'], handler_class.layouts
 
       handler_class.layouts 'layouts/web', 'layouts/search'
-      assert_equal [ 'layouts/web', 'layouts/search' ], handler_class.layouts
+      assert_equal ['layouts/app', 'layouts/web', 'layouts/search'], handler_class.layouts
     end
 
   end
