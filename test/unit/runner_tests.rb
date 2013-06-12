@@ -11,9 +11,14 @@ class Deas::Runner
     end
     subject{ @runner }
 
-    should have_reader  :app_settings
+    should have_reader :app_settings
     should have_readers :request, :response, :params, :logger, :session
-    should have_imeths :halt, :redirect, :content_type, :status, :render
+    should have_imeths :halt, :redirect, :content_type, :status
+    should have_imeths :render, :send_file
+
+    should "raise NotImplementedError with #send_file" do
+      assert_raises(NotImplementedError){ subject.send_file }
+    end
 
     should "raise NotImplementedError with #halt" do
       assert_raises(NotImplementedError){ subject.halt }

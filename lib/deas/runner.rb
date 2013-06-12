@@ -16,6 +16,7 @@ module Deas
     def status(*args);       raise NotImplementedError; end
     def headers(*args);      raise NotImplementedError; end
     def render(*args);       raise NotImplementedError; end
+    def send_file(*args);    raise NotImplementedError; end
 
   end
 
