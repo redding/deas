@@ -33,6 +33,12 @@ module Deas::ViewHandler
       assert_equal({ :some => :option }, render_args.options)
     end
 
+    should "be able to send files" do
+      send_file_args = test_runner(SendFileViewHandler).run
+      assert_equal "my_file.txt",        send_file_args.file_path
+      assert_equal({ :some => :option }, send_file_args.options)
+    end
+
     should "allow specifying the layouts using #layout or #layouts" do
       handler_class = Class.new{ include Deas::ViewHandler }
 

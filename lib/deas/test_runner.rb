@@ -74,6 +74,12 @@ module Deas
 
     RenderArgs = Struct.new(:template_name, :options, :block)
 
+    def send_file(file_path, options = nil, &block)
+      SendFileArgs.new(file_path, options, block)
+    end
+
+    SendFileArgs = Struct.new(:file_path, :options, :block)
+
   end
 
 end
