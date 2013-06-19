@@ -1,6 +1,6 @@
 require 'assert'
-require 'deas/runner'
 require 'test/support/view_handlers'
+require 'deas/runner'
 
 class Deas::Runner
 

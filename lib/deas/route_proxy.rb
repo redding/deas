@@ -1,4 +1,5 @@
 require 'deas/view_handler'
+require 'deas/exceptions'
 
 module Deas
   class RouteProxy
@@ -23,13 +24,6 @@ module Deas
       klass == Object ? false : klass
     rescue NameError
       false
-    end
-
-    class NoHandlerClassError < RuntimeError
-      def initialize(handler_class_name)
-        super "Deas couldn't find the view handler '#{handler_class_name}'" \
-              " - it doesn't exist or hasn't been required in yet."
-      end
     end
 
   end

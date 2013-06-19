@@ -1,8 +1,8 @@
 require 'assert'
-require 'deas/sinatra_runner'
-require 'deas/template'
 require 'test/support/fake_sinatra_call'
 require 'test/support/view_handlers'
+require 'deas/template'
+require 'deas/sinatra_runner'
 
 class Deas::SinatraRunner
 
