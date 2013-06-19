@@ -4,13 +4,13 @@ require 'deas'
 
 module Deas
 
-  class RackTestContext < Assert::Context
+  class RackTestsContext < Assert::Context
     include Assert::Rack::Test
 
     def app; @app; end
   end
 
-  class RackTests < RackTestContext
+  class RackTests < RackTestsContext
     desc "a Deas server rack app"
     setup do
       @app = DeasTestServer.new
@@ -160,7 +160,7 @@ module Deas
 
   end
 
-  class ShowExceptionsTests < RackTestContext
+  class ShowExceptionsTests < RackTestsContext
     desc "a Deas server rack app with show exceptions enabled"
     setup do
       @app = DeasDevServer.new

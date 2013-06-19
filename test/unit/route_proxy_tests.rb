@@ -24,7 +24,7 @@ class Deas::RouteProxy
     end
 
     should "complain if there is no handler class with the given name" do
-      assert_raises(Deas::RouteProxy::NoHandlerClassError) do
+      assert_raises(Deas::NoHandlerClassError) do
         Deas::RouteProxy.new('SomethingNotDefined').handler_class
       end
     end
