@@ -1,7 +1,7 @@
 require 'assert'
+require 'test/support/view_handlers'
 require 'deas/test_helpers'
 require 'deas/view_handler'
-require 'test/support/view_handlers'
 
 module Deas::ViewHandler
 

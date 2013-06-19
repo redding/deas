@@ -1,6 +1,6 @@
 require 'assert'
-require 'deas/template'
 require 'test/support/fake_sinatra_call'
+require 'deas/template'
 
 class Deas::Template
 
