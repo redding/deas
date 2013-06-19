@@ -1,42 +1,38 @@
 require 'assert'
-require 'deas/route'
-require 'deas/sinatra_runner'
-require 'test/support/fake_sinatra_call'
 require 'test/support/view_handlers'
+require 'deas/route_proxy'
+require 'deas/route'
 
 class Deas::Route
 
   class BaseTests < Assert::Context
     desc "Deas::Route"
     setup do
-      @route = Deas::Route.new(:get, '/test', 'TestViewHandler')
+      @handler_proxy = Deas::RouteProxy.new('TestViewHandler')
+      @route = Deas::Route.new(:get, '/test', @handler_proxy)
     end
     subject{ @route }
 
-    should have_instance_methods :method, :path, :handler_class_name,
-      :handler_class, :run
+    should have_readers :method, :path, :handler_proxy, :handler_class
+    should have_imeths :validate!, :run
 
-    should "allow passing a constantized handler when initialized" do
-      route = Deas::Route.new(:get, '/test', 'TestViewHandler', TestViewHandler)
-
-      # handler class is set without calling constantize
-      assert_equal TestViewHandler, route.handler_class
+    should "know its method and path and handler_proxy" do
+      assert_equal :get, subject.method
+      assert_equal '/test', subject.path
+      assert_equal @handler_proxy, subject.handler_proxy
     end
 
-    should "constantize the handler class with #constantize!" do
+    should "set its handler class on `validate!`" do
       assert_nil subject.handler_class
 
-      assert_nothing_raised{ subject.constantize! }
-
+      assert_nothing_raised{ subject.validate! }
       assert_equal TestViewHandler, subject.handler_class
     end
 
-    should "raise a custom exception if the handler class name " \
-           "can't be constantized" do
-      route = Deas::Route.new(:get, '/', 'SomethingNotDefined')
-
-      assert_raises(Deas::NoHandlerClassError) do
-        route.constantize!
+    should "complain given an invalid handler class" do
+      proxy = Deas::RouteProxy.new('SomethingNotDefined')
+      assert_raises(Deas::RouteProxy::NoHandlerClassError) do
+        Deas::Route.new(:get, '/test', proxy).validate!
       end
     end
 

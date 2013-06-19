@@ -1,16 +1,18 @@
 require 'assert'
+require 'sinatra/base'
+require 'test/support/view_handlers'
+require 'deas/route_proxy'
 require 'deas/route'
 require 'deas/server'
 require 'deas/sinatra_app'
-require 'sinatra/base'
-require 'test/support/view_handlers'
 
 module Deas::SinatraApp
 
   class BaseTests < Assert::Context
     desc "Deas::SinatraApp"
     setup do
-      @route = Deas::Route.new(:get, '/something', 'TestViewHandler')
+      proxy = Deas::RouteProxy.new('TestViewHandler')
+      @route = Deas::Route.new(:get, '/something', proxy)
       @configuration = Deas::Server::Configuration.new.tap do |c|
         c.env              = 'staging'
         c.root             = 'path/to/somewhere'
