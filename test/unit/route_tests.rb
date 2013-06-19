@@ -31,7 +31,7 @@ class Deas::Route
 
     should "complain given an invalid handler class" do
       proxy = Deas::RouteProxy.new('SomethingNotDefined')
-      assert_raises(Deas::RouteProxy::NoHandlerClassError) do
+      assert_raises(Deas::NoHandlerClassError) do
         Deas::Route.new(:get, '/test', proxy).validate!
       end
     end
