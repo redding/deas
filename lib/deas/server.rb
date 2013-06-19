@@ -5,7 +5,8 @@ require 'set'
 require 'deas/exceptions'
 require 'deas/template'
 require 'deas/logging'
-require 'deas/redirect_handler'
+require 'deas/redirect_proxy'
+require 'deas/route_proxy'
 require 'deas/route'
 require 'deas/show_exceptions'
 require 'deas/sinatra_app'
@@ -70,8 +71,8 @@ module Deas::Server
       self.init_procs.each{ |p| p.call }
       raise Deas::ServerRootError if self.root.nil?
 
-      # constantize the routes to ensure they are available
-      self.routes.each(&:constantize!)
+      # validate the routes
+      self.routes.each(&:validate!)
 
       # set the :erb :outvar setting if it hasn't been set.  this is used
       # by template helpers and plugins and needs to be queryable.  the actual
@@ -94,6 +95,10 @@ module Deas::Server
       Class.new(Deas::Template::Scope).tap do |klass|
         klass.send(:include, *self.template_helpers)
       end
+    end
+
+    def add_route(http_method, path, proxy)
+      Deas::Route.new(http_method, path, proxy).tap{ |r| self.routes.push(r) }
     end
 
   end
@@ -218,20 +223,16 @@ module Deas::Server
     end
 
     def redirect(http_method, path, to_path = nil, &block)
-      name          = 'Deas::RedirectHandler'
-      handler_class = Deas::RedirectHandler.new(to_path, &block)
-      Deas::Route.new(http_method, path, name, handler_class).tap do |route|
-        self.configuration.routes.push(route)
-      end
+      proxy = Deas::RedirectProxy.new(to_path, &block)
+      self.configuration.add_route(http_method, path, proxy)
     end
 
     def route(http_method, path, handler_class_name)
       if self.view_handler_ns && !(handler_class_name =~ /^::/)
         handler_class_name = "#{self.view_handler_ns}::#{handler_class_name}"
       end
-      Deas::Route.new(http_method, path, handler_class_name).tap do |route|
-        self.configuration.routes.push(route)
-      end
+      proxy = Deas::RouteProxy.new(handler_class_name)
+      self.configuration.add_route(http_method, path, proxy)
     end
 
   end
