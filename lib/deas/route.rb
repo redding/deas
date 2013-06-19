@@ -1,51 +1,28 @@
 require 'deas/sinatra_runner'
 
 module Deas
-
   class Route
-    attr_reader :method, :path, :handler_class_name, :handler_class
 
-    def initialize(method, path, handler_class_name, handler_class = nil)
-      @method = method
-      @path   = path
-      @handler_class_name = handler_class_name
-      @handler_class      = handler_class
+    attr_reader :method, :path, :handler_proxy, :handler_class
+
+    def initialize(method, path, handler_proxy)
+      @method, @path, @handler_proxy = method, path, handler_proxy
     end
 
-    def constantize!
-      @handler_class ||= constantize_name(handler_class_name)
-      raise(NoHandlerClassError.new(handler_class_name)) if !@handler_class
+    def validate!
+      @handler_class = @handler_proxy.handler_class
     end
 
+    # TODO: unit test this??
     def run(sinatra_call)
       sinatra_call.request.env.tap do |env|
         env['sinatra.params']          = sinatra_call.params
-        env['deas.handler_class_name'] = @handler_class_name
+        env['deas.handler_class_name'] = self.handler_class.name
         env['deas.logging'].call "  Handler: #{env['deas.handler_class_name']}"
         env['deas.logging'].call "  Params:  #{env['sinatra.params'].inspect}"
       end
-      Deas::SinatraRunner.run(@handler_class, sinatra_call)
-    end
-
-    private
-
-    def constantize_name(class_name)
-      names = class_name.to_s.split('::').reject{|name| name.empty? }
-      klass = names.inject(Object) do |constant, name|
-        constant.const_get(name)
-      end
-      klass == Object ? false : klass
-    rescue NameError
-      false
+      Deas::SinatraRunner.run(self.handler_class, sinatra_call)
     end
 
   end
-
-  class NoHandlerClassError < RuntimeError
-    def initialize(handler_class_name)
-      super "Deas couldn't find the view handler '#{handler_class_name}'. " \
-        "It doesn't exist or hasn't been required in yet."
-    end
-  end
-
 end

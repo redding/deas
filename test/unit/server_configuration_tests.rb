@@ -3,6 +3,7 @@ require 'set'
 require 'test/support/view_handlers'
 require 'deas/exceptions'
 require 'deas/template'
+require 'deas/route_proxy'
 require 'deas/server'
 
 class Deas::Server::Configuration
@@ -89,7 +90,8 @@ class Deas::Server::Configuration
     setup do
       @initialized = false
       @other_initialized = false
-      @route = Deas::Route.new(:get, '/something', 'TestViewHandler')
+      proxy = Deas::RouteProxy.new('TestViewHandler')
+      @route = Deas::Route.new(:get, '/something', proxy)
 
       @configuration = Deas::Server::Configuration.new.tap do |c|
         c.env              = 'staging'

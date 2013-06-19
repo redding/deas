@@ -1,5 +1,5 @@
 module Deas
-
+  # TODO: still needed??
   Error = Class.new(RuntimeError)
   ServerError = Class.new(Error)
   ServerRootError = Class.new(ServerError) do
