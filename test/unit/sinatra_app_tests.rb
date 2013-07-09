@@ -58,7 +58,7 @@ module Deas::SinatraApp
 
     should "define Sinatra routes for every route in the configuration" do
       get_routes = subject.routes[@route.method.to_s.upcase] || []
-      sinatra_route = get_routes.detect{|route| route[0].match(@route.path) }
+      sinatra_route = get_routes.detect{ |route| route[0].match(@route.path) }
 
       assert_not_nil sinatra_route
     end

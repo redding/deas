@@ -16,17 +16,19 @@ class Deas::Server::Configuration
     end
     subject{ @configuration }
 
-    # sinatra related options
+    # sinatra-based options
+
     should have_imeths :env, :root, :public_folder, :views_folder
     should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
-    should have_imeths :static_files, :reload_templates
+    should have_imeths :static_files, :reload_templates, :default_charset
 
     # server handling options
-    should have_imeths :error_procs, :init_procs, :logger, :middlewares, :settings
-    should have_imeths :verbose_logging, :routes, :view_handler_ns, :default_charset
 
-    should have_reader :template_helpers
-    should have_imeths :valid?, :validate!
+    should have_imeths :logger, :verbose_logging, :view_handler_ns
+
+    should have_accessors :settings, :error_procs, :init_procs, :template_helpers
+    should have_accessors :middlewares, :routes, :urls
+    should have_imeths :valid?, :validate!, :template_scope, :add_route
 
     should "default the env to 'development'" do
       assert_equal 'development', subject.env
@@ -47,15 +49,19 @@ class Deas::Server::Configuration
     end
 
     should "default the handling options" do
+      assert_instance_of Deas::NullLogger, subject.logger
+      assert_equal true, subject.verbose_logging
+      assert_nil subject.view_handler_ns
+    end
+
+    should "default its stored configuration" do
+      assert_empty subject.settings
       assert_empty subject.error_procs
       assert_empty subject.init_procs
-      assert_instance_of Deas::NullLogger, subject.logger
-      assert_empty subject.middlewares
-      assert_empty subject.settings
-      assert_equal true, subject.verbose_logging
-      assert_empty subject.routes
-      assert_nil   subject.view_handler_ns
       assert_empty subject.template_helpers
+      assert_empty subject.middlewares
+      assert_empty subject.routes
+      assert_empty subject.urls
     end
 
     should "build a template scope including its template helpers" do
@@ -102,8 +108,8 @@ class Deas::Server::Configuration
         c.show_exceptions  = true
         c.static           = true
         c.reload_templates = true
-        c.routes           = [ @route ]
         c.middlewares      = [ ['MyMiddleware'] ]
+        c.routes           = [ @route ]
       end
       @configuration.init_procs << proc{ @initialized = true }
       @configuration.init_procs << proc{ @other_initialized = true }
