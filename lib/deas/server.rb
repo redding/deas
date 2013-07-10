@@ -1,13 +1,14 @@
-require 'ns-options'
-require 'ns-options/boolean'
 require 'pathname'
 require 'set'
+require 'ns-options'
+require 'ns-options/boolean'
 require 'deas/exceptions'
 require 'deas/template'
 require 'deas/logging'
 require 'deas/redirect_proxy'
 require 'deas/route_proxy'
 require 'deas/route'
+require 'deas/url'
 require 'deas/show_exceptions'
 require 'deas/sinatra_app'
 
@@ -17,7 +18,8 @@ module Deas::Server
   class Configuration
     include NsOptions::Proxy
 
-    # Sinatra based options
+    # Sinatra-based options
+
     option :env,  String,   :default => 'development'
 
     option :root,          Pathname, :required => true
@@ -30,19 +32,16 @@ module Deas::Server
     option :show_exceptions,  NsOptions::Boolean, :default => false
     option :static_files,     NsOptions::Boolean, :default => true
     option :reload_templates, NsOptions::Boolean, :default => false
+    option :default_charset,  String,             :default => 'utf-8'
 
     # server handling options
-    option :error_procs,     Array,  :default => []
-    option :init_procs,      Array,  :default => []
-    option :logger,                  :default => proc{ Deas::NullLogger.new }
-    option :middlewares,     Array,  :default => []
-    option :settings,        Hash,   :default => {}
-    option :verbose_logging,         :default => true
-    option :routes,          Array,  :default => []
-    option :view_handler_ns, String
-    option :default_charset, String, :default => 'utf-8'
 
-    attr_reader :template_helpers
+    option :logger,                              :default => proc{ Deas::NullLogger.new }
+    option :verbose_logging, NsOptions::Boolean, :default => true
+    option :view_handler_ns, String
+
+    attr_accessor :settings, :error_procs, :init_procs, :template_helpers
+    attr_accessor :middlewares, :routes, :urls
 
     def initialize(values=nil)
       # these are defaulted here because we want to use the Configuration
@@ -53,7 +52,9 @@ module Deas::Server
         :public_folder => proc{ self.root.join('public') },
         :views_folder  => proc{ self.root.join('views') }
       }))
-      @template_helpers = []
+      @settings, @urls = {}, {}
+      @error_procs, @init_procs, @template_helpers = [], [], []
+      @middlewares, @routes = [], []
       @valid = nil
     end
 
@@ -99,6 +100,10 @@ module Deas::Server
 
     def add_route(http_method, path, proxy)
       Deas::Route.new(http_method, path, proxy).tap{ |r| self.routes.push(r) }
+    end
+
+    def add_url(name, path)
+      self.urls[name] = Deas::Url.new(name, path)
     end
 
   end
@@ -202,24 +207,24 @@ module Deas::Server
       self.configuration.default_charset *args
     end
 
-    def get(path, handler_class_name)
-      self.route(:get, path, handler_class_name)
+    def get(path, handler_class_name, url_name = nil)
+      self.route(:get, path, handler_class_name, url_name)
     end
 
-    def post(path, handler_class_name)
-      self.route(:post, path, handler_class_name)
+    def post(path, handler_class_name, url_name = nil)
+      self.route(:post, path, handler_class_name, url_name)
     end
 
-    def put(path, handler_class_name)
-      self.route(:put, path, handler_class_name)
+    def put(path, handler_class_name, url_name = nil)
+      self.route(:put, path, handler_class_name, url_name)
     end
 
-    def patch(path, handler_class_name)
-      self.route(:patch, path, handler_class_name)
+    def patch(path, handler_class_name, url_name = nil)
+      self.route(:patch, path, handler_class_name, url_name)
     end
 
-    def delete(path, handler_class_name)
-      self.route(:delete, path, handler_class_name)
+    def delete(path, handler_class_name, url_name = nil)
+      self.route(:delete, path, handler_class_name, url_name)
     end
 
     def redirect(http_method, path, to_path = nil, &block)
@@ -227,11 +232,19 @@ module Deas::Server
       self.configuration.add_route(http_method, path, proxy)
     end
 
-    def route(http_method, path, handler_class_name)
+    def route(http_method, path, handler_class_name, url_name = nil)
       if self.view_handler_ns && !(handler_class_name =~ /^::/)
         handler_class_name = "#{self.view_handler_ns}::#{handler_class_name}"
       end
       proxy = Deas::RouteProxy.new(handler_class_name)
+
+      if url_name && !url_name.to_s.empty?
+        if !path.kind_of?(::String)
+          raise ArgumentError, "invalid path `#{path.inspect}` - "\
+                               "can only provide a url name with String paths"
+        end
+        self.configuration.add_url(url_name.to_sym, path)
+      end
       self.configuration.add_route(http_method, path, proxy)
     end
 

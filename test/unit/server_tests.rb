@@ -15,15 +15,14 @@ module Deas::Server
 
     should have_imeths :new, :configuration
 
-    # DSL for sinatra settings
+    # DSL for sinatra-based settings
     should have_imeths :env, :root, :public_folder, :views_folder
     should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
-    should have_imeths :static_files, :reload_templates
+    should have_imeths :static_files, :reload_templates, :default_charset
 
-    # DSL for server handling
+    # DSL for server handling settings
     should have_imeths :init, :error, :template_helpers, :template_helper?
     should have_imeths :use, :set, :view_handler_ns, :verbose_logging, :logger
-    should have_imeths :default_charset
     should have_imeths :get, :post, :put, :patch, :delete, :redirect, :route
 
     should "allow setting it's configuration options" do
@@ -174,6 +173,45 @@ module Deas::Server
       assert_equal :options,    route.method
       assert_equal '/get_info', route.path
       assert_equal 'GetInfo',   route.handler_proxy.handler_class_name
+    end
+
+    should "not define urls for routes created with no url name" do
+      assert_empty subject.configuration.urls
+
+      @server_class.route(:get, '/info', 'GetInfo')
+      assert_empty subject.configuration.urls
+
+      @server_class.route(:get, '/info', 'GetInfo', nil)
+      assert_empty subject.configuration.urls
+
+      @server_class.route(:get, '/info', 'GetInfo', '')
+      assert_empty subject.configuration.urls
+
+      @server_class.route(:get, '/info', 'GetInfo', 'get_info')
+      assert_not_empty subject.configuration.urls
+    end
+
+  end
+
+  class NamedUrlTests < BaseTests
+    desc "when defining a route with a url name"
+    setup do
+      @server_class.route(:get, '/info', 'GetInfo', 'get_info')
+    end
+
+    should "define a url for the route on the server" do
+      url = subject.configuration.urls[:get_info]
+
+      assert_not_nil url
+      assert_kind_of Deas::Url, url
+      assert_equal :get_info, url.name
+      assert_equal '/info', url.path
+    end
+
+    should "complain if given a non-string path" do
+      assert_raises ArgumentError do
+        @server_class.route(:get, /^\/info/, 'GetInfo', 'get_info')
+      end
     end
 
   end
