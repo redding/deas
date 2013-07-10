@@ -57,7 +57,8 @@ module Deas
 
     RESPONSE_STATUS_NAMES = {
       200 => 'OK',
-      400 => 'BAD REQUEST' ,
+      302 => 'FOUND',
+      400 => 'BAD REQUEST',
       401 => 'UNAUTHORIZED',
       403 => 'FORBIDDEN',
       404 => 'NOT FOUND',
@@ -75,6 +76,7 @@ module Deas
       end
       env['deas.logging'] = Proc.new{ |msg| log(msg) }
       status, headers, body = super(env)
+      log "  Redir:   #{headers['Location']}" if headers.key?('Location')
       log "===== Completed in #{env['deas.time_taken']}ms (#{response_display(status)}) ====="
       [ status, headers, body ]
     end
@@ -93,14 +95,18 @@ module Deas
       env['deas.logging'] = Proc.new{ |msg| } # no-op
       status, headers, body = super(env)
       request = Rack::Request.new(env)
-      log SummaryLine.new({
+      line_attrs = {
         'method'  => request.request_method,
         'path'    => request.path,
         'handler' => env['deas.handler_class_name'],
         'params'  => env['sinatra.params'],
         'time'    => env['deas.time_taken'],
         'status'  => status
-      })
+      }
+      if headers.key?('Location')
+        line_attrs['redir'] = headers['Location']
+      end
+      log SummaryLine.new(line_attrs)
       [ status, headers, body ]
     end
 
@@ -108,10 +114,12 @@ module Deas
 
   module SummaryLine
     def self.keys
-      %w{time status method path handler params}
+      %w{time status method path handler params redir}
     end
     def self.new(line_attrs)
-      self.keys.map{ |k| "#{k}=#{line_attrs[k].inspect}" }.join(' ')
+      self.keys.select{ |k| line_attrs.key?(k) }.
+                map{ |k| "#{k}=#{line_attrs[k].inspect}"  }.
+                join(' ')
     end
   end
 
