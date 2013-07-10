@@ -229,6 +229,9 @@ module Deas::Server
 
     def redirect(http_method, path, to_path = nil, &block)
       url = self.configuration.urls[to_path]
+      if to_path.kind_of?(::Symbol) && url.nil?
+        raise ArgumentError, "no url named `#{to_path.inspect}`"
+      end
       proxy = Deas::RedirectProxy.new(url || to_path, &block)
       self.configuration.add_route(http_method, path, proxy)
     end
