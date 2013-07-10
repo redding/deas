@@ -20,13 +20,15 @@ class Deas::RedirectProxy
   end
 
   class HandlerClassTests < BaseTests
-    desc "handler class"
+    include Deas::TestHelpers
+
+    desc "redir handler class"
     setup do
       @handler_class = @proxy.handler_class
     end
     subject{ @handler_class }
 
-    should have_accessors :redirect_path
+    should have_accessor :redirect_path
     should have_imeth :name
 
     should "be a view handler" do
@@ -39,41 +41,63 @@ class Deas::RedirectProxy
       assert_equal 'Deas::RedirectHandler', subject.name
     end
 
-    should "know its redirect path" do
-      assert_instance_of Proc, subject.redirect_path
-      assert_equal '/somewhere', subject.redirect_path.call
+    should "store its redirect path as a proc" do
+      assert_kind_of Proc, subject.redirect_path
+
+      url = Deas::Url.new(:some_thing, '/:some/:thing')
+      handler_class = Deas::RedirectProxy.new(url).handler_class
+      assert_kind_of Proc, handler_class.redirect_path
+
+      path_proc = proc{ '/somewhere' }
+      handler_class = Deas::RedirectProxy.new(&path_proc).handler_class
+      assert_kind_of Proc, handler_class.redirect_path
     end
 
-    should "allow specifying the redir path as a block" do
-      path_proc = proc{ '/somewhere' }
+  end
 
-      handler_class = Deas::RedirectProxy.new(&path_proc).handler_class
-      assert_equal path_proc, handler_class.redirect_path
-      assert_equal '/somewhere', subject.redirect_path.call
+  class HandlerTests < HandlerClassTests
+    desc "redir handler instance"
+    setup do
+      @handler = test_handler(@handler_class)
+    end
+    subject{ @handler }
+
+    should have_reader :redirect_path
+
+    should "know its redir path if from a path string" do
+      assert_equal '/somewhere', subject.redirect_path
+    end
+
+    should "know its redir path if from Url" do
+      url = Deas::Url.new(:some_thing, '/:some/:thing')
+      handler_class = Deas::RedirectProxy.new(url).handler_class
+      handler = test_handler(handler_class, {
+        :params => { 'some' => 'a', 'thing' => 'goose' }
+      })
+
+      assert_equal '/a/goose', handler.redirect_path
+    end
+
+    should "know its redir path if from a block" do
+      handler_class = Deas::RedirectProxy.new(&proc{'/from-block-arg'}).handler_class
+      handler = test_handler(handler_class)
+
+      assert_equal '/from-block-arg', handler.redirect_path
     end
 
   end
 
   class RunTests < HandlerClassTests
-    include Deas::TestHelpers
-
     desc "when run"
-
-    should "redirect to the path that it was build with" do
-      render_args = test_runner(subject).run
-      assert_equal true,         render_args.redirect?
-      assert_equal '/somewhere', render_args.path
+    setup do
+      @runner = test_runner(@handler_class)
+      @handler = @runner.handler
+      @render_args = @runner.run
     end
 
-    should "redirect to the path returned from instance evaling the proc" do
-      path_proc = proc{ params['redirect_to'] }
-      handler_class = Deas::RedirectProxy.new(&path_proc).handler_class
-
-      render_args = test_runner(handler_class, {
-        :params => { 'redirect_to' => '/go_here' }
-      }).run
-      assert_equal true,       render_args.redirect?
-      assert_equal '/go_here', render_args.path
+    should "redirect to the handler's redirect path" do
+      assert @render_args.redirect?
+      assert_equal @handler.redirect_path, @render_args.path
     end
 
   end
