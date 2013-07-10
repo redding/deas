@@ -23,7 +23,8 @@ module Deas::Server
     # DSL for server handling settings
     should have_imeths :init, :error, :template_helpers, :template_helper?
     should have_imeths :use, :set, :view_handler_ns, :verbose_logging, :logger
-    should have_imeths :get, :post, :put, :patch, :delete, :redirect, :route
+    should have_imeths :get, :post, :put, :patch, :delete
+    should have_imeths :redirect, :route, :url
 
     should "allow setting it's configuration options" do
       config = subject.configuration
@@ -196,7 +197,7 @@ module Deas::Server
   class NamedUrlTests < BaseTests
     desc "when defining a route with a url name"
     setup do
-      @server_class.route(:get, '/info', 'GetInfo', 'get_info')
+      @server_class.route(:get, '/info/:for', 'GetInfo', 'get_info')
     end
 
     should "define a url for the route on the server" do
@@ -205,12 +206,25 @@ module Deas::Server
       assert_not_nil url
       assert_kind_of Deas::Url, url
       assert_equal :get_info, url.name
-      assert_equal '/info', url.path
+      assert_equal '/info/:for', url.path
     end
 
     should "complain if given a non-string path" do
       assert_raises ArgumentError do
-        @server_class.route(:get, /^\/info/, 'GetInfo', 'get_info')
+        subject.route(:get, /^\/info/, 'GetInfo', 'get_info')
+      end
+    end
+
+    should "build a path for a url given params" do
+      exp_path = "/info/now"
+
+      assert_equal exp_path, subject.url(:get_info, :for => 'now')
+      assert_equal exp_path, subject.url(:get_info, 'now')
+    end
+
+    should "complain is building a named url that hasn't been defined" do
+      assert_raises ArgumentError do
+        subject.url(:get_all_info, 'now')
       end
     end
 
