@@ -228,7 +228,8 @@ module Deas::Server
     end
 
     def redirect(http_method, path, to_path = nil, &block)
-      proxy = Deas::RedirectProxy.new(to_path, &block)
+      url = self.configuration.urls[to_path]
+      proxy = Deas::RedirectProxy.new(url || to_path, &block)
       self.configuration.add_route(http_method, path, proxy)
     end
 

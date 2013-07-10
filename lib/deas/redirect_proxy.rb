@@ -1,4 +1,5 @@
 require 'deas/view_handler'
+require 'deas/url'
 
 module Deas
   class RedirectProxy
@@ -16,12 +17,25 @@ module Deas
 
         def self.name; 'Deas::RedirectHandler'; end
 
+        attr_reader :redirect_path
+
+        def init!
+          @redirect_path = self.instance_eval(&self.class.redirect_path)
+        end
+
         def run!
-          redirect self.instance_eval(&self.class.redirect_path)
+          redirect @redirect_path
         end
 
       end
-      @handler_class.redirect_path = path ? proc{ path } : block
+
+      @handler_class.redirect_path = if path.nil?
+        block
+      elsif path.kind_of?(Deas::Url)
+        proc{ path.path_for(params) }
+      else
+        proc{ path }
+      end
       @handler_class_name = @handler_class.name
     end
 
