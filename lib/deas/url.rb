@@ -18,12 +18,15 @@ module Deas
     private
 
     def apply_named_params(path, params)
-      splat = params[:splat] || params['splat'] || '*'
-      params.inject(path){ |s, (k, v)| s.gsub(":#{k}", v) }.gsub("*", splat)
+      # ignore captures in applying params
+      captures   = params.delete(:captures) || params.delete('captures') || []
+      splat      = params.delete(:splat)    || params.delete('splat')    || []
+      splat_path = splat.inject(path){ |p, v| p.sub(/\*+/, v.to_s) }
+      params.inject(splat_path){ |p, (k, v)| p.gsub(":#{k}", v.to_s) }
     end
 
     def apply_ordered_params(path, params)
-      params.inject(path){ |s, p| s.sub(/\*+|\:\w+/i, p) }
+      params.inject(path){ |p, v| p.sub(/\*+|\:\w+/i, v.to_s) }
     end
 
   end

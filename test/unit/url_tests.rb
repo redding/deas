@@ -25,50 +25,63 @@ class Deas::Url
   class PathForTests < BaseTests
     desc "when generating paths"
     setup do
-      @url = Deas::Url.new(:some_thing, '/:some/:thing/*')
+      @url = Deas::Url.new(:some_thing, '/:some/:thing/*/*')
     end
 
     should "generate given named params only" do
-      exp_path = "/a/goose/*"
+      exp_path = "/a/goose/*/*"
       assert_equal exp_path, subject.path_for({
         'some' => 'a',
         :thing => 'goose'
       })
 
+      exp_path = "/a/goose/cooked-well/*"
+      assert_equal exp_path, subject.path_for({
+        'some' => 'a',
+        :thing => 'goose',
+        :splat => ['cooked-well']
+      })
+
       exp_path = "/a/goose/cooked/well"
       assert_equal exp_path, subject.path_for({
         'some'  => 'a',
         :thing  => 'goose',
-        'splat' => 'cooked/well'
+        'splat' => ['cooked', 'well']
       })
     end
 
     should "generate given ordered params only" do
-      exp_path = "/a/:thing/*"
+      exp_path = "/a/:thing/*/*"
       assert_equal exp_path, subject.path_for('a')
 
-      exp_path = "/a/goose/*"
+      exp_path = "/a/goose/*/*"
       assert_equal exp_path, subject.path_for('a', 'goose')
 
+      exp_path = "/a/goose/cooked-well/*"
+      assert_equal exp_path, subject.path_for('a', 'goose', 'cooked-well')
+
       exp_path = "/a/goose/cooked/well"
-      assert_equal exp_path, subject.path_for('a', 'goose', 'cooked/well')
+      assert_equal exp_path, subject.path_for('a', 'goose', 'cooked', 'well')
     end
 
     should "generate given mixed ordered and named params" do
-      exp_path = "/:some/:thing/*"
+      exp_path = "/:some/:thing/*/*"
       assert_equal exp_path, subject.path_for
 
-      exp_path = "/a/goose/*"
+      exp_path = "/a/goose/*/*"
       assert_equal exp_path, subject.path_for('a', 'thing' => 'goose')
 
-      exp_path = "/goose/a/well"
+      exp_path = "/goose/a/well/*"
       assert_equal exp_path, subject.path_for('a', 'well', 'some' => 'goose')
+    end
+
+    should "pass on this" do
 
       exp_path = "/a/goose/cooked/well"
-      assert_equal exp_path, subject.path_for('these', 'are', 'ignored', {
+      assert_equal exp_path, subject.path_for('ignore', 'these', 'params', {
         'some'  => 'a',
         :thing  => 'goose',
-        'splat' => 'cooked/well'
+        'splat' => ['cooked', 'well']
       })
     end
 
