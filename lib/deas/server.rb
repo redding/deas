@@ -248,6 +248,14 @@ module Deas::Server
       self.configuration.add_route(http_method, path, proxy)
     end
 
+    def url(name, *args)
+      url = self.configuration.urls[name.to_sym]
+      raise ArgumentError, "no route named `#{name.to_sym.inspect}`" unless url
+
+      url.path_for(*args)
+    end
+
   end
 
 end
+
