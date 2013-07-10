@@ -222,9 +222,15 @@ module Deas::Server
       assert_equal exp_path, subject.url(:get_info, 'now')
     end
 
-    should "complain is building a named url that hasn't been defined" do
+    should "complain if building a named url that hasn't been defined" do
       assert_raises ArgumentError do
         subject.url(:get_all_info, 'now')
+      end
+    end
+
+    should "complain if redirecting to a named url that hasn't been defined" do
+      assert_raises ArgumentError do
+        subject.redirect(:get, '/somewhere', :not_defined_url)
       end
     end
 
