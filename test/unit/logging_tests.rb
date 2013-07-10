@@ -50,21 +50,37 @@ module Deas::Logging
     subject{ Deas::SummaryLine }
 
     should "output its attributes in a specific order" do
-      assert_equal %w{time status method path handler params}, subject.keys
+      assert_equal %w{time status method path handler params redir}, subject.keys
     end
 
     should "output its attributes in a single line" do
       line_attrs = {
-        'time' => 't',
-        'status' => 's',
-        'method' => 'm',
-        'path' => 'pth',
+        'time'    => 't',
+        'status'  => 's',
+        'method'  => 'm',
+        'path'    => 'pth',
         'handler' => 'h',
-        'params' => 'p',
+        'params'  => 'p',
+        'redir'   => 'r'
       }
       exp_line = "time=\"t\" "\
                  "status=\"s\" "\
                  "method=\"m\" "\
+                 "path=\"pth\" "\
+                 "handler=\"h\" "\
+                 "params=\"p\" "\
+                 "redir=\"r\""
+      assert_equal exp_line, subject.new(line_attrs)
+    end
+
+    should "only output keys if data exists for them" do
+      line_attrs = {
+        'status'  => 's',
+        'path'    => 'pth',
+        'handler' => 'h',
+        'params'  => 'p'
+      }
+      exp_line = "status=\"s\" "\
                  "path=\"pth\" "\
                  "handler=\"h\" "\
                  "params=\"p\""
