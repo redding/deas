@@ -242,17 +242,19 @@ module Deas::Server
       end
       proxy = Deas::RouteProxy.new(handler_class_name)
 
-      if url_name && !url_name.to_s.empty?
-        if !path.kind_of?(::String)
-          raise ArgumentError, "invalid path `#{path.inspect}` - "\
-                               "can only provide a url name with String paths"
-        end
-        self.configuration.add_url(url_name.to_sym, path)
-      end
+      self.url(url_name, path) if url_name && !url_name.to_s.empty?
       self.configuration.add_route(http_method, path, proxy)
     end
 
-    def url(name, *args)
+    def url(name, path)
+      if !path.kind_of?(::String)
+        raise ArgumentError, "invalid path `#{path.inspect}` - "\
+                             "can only provide a url name with String paths"
+      end
+      self.configuration.add_url(name.to_sym, path)
+    end
+
+    def url_for(name, *args)
       url = self.configuration.urls[name.to_sym]
       raise ArgumentError, "no route named `#{name.to_sym.inspect}`" unless url
 

@@ -24,7 +24,7 @@ module Deas::Server
     should have_imeths :init, :error, :template_helpers, :template_helper?
     should have_imeths :use, :set, :view_handler_ns, :verbose_logging, :logger
     should have_imeths :get, :post, :put, :patch, :delete
-    should have_imeths :redirect, :route, :url
+    should have_imeths :redirect, :route, :url, :url_for
 
     should "allow setting it's configuration options" do
       config = subject.configuration
@@ -200,6 +200,16 @@ module Deas::Server
       @server_class.route(:get, '/info/:for', 'GetInfo', 'get_info')
     end
 
+    should "define a url given a name and a path" do
+      subject.url 'add_test', '/add-test'
+      url = subject.configuration.urls[:add_test]
+
+      assert_not_nil url
+      assert_kind_of Deas::Url, url
+      assert_equal :add_test, url.name
+      assert_equal '/add-test', url.path
+    end
+
     should "define a url for the route on the server" do
       url = subject.configuration.urls[:get_info]
 
@@ -218,13 +228,13 @@ module Deas::Server
     should "build a path for a url given params" do
       exp_path = "/info/now"
 
-      assert_equal exp_path, subject.url(:get_info, :for => 'now')
-      assert_equal exp_path, subject.url(:get_info, 'now')
+      assert_equal exp_path, subject.url_for(:get_info, :for => 'now')
+      assert_equal exp_path, subject.url_for(:get_info, 'now')
     end
 
     should "complain if building a named url that hasn't been defined" do
       assert_raises ArgumentError do
-        subject.url(:get_all_info, 'now')
+        subject.url_for(:get_all_info, 'now')
       end
     end
 
