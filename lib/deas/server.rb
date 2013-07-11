@@ -227,13 +227,16 @@ module Deas::Server
       self.route(:delete, path, handler_class_name, url_name)
     end
 
-    def redirect(http_method, path, to_path = nil, &block)
-      url = self.configuration.urls[to_path]
-      if to_path.kind_of?(::Symbol) && url.nil?
+    def redirect(http_method, from_path, to_path = nil, &block)
+      to_url = self.configuration.urls[to_path]
+      if to_path.kind_of?(::Symbol) && to_url.nil?
         raise ArgumentError, "no url named `#{to_path.inspect}`"
       end
-      proxy = Deas::RedirectProxy.new(url || to_path, &block)
-      self.configuration.add_route(http_method, path, proxy)
+      proxy = Deas::RedirectProxy.new(to_url || to_path, &block)
+
+      from_url = self.configuration.urls[from_path]
+      from_url_path = from_url.path if from_url
+      self.configuration.add_route(http_method, from_url_path || from_path, proxy)
     end
 
     def route(http_method, path, handler_class_name, url_name = nil)
