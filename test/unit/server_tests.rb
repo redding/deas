@@ -154,7 +154,7 @@ module Deas::Server
     end
 
     should "add a redirect route using #redirect" do
-      subject.redirect(:get, '/invalid', '/assets')
+      subject.redirect('/invalid', '/assets')
 
       route = subject.configuration.routes[0]
       assert_instance_of Deas::Route, route
@@ -213,12 +213,12 @@ module Deas::Server
 
     should "complain if redirecting to a named url that hasn't been defined" do
       assert_raises ArgumentError do
-        subject.redirect(:get, '/somewhere', :not_defined_url)
+        subject.redirect('/somewhere', :not_defined_url)
       end
     end
 
     should "redirect using a url name instead of a path" do
-      subject.redirect(:get, :get_info, '/somewhere')
+      subject.redirect(:get_info, '/somewhere')
       url   = subject.configuration.urls[:get_info]
       route = subject.configuration.routes.last
 
