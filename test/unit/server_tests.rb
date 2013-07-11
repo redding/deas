@@ -253,6 +253,14 @@ module Deas::Server
       assert_equal url.path, route.path
     end
 
+    should "route using a url name instead of a path" do
+      subject.route(:get, :get_info, 'GetInfo')
+      url   = subject.configuration.urls[:get_info]
+      route = subject.configuration.routes.last
+
+      assert_equal url.path, route.path
+    end
+
   end
 
 end
