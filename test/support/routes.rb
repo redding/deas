@@ -40,8 +40,8 @@ class DeasTestServer
 
   get '/handler/tests.json', 'HandlerTestsHandler'
 
-  redirect :get, '/route_redirect',   '/somewhere'
-  redirect(:get, '/:prefix/redirect'){ "/#{params['prefix']}/somewhere" }
+  redirect '/route_redirect',   '/somewhere'
+  redirect('/:prefix/redirect'){ "/#{params['prefix']}/somewhere" }
 
 end
 
