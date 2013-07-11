@@ -207,27 +207,27 @@ module Deas::Server
       self.configuration.default_charset *args
     end
 
-    def get(path, handler_class_name, url_name = nil)
-      self.route(:get, path, handler_class_name, url_name)
+    def get(path, handler_class_name)
+      self.route(:get, path, handler_class_name)
     end
 
-    def post(path, handler_class_name, url_name = nil)
-      self.route(:post, path, handler_class_name, url_name)
+    def post(path, handler_class_name)
+      self.route(:post, path, handler_class_name)
     end
 
-    def put(path, handler_class_name, url_name = nil)
-      self.route(:put, path, handler_class_name, url_name)
+    def put(path, handler_class_name)
+      self.route(:put, path, handler_class_name)
     end
 
-    def patch(path, handler_class_name, url_name = nil)
-      self.route(:patch, path, handler_class_name, url_name)
+    def patch(path, handler_class_name)
+      self.route(:patch, path, handler_class_name)
     end
 
-    def delete(path, handler_class_name, url_name = nil)
-      self.route(:delete, path, handler_class_name, url_name)
+    def delete(path, handler_class_name)
+      self.route(:delete, path, handler_class_name)
     end
 
-    def redirect(http_method, from_path, to_path = nil, &block)
+    def redirect(from_path, to_path = nil, &block)
       to_url = self.configuration.urls[to_path]
       if to_path.kind_of?(::Symbol) && to_url.nil?
         raise ArgumentError, "no url named `#{to_path.inspect}`"
@@ -236,10 +236,10 @@ module Deas::Server
 
       from_url = self.configuration.urls[from_path]
       from_url_path = from_url.path if from_url
-      self.configuration.add_route(http_method, from_url_path || from_path, proxy)
+      self.configuration.add_route(:get, from_url_path || from_path, proxy)
     end
 
-    def route(http_method, from_path, handler_class_name, url_name = nil)
+    def route(http_method, from_path, handler_class_name)
       if self.view_handler_ns && !(handler_class_name =~ /^::/)
         handler_class_name = "#{self.view_handler_ns}::#{handler_class_name}"
       end
@@ -247,10 +247,7 @@ module Deas::Server
 
       from_url = self.configuration.urls[from_path]
       from_url_path = from_url.path if from_url
-      path = from_url_path || from_path
-
-      self.url(url_name, path) if url_name && !url_name.to_s.empty?
-      self.configuration.add_route(http_method, path, proxy)
+      self.configuration.add_route(http_method, from_url_path || from_path, proxy)
     end
 
     def url(name, path)
