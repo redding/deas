@@ -176,22 +176,6 @@ module Deas::Server
       assert_equal 'GetInfo',   route.handler_proxy.handler_class_name
     end
 
-    should "not define urls for routes created with no url name" do
-      assert_empty subject.configuration.urls
-
-      @server_class.route(:get, '/info', 'GetInfo')
-      assert_empty subject.configuration.urls
-
-      @server_class.route(:get, '/info', 'GetInfo', nil)
-      assert_empty subject.configuration.urls
-
-      @server_class.route(:get, '/info', 'GetInfo', '')
-      assert_empty subject.configuration.urls
-
-      @server_class.route(:get, '/info', 'GetInfo', 'get_info')
-      assert_not_empty subject.configuration.urls
-    end
-
   end
 
   class NamedUrlTests < BaseTests
@@ -209,26 +193,14 @@ module Deas::Server
       assert_equal '/info/:for', url.path
     end
 
-    should "define a url for the route on the server" do
-      subject.route(:get, '/info/:for', 'GetInfo', 'get_info')
-      url = subject.configuration.urls[:get_info]
-
-      assert_not_nil url
-      assert_kind_of Deas::Url, url
-      assert_equal :get_info, url.name
-      assert_equal '/info/:for', url.path
-    end
-
-    should "complain if given a non-string path" do
+    should "complain if defining a url with a non-string path" do
       assert_raises ArgumentError do
-        subject.route(:get, /^\/info/, 'GetInfo', 'get_info')
+        subject.url(:get_info, /^\/info/)
       end
     end
 
     should "build a path for a url given params" do
-      subject.route(:get, '/info/:for', 'GetInfo', 'get_info')
       exp_path = "/info/now"
-
       assert_equal exp_path, subject.url_for(:get_info, :for => 'now')
       assert_equal exp_path, subject.url_for(:get_info, 'now')
     end
