@@ -239,11 +239,15 @@ module Deas::Server
       self.configuration.add_route(http_method, from_url_path || from_path, proxy)
     end
 
-    def route(http_method, path, handler_class_name, url_name = nil)
+    def route(http_method, from_path, handler_class_name, url_name = nil)
       if self.view_handler_ns && !(handler_class_name =~ /^::/)
         handler_class_name = "#{self.view_handler_ns}::#{handler_class_name}"
       end
       proxy = Deas::RouteProxy.new(handler_class_name)
+
+      from_url = self.configuration.urls[from_path]
+      from_url_path = from_url.path if from_url
+      path = from_url_path || from_path
 
       self.url(url_name, path) if url_name && !url_name.to_s.empty?
       self.configuration.add_route(http_method, path, proxy)
