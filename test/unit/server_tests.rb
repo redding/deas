@@ -195,22 +195,22 @@ module Deas::Server
   end
 
   class NamedUrlTests < BaseTests
-    desc "when defining a route with a url name"
+    desc "when using named urls"
     setup do
-      @server_class.route(:get, '/info/:for', 'GetInfo', 'get_info')
+      @server_class.url('get_info', '/info/:for')
     end
 
     should "define a url given a name and a path" do
-      subject.url 'add_test', '/add-test'
-      url = subject.configuration.urls[:add_test]
+      url = subject.configuration.urls[:get_info]
 
       assert_not_nil url
       assert_kind_of Deas::Url, url
-      assert_equal :add_test, url.name
-      assert_equal '/add-test', url.path
+      assert_equal :get_info, url.name
+      assert_equal '/info/:for', url.path
     end
 
     should "define a url for the route on the server" do
+      subject.route(:get, '/info/:for', 'GetInfo', 'get_info')
       url = subject.configuration.urls[:get_info]
 
       assert_not_nil url
@@ -226,6 +226,7 @@ module Deas::Server
     end
 
     should "build a path for a url given params" do
+      subject.route(:get, '/info/:for', 'GetInfo', 'get_info')
       exp_path = "/info/now"
 
       assert_equal exp_path, subject.url_for(:get_info, :for => 'now')
@@ -242,6 +243,14 @@ module Deas::Server
       assert_raises ArgumentError do
         subject.redirect(:get, '/somewhere', :not_defined_url)
       end
+    end
+
+    should "redirect using a url name instead of a path" do
+      subject.redirect(:get, :get_info, '/somewhere')
+      url   = subject.configuration.urls[:get_info]
+      route = subject.configuration.routes.last
+
+      assert_equal url.path, route.path
     end
 
   end
