@@ -13,6 +13,9 @@ module Deas::SinatraApp
     setup do
       proxy = Deas::RouteProxy.new('TestViewHandler')
       @route = Deas::Route.new(:get, '/something', proxy)
+      @router = Deas::Router.new
+      @router.routes = [ @route ]
+
       @configuration = Deas::Server::Configuration.new.tap do |c|
         c.env              = 'staging'
         c.root             = 'path/to/somewhere'
@@ -22,7 +25,7 @@ module Deas::SinatraApp
         c.show_exceptions  = true
         c.static           = true
         c.reload_templates = true
-        c.routes           = [ @route ]
+        c.router           = @router
       end
       @sinatra_app = Deas::SinatraApp.new(@configuration)
     end

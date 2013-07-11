@@ -1,10 +1,10 @@
 require 'assert'
-require 'set'
+require 'deas/server'
+
 require 'test/support/view_handlers'
 require 'deas/exceptions'
 require 'deas/template'
-require 'deas/route_proxy'
-require 'deas/server'
+require 'deas/router'
 
 class Deas::Server::Configuration
 
@@ -24,11 +24,11 @@ class Deas::Server::Configuration
 
     # server handling options
 
-    should have_imeths :logger, :verbose_logging, :view_handler_ns
+    should have_imeths :verbose_logging, :logger
 
     should have_accessors :settings, :error_procs, :init_procs, :template_helpers
-    should have_accessors :middlewares, :routes, :urls
-    should have_imeths :valid?, :validate!, :template_scope, :add_route
+    should have_accessors :middlewares, :router
+    should have_imeths :valid?, :validate!, :urls, :routes, :template_scope
 
     should "default the env to 'development'" do
       assert_equal 'development', subject.env
@@ -51,7 +51,6 @@ class Deas::Server::Configuration
     should "default the handling options" do
       assert_instance_of Deas::NullLogger, subject.logger
       assert_equal true, subject.verbose_logging
-      assert_nil subject.view_handler_ns
     end
 
     should "default its stored configuration" do
@@ -62,6 +61,7 @@ class Deas::Server::Configuration
       assert_empty subject.middlewares
       assert_empty subject.routes
       assert_empty subject.urls
+      assert_kind_of Deas::Router, subject.router
     end
 
     should "build a template scope including its template helpers" do
@@ -98,6 +98,8 @@ class Deas::Server::Configuration
       @other_initialized = false
       proxy = Deas::RouteProxy.new('TestViewHandler')
       @route = Deas::Route.new(:get, '/something', proxy)
+      @router = Deas::Router.new
+      @router.routes = [ @route ]
 
       @configuration = Deas::Server::Configuration.new.tap do |c|
         c.env              = 'staging'
@@ -109,7 +111,7 @@ class Deas::Server::Configuration
         c.static           = true
         c.reload_templates = true
         c.middlewares      = [ ['MyMiddleware'] ]
-        c.routes           = [ @route ]
+        c.router           = @router
       end
       @configuration.init_procs << proc{ @initialized = true }
       @configuration.init_procs << proc{ @other_initialized = true }
