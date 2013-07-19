@@ -106,4 +106,26 @@ module Deas::Server
 
   end
 
+  class NewTests < BaseTests
+    desc "module #new method"
+    subject{ Deas::Server }
+
+    should have_imeth :new
+
+    should "build a sinatra app with the given configuration" do
+      server_app = subject.new do
+        root Dir.pwd
+        env 'staging'
+      end
+
+      # don't know of a better way to test this b/c you get back a crappy
+      # Sinatra "app" thingy.  It works
+
+      assert includes Sinatra::Templates, server_app.included_modules
+      assert_includes Sinatra::Helpers,   server_app.included_modules
+      assert_includes Rack::Utils,        server_app.included_modules
+    end
+
+  end
+
 end
