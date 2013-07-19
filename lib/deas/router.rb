@@ -8,8 +8,9 @@ module Deas
 
     attr_accessor :urls, :routes
 
-    def initialize
+    def initialize(&block)
       @urls, @routes = {}, []
+      self.instance_eval(&block) if !block.nil?
     end
 
     def view_handler_ns(value = nil)
