@@ -108,6 +108,15 @@ class Deas::Router
       assert_not_nil route.handler_class
     end
 
+    should "instance eval any given block" do
+      router = Deas::Router.new do
+        get('/things', 'ListThings')
+      end
+
+      assert_equal 1, router.routes.size
+      assert_instance_of Deas::Route, router.routes.first
+    end
+
   end
 
   class NamedUrlTests < BaseTests
