@@ -26,7 +26,7 @@ module Deas
     end
 
     def apply_ordered_params(path, params)
-      params.inject(path){ |p, v| p.sub(/\*+|\:\w+/i, v.to_s) }
+      params.inject(path){ |p, v| p.sub(/\*+|\:\w+/i, v.to_s) }.gsub(/\/\/+/, '/')
     end
 
   end

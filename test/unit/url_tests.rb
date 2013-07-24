@@ -73,15 +73,21 @@ class Deas::Url
 
       exp_path = "/goose/a/well/*"
       assert_equal exp_path, subject.path_for('a', 'well', 'some' => 'goose')
-    end
-
-    should "pass on this" do
 
       exp_path = "/a/goose/cooked/well"
       assert_equal exp_path, subject.path_for('ignore', 'these', 'params', {
         'some'  => 'a',
         :thing  => 'goose',
         'splat' => ['cooked', 'well']
+      })
+    end
+
+    should "'squash' duplicate forward-slashes" do
+      exp_path = "/a/goose/cooked/well/"
+      assert_equal exp_path, subject.path_for({
+        'some'  => '/a',
+        :thing  => '/goose',
+        'splat' => ['///cooked', 'well//']
       })
     end
 
