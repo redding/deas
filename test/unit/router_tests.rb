@@ -146,6 +146,12 @@ class Deas::Router
       assert_equal exp_path, subject.url_for(:get_info, 'now')
     end
 
+    should "'squash' duplicate forward-slashes when building urls" do
+      exp_path = "/info/now"
+      assert_equal exp_path, subject.url_for(:get_info, :for => '/now')
+      assert_equal exp_path, subject.url_for(:get_info, '/now')
+    end
+
     should "complain if building a named url that hasn't been defined" do
       assert_raises ArgumentError do
         subject.url_for(:get_all_info, 'now')
