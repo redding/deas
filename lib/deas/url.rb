@@ -24,10 +24,14 @@ module Deas
     end
 
     def apply_hashed(path, params)
+      # don't alter the given params
+      hash = params.dup
+
       # ignore captures in applying params
-      captures = params.delete(:captures) || params.delete('captures') || []
-      splat    = params.delete(:splat)    || params.delete('splat')    || []
-      apply_extra(apply_named(apply_splat(@path, splat), params), params)
+      captures = hash.delete(:captures) || hash.delete('captures') || []
+      splat    = hash.delete(:splat)    || hash.delete('splat')    || []
+
+      apply_extra(apply_named(apply_splat(@path, splat), hash), hash)
     end
 
     def apply_splat(path, params)

@@ -102,6 +102,14 @@ class Deas::Url
       })
     end
 
+    should "not alter the given params" do
+      params = {'some' => 'thing'}
+      exp_params = params.dup
+
+      subject.path_for(params)
+      assert_equal exp_params, params
+    end
+
   end
 
 end
