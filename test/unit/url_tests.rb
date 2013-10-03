@@ -5,7 +5,7 @@ require 'test/support/view_handlers'
 
 class Deas::Url
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::Url"
     setup do
       @url = Deas::Url.new(:get_info, '/info')
@@ -22,7 +22,7 @@ class Deas::Url
 
   end
 
-  class PathForTests < BaseTests
+  class PathForTests < UnitTests
     desc "when generating paths"
     setup do
       @url = Deas::Url.new(:some_thing, '/:some/:thing/*/*')
@@ -47,6 +47,17 @@ class Deas::Url
         'some'  => 'a',
         :thing  => 'goose',
         'splat' => ['cooked', 'well']
+      })
+    end
+
+    should "append other (additional) params as query params" do
+      exp_path = "/a/goose/cooked/well?aye=a%20a%20a&bee=b"
+      assert_equal exp_path, subject.path_for({
+        'some'  => 'a',
+        :thing  => 'goose',
+        'splat' => ['cooked', 'well'],
+        'bee'   => 'b',
+        :aye    => 'a a a'
       })
     end
 
