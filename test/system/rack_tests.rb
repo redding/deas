@@ -2,6 +2,8 @@ require 'assert'
 require 'assert-rack-test'
 require 'deas'
 
+require 'haml'
+
 module Deas
 
   class RackTestsContext < Assert::Context
@@ -153,7 +155,7 @@ module Deas
       assert_equal 'something',    @data['app_settings_a_setting']
       assert_equal 'Logger',       @data['logger_class_name']
       assert_equal 'GET',          @data['request_method']
-      assert_equal 'Content-Type', @data['response_firstheaderval']
+      assert_equal 'Content-Type', @data['response_firstheader']
       assert_equal 'something',    @data['params_a_param']
       assert_equal '{}',           @data['session_inspect']
     end
