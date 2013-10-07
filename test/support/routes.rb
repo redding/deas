@@ -230,7 +230,7 @@ class HandlerTestsHandler
     set_data('app_settings_a_setting'){ self.app_settings.a_setting }
     set_data('logger_class_name'){ self.logger.class.name }
     set_data('request_method'){ self.request.request_method.to_s }
-    set_data('response_firstheaderval'){ self.response.headers.sort.first.to_s }
+    set_data('response_firstheader'){ self.response.headers.keys.first }
     set_data('params_a_param'){ self.params['a-param'] }
     set_data('session_inspect'){ self.session.inspect }
   end
