@@ -11,6 +11,7 @@ Gem::Specification.new do |gem|
   gem.description = %q{Handler-based web framework powered by Sinatra}
   gem.summary     = %q{Handler-based web framework powered by Sinatra}
   gem.homepage    = "http://github.com/redding/deas"
+  gem.license     = 'MIT'
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
