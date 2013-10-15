@@ -30,14 +30,17 @@ module Deas
 
     # The real Rack call interface.
     # This is the common behavior for both the verbose and summary logging
-    # middlewares. It times the response and returns it as is.
+    # middlewares. It sets rack's logger, times the response and returns it as is.
     def call!(env)
+      env['rack.logger'] = @logger
+
       status, headers, body = nil, nil, nil
       benchmark = Benchmark.measure do
         status, headers, body = @app.call(env)
       end
       log_error(env['sinatra.error'])
       env['deas.time_taken'] = RoundedTime.new(benchmark.real)
+
       [ status, headers, body ]
     end
 
