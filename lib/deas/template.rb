@@ -49,8 +49,8 @@ module Deas
         Template.new(@sinatra_call, name, options || {}).render(&block)
       end
 
-      def partial(name, locals = nil)
-        Partial.new(@sinatra_call, name, locals || {}).render
+      def partial(name, locals = nil, &block)
+        Partial.new(@sinatra_call, name, locals || {}).render(&block)
       end
 
       def escape_html(html)

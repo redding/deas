@@ -4,7 +4,7 @@ require 'deas/template'
 
 class Deas::Template
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::Template"
     setup do
       @fake_sinatra_call = FakeSinatraCall.new
@@ -54,7 +54,7 @@ class Deas::Template
 
   end
 
-  class WithLayoutsTests < BaseTests
+  class WithLayoutsTests < UnitTests
     desc "with layouts"
     setup do
       @template = Deas::Template.new(@fake_sinatra_call, 'users/index', {
@@ -62,20 +62,19 @@ class Deas::Template
       })
     end
 
-    should "call the engine's `erb` method for each layout, " \
-           "in the `layout` option" do
-      return_value = subject.render
+    should "call the engine's `erb` method for each layout" do
+      web_lay_render_args     = subject.render
+      search_lay_render_args  = web_lay_render_args.block_call_result
+      users_index_render_args = search_lay_render_args.block_call_result
 
-      # the return_value is a one-dimensional array of all the render args
-      # used in order. Thus the, 0, 2, 4 nature of the indexes.
-      assert_equal :"layouts/web",    return_value[0]
-      assert_equal :"layouts/search", return_value[2]
-      assert_equal :"users/index",    return_value[4]
+      assert_equal :"layouts/web",    web_lay_render_args.template_name
+      assert_equal :"layouts/search", search_lay_render_args.template_name
+      assert_equal :"users/index",    users_index_render_args.template_name
     end
 
   end
 
-  class ScopeTests < BaseTests
+  class ScopeTests < UnitTests
     desc "Deas::Template::RenderScope"
     setup do
       @scope = Deas::Template::Scope.new(@fake_sinatra_call)
@@ -86,47 +85,45 @@ class Deas::Template
     should have_imeths :render, :partial, :escape_html, :h, :escape_url, :u
     should have_imeths :logger
 
-    should "call the sinatra_call's erb method with #partial" do
-      return_value = subject.partial('part', :something => true)
-
-      assert_equal :_part, return_value[0]
-
-      expected_options = return_value[1]
-      assert_instance_of Deas::Template::Scope, expected_options[:scope]
-
-      expected_locals = { :something => true }
-      assert_equal(expected_locals, expected_options[:locals])
-    end
-
     should "call the sinatra_call's erb method with #render" do
-      return_value = subject.render('my_template', {
+      render_args = subject.render('my_template', {
         :views  => '/path/to/templates',
         :locals => { :something => true }
-      })
+      }, &Proc.new{ '#render called this proc' })
 
-      assert_equal :my_template, return_value[0]
+      assert_equal :my_template, render_args.template_name
+      assert_instance_of Deas::Template::Scope, render_args.opts[:scope]
 
-      expected_options = return_value[1]
-      assert_instance_of Deas::Template::Scope, expected_options[:scope]
+      exp_locals = { :something => true }
+      assert_equal exp_locals, render_args.opts[:locals]
 
-      expected_locals = { :something => true }
-      assert_equal(expected_locals, expected_options[:locals])
+      assert_equal '#render called this proc', render_args.block_call_result
+    end
+
+    should "call the sinatra_call's erb method with #partial" do
+      render_args = subject.partial('part', {
+        :something => true
+      }, &Proc.new{ '#partial called this proc' })
+
+      assert_equal :_part, render_args.template_name
+      assert_instance_of Deas::Template::Scope, render_args.opts[:scope]
+
+      exp_locals = { :something => true }
+      assert_equal exp_locals, render_args.opts[:locals]
+
+      assert_equal '#partial called this proc', render_args.block_call_result
     end
 
     should "escape html with #h or #escape_html" do
-      return_value = subject.escape_html("<strong></strong>")
-      assert_equal "&lt;strong&gt;&lt;&#x2F;strong&gt;", return_value
-
-      return_value = subject.h("<strong></strong>")
-      assert_equal "&lt;strong&gt;&lt;&#x2F;strong&gt;", return_value
+      exp_val = "&lt;strong&gt;&lt;&#x2F;strong&gt;"
+      assert_equal exp_val, subject.escape_html("<strong></strong>")
+      assert_equal exp_val, subject.h("<strong></strong>")
     end
 
     should "escape urls with #u or #escape_url" do
-      return_value = subject.escape_url("/path/to/somewhere")
-      assert_equal "%2Fpath%2Fto%2Fsomewhere", return_value
-
-      return_value = subject.u("/path/to/somewhere")
-      assert_equal "%2Fpath%2Fto%2Fsomewhere", return_value
+      exp_val = "%2Fpath%2Fto%2Fsomewhere"
+      assert_equal exp_val, subject.escape_url("/path/to/somewhere")
+      assert_equal exp_val, subject.u("/path/to/somewhere")
     end
 
     should "expose the sinatra call (and deas server) logger" do
@@ -135,7 +132,7 @@ class Deas::Template
 
   end
 
-  class PartialTests < BaseTests
+  class PartialTests < UnitTests
     desc "Partial"
     setup do
       @partial = Deas::Template::Partial.new(@fake_sinatra_call, 'users/index/listing', {

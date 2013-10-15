@@ -33,11 +33,14 @@ class FakeSinatraCall
   def headers(*args);      args; end
 
   # return the template name for each nested calls
-  def erb(name, opts, &block)
+
+  RenderArgs = Struct.new(:template_name, :opts, :block_call_result)
+
+  def erb(template_name, opts, &block)
     if block
-      [ name, opts, block.call ].flatten
+      RenderArgs.new(template_name, opts, block.call)
     else
-      [ name, opts ]
+      RenderArgs.new(template_name, opts, nil)
     end
   end
 
