@@ -107,6 +107,12 @@ module Deas::Server
     receiver.class_eval{ extend ClassMethods }
   end
 
+  def self.new(&block)
+    server_class = Class.new{ include Deas::Server }
+    server_class.class_eval(&block) if !block.nil?
+    server_class.new
+  end
+
   module ClassMethods
 
     def new
