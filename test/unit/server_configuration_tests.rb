@@ -18,7 +18,7 @@ class Deas::Server::Configuration
 
     # sinatra-based options
 
-    should have_imeths :env, :root, :public_folder, :views_folder
+    should have_imeths :env, :root, :public_root, :views_root
     should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
     should have_imeths :static_files, :reload_templates, :default_charset
 
@@ -35,8 +35,8 @@ class Deas::Server::Configuration
     end
 
     should "default the public and views folders based off the root" do
-      assert_equal subject.root.join('public'), subject.public_folder
-      assert_equal subject.root.join('views'), subject.views_folder
+      assert_equal subject.root.join('public'), subject.public_root
+      assert_equal subject.root.join('views'), subject.views_root
     end
 
     should "default the Sinatra flags" do
