@@ -13,8 +13,8 @@ module Deas
         set :environment, server_config.env
         set :root,        server_config.root
 
-        set :public_folder, server_config.public_folder
-        set :views,         server_config.views_folder
+        set :public_folder, server_config.public_root
+        set :views,         server_config.views_root
 
         set :dump_errors,      server_config.dump_errors
         set :method_override,  server_config.method_override

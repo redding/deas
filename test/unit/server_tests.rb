@@ -16,7 +16,7 @@ module Deas::Server
     should have_imeths :new, :configuration
 
     # DSL for sinatra-based settings
-    should have_imeths :env, :root, :public_folder, :views_folder
+    should have_imeths :env, :root, :public_root, :views_root
     should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
     should have_imeths :static_files, :reload_templates, :default_charset
 
@@ -41,11 +41,11 @@ module Deas::Server
       subject.root '/path/to/root'
       assert_equal '/path/to/root', config.root.to_s
 
-      subject.public_folder '/path/to/public'
-      assert_equal '/path/to/public', config.public_folder.to_s
+      subject.public_root '/path/to/public'
+      assert_equal '/path/to/public', config.public_root.to_s
 
-      subject.views_folder '/path/to/views'
-      assert_equal '/path/to/views', config.views_folder.to_s
+      subject.views_root '/path/to/views'
+      assert_equal '/path/to/views', config.views_root.to_s
 
       subject.dump_errors true
       assert_equal true, config.dump_errors

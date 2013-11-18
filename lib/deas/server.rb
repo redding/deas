@@ -18,9 +18,9 @@ module Deas::Server
 
     option :env,  String,   :default => 'development'
 
-    option :root,          Pathname, :required => true
-    option :public_folder, Pathname
-    option :views_folder,  Pathname
+    option :root,        Pathname, :required => true
+    option :public_root, Pathname
+    option :views_root,  Pathname
 
     option :dump_errors,      NsOptions::Boolean, :default => false
     option :method_override,  NsOptions::Boolean, :default => true
@@ -44,8 +44,8 @@ module Deas::Server
       # Configuration class `root`, which will not update these options as
       # expected.
       super((values || {}).merge({
-        :public_folder => proc{ self.root.join('public') },
-        :views_folder  => proc{ self.root.join('views') }
+        :public_root => proc{ self.root.join('public') },
+        :views_root  => proc{ self.root.join('views') }
       }))
       @settings = {}
       @error_procs, @init_procs, @template_helpers, @middlewares = [], [], [], []
@@ -127,12 +127,12 @@ module Deas::Server
       self.configuration.root *args
     end
 
-    def public_folder(*args)
-      self.configuration.public_folder *args
+    def public_root(*args)
+      self.configuration.public_root *args
     end
 
-    def views_folder(*args)
-      self.configuration.views_folder *args
+    def views_root(*args)
+      self.configuration.views_root *args
     end
 
     def dump_errors(*args)
