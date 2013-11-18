@@ -34,7 +34,7 @@ module Deas
     def render(&block)
       template_names = [ @layouts, @name ].flatten.reverse
       top_render_proc = template_names.inject(block) do |render_proc, name|
-        proc{ @sinatra_call.send(engine(name), name, @options, &render_proc) }
+        proc{ @sinatra_call.send(engine(name), name, @options.dup, &render_proc) }
       end
       top_render_proc.call
     end

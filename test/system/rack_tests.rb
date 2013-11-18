@@ -68,29 +68,30 @@ module Deas
     end
 
     should "render erb templates using layouts" do
-      expected_body = "Layout 1\nLayout 2\nLayout 3\nWith Layout\n"
-
       get '/with_layout'
+      expected_body = "Layout 1\nLayout 2\nLayout 3\nWith Layouts View: WithLayoutHandler\n"
       assert_equal 200,           last_response.status
       assert_equal expected_body, last_response.body
 
       get '/alt_with_layout'
+      expected_body = "Layout 1\nLayout 2\nLayout 3\nWith Layouts View: AlternateWithLayoutHandler\n"
       assert_equal 200,           last_response.status
       assert_equal expected_body, last_response.body
     end
 
     should "render mixed (erb and other) templates using layouts" do
-      expected_body = "Layout 1\nWith Layout\n"
-
       get '/haml_with_layout'
+      expected_body = "Layout 1\n<span>HamlWithLayoutHandler</span>\n"
       assert_equal 200,           last_response.status
       assert_equal expected_body, last_response.body
 
       get '/with_haml_layout'
+      expected_body = "Layout 1\nWith Layouts View: WithHamlLayoutHandler\n"
       assert_equal 200,           last_response.status
       assert_equal expected_body, last_response.body
 
       get '/haml_with_haml_layout'
+      expected_body = "Layout 1\n<span>HamlWithHamlLayoutHandler</span>\n"
       assert_equal 200,           last_response.status
       assert_equal expected_body, last_response.body
     end
