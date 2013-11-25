@@ -5,6 +5,17 @@ class TestViewHandler
 
 end
 
+class TestRunnerViewHandler
+  include Deas::ViewHandler
+
+  attr_accessor :custom_value
+
+  def run!
+    'run has run'
+  end
+
+end
+
 class RenderViewHandler
   include Deas::ViewHandler
 
