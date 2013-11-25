@@ -104,4 +104,65 @@ class Deas::TestRunner
 
   end
 
+  class ParamsTests < UnitTests
+    desc "normalizing params"
+
+    should "convert any non-Array or non-Hash values to strings" do
+      exp_params = {
+        'nil' => '',
+        'int' => '42',
+        'str' => 'string'
+      }
+      assert_equal exp_params, runner_params({
+        'nil' => nil,
+        'int' => 42,
+        'str' => 'string'
+      })
+    end
+
+    should "recursively convert array values to strings" do
+      exp_params = {
+        'array' => ['', '42', 'string']
+      }
+      assert_equal exp_params, runner_params({
+        'array' => [nil, 42, 'string']
+      })
+    end
+
+    should "recursively convert hash values to strings" do
+      exp_params = {
+        'values' => {
+          'nil' => '',
+          'int' => '42',
+          'str' => 'string'
+        }
+      }
+      assert_equal exp_params, runner_params({
+        'values' => {
+          'nil' => nil,
+          'int' => 42,
+          'str' => 'string'
+        }
+      })
+    end
+
+    should "convert any non-string hash keys to string keys" do
+      exp_params = {
+        'nil' => '',
+        'vals' => { '42' => 'int', 'str' => 'string' }
+      }
+      assert_equal exp_params, runner_params({
+        'nil' => '',
+        :vals => { 42 => :int, 'str' => 'string' }
+      })
+    end
+
+    private
+
+    def runner_params(params)
+      Deas::TestRunner.new(TestRunnerViewHandler, :params => params).params
+    end
+
+  end
+
 end

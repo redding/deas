@@ -75,7 +75,7 @@ class HaltViewHandler
   include Deas::ViewHandler
 
   def run!
-    halt_args = [ params['code'], params['headers'], params['body'] ].compact
+    halt_args = [ params['code'].to_i, params['headers'], params['body'] ].compact
     halt(*halt_args)
   end
 

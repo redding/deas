@@ -11,7 +11,7 @@ module Deas
       args = (args || {}).dup
       @app_settings = OpenStruct.new(args.delete(:app_settings))
       @logger       = args.delete(:logger) || Deas::NullLogger.new
-      @params       = args.delete(:params) || {}
+      @params       = normalize_params(args.delete(:params) || {})
       @request      = args.delete(:request)
       @response     = args.delete(:response)
       @session      = args.delete(:session)
@@ -79,6 +79,24 @@ module Deas
     end
 
     SendFileArgs = Struct.new(:file_path, :options, :block)
+
+    private
+
+    def normalize_params(params)
+      Stringify.new(params)
+    end
+
+    module Stringify
+      def self.new(value)
+        if value.is_a?(::Array)
+          value.map{ |i| Stringify.new(i) }
+        elsif Rack::Utils.params_hash_type?(value)
+          value.inject({}){ |v, (k, i)| v[k.to_s] = Stringify.new(i); v }
+        else
+          value.to_s
+        end
+      end
+    end
 
   end
 
