@@ -13,7 +13,7 @@ module Deas
       @sinatra_call  = sinatra_call
       @app_settings  = @sinatra_call.settings
       @logger        = @sinatra_call.settings.logger
-      @params        = @sinatra_call.params
+      @params        = normalize_params(@sinatra_call.params)
       @request       = @sinatra_call.request
       @response      = @sinatra_call.response
       @session       = @sinatra_call.session
@@ -79,6 +79,22 @@ module Deas
 
     def get_content_type(template_name)
       File.extname(template_name)[1..-1] || 'html'
+    end
+
+    def normalize_params(params)
+      StringifiedKeys.new(params)
+    end
+
+    module StringifiedKeys
+      def self.new(value)
+        if value.is_a?(::Array)
+          value.map{ |i| StringifiedKeys.new(i) }
+        elsif Rack::Utils.params_hash_type?(value)
+          value.inject({}){ |h, (k, v)| h[k.to_s] = StringifiedKeys.new(v); h }
+        else
+          value
+        end
+      end
     end
 
   end
