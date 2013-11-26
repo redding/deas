@@ -6,7 +6,7 @@ require 'deas/sinatra_runner'
 
 class Deas::SinatraRunner
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::SinatraRunner"
     setup do
       @fake_sinatra_call = FakeSinatraCall.new
@@ -82,7 +82,7 @@ class Deas::SinatraRunner
 
   end
 
-  class RunTests < BaseTests
+  class RunTests < UnitTests
     desc "run"
     setup do
       @return_value = @runner.run
@@ -102,6 +102,45 @@ class Deas::SinatraRunner
 
     should "return the handler's run! return value" do
       assert_equal true, @return_value
+    end
+
+  end
+
+  class ParamsTests < UnitTests
+    desc "normalizing params"
+
+    should "convert any non-string hash keys to string keys" do
+      exp_params = {
+        'a' => 'aye',
+        'b' => 'bee',
+        'attachment' => {
+          'tempfile' => 'a-file',
+          'content_type' => 'whatever'
+        },
+        'attachments' => [
+          { 'tempfile' => 'a-file' },
+          { 'tempfile' => 'b-file' }
+        ]
+      }
+      assert_equal exp_params, runner_params({
+        :a  => 'aye',
+        'b' => 'bee',
+        'attachment' => {
+          :tempfile => 'a-file',
+          :content_type => 'whatever'
+        },
+        'attachments' => [
+          { :tempfile  => 'a-file' },
+          { 'tempfile' => 'b-file' }
+        ]
+      })
+    end
+
+    private
+
+    def runner_params(params)
+      @fake_sinatra_call.params = params
+      Deas::SinatraRunner.new(FlagViewHandler, @fake_sinatra_call).params
     end
 
   end
