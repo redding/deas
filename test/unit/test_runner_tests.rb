@@ -1,6 +1,7 @@
 require 'assert'
 require 'deas/test_runner'
 
+require 'rack/test'
 require 'test/support/view_handlers'
 
 class Deas::TestRunner
@@ -155,6 +156,30 @@ class Deas::TestRunner
         'nil' => '',
         :vals => { 42 => :int, 'str' => 'string' }
       })
+    end
+
+    should "not convert File param values to strings" do
+      tempfile = File.new(TEST_SUPPORT_ROOT.join('routes.rb'))
+      params = runner_params({
+        'attachment' => { :tempfile => tempfile }
+      })
+      assert_kind_of File, params['attachment']['tempfile']
+    end
+
+    should "not convert Rack::Multipart::UploadedFile param values to strings" do
+      tempfile = Rack::Multipart::UploadedFile.new(TEST_SUPPORT_ROOT.join('routes.rb'))
+      params = runner_params({
+        'attachment' => { :tempfile => tempfile }
+      })
+      assert_kind_of Rack::Multipart::UploadedFile, params['attachment']['tempfile']
+    end
+
+    should "not convert Rack::Test::UploadedFile param values to strings" do
+      tempfile = Rack::Test::UploadedFile.new(TEST_SUPPORT_ROOT.join('routes.rb'))
+      params = runner_params({
+        'attachment' => { :tempfile => tempfile }
+      })
+      assert_kind_of Rack::Test::UploadedFile, params['attachment']['tempfile']
     end
 
     private

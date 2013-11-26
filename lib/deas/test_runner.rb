@@ -1,4 +1,5 @@
 require 'ostruct'
+require 'rack/multipart'
 require 'deas/runner'
 
 module Deas
@@ -91,10 +92,18 @@ module Deas
         if value.is_a?(::Array)
           value.map{ |i| Stringify.new(i) }
         elsif Rack::Utils.params_hash_type?(value)
-          value.inject({}){ |v, (k, i)| v[k.to_s] = Stringify.new(i); v }
+          value.inject({}){ |h, (k, v)| h[k.to_s] = Stringify.new(v); h }
+        elsif self.file_type?(value)
+          value
         else
           value.to_s
         end
+      end
+
+      def self.file_type?(value)
+        value.kind_of?(::File) ||
+        value.kind_of?(::Rack::Multipart::UploadedFile) ||
+        (defined?(::Rack::Test::UploadedFile) && value.kind_of?(::Rack::Test::UploadedFile))
       end
     end
 
