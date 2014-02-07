@@ -61,6 +61,44 @@ class Deas::Url
       })
     end
 
+    should "ignore any 'captures'" do
+      exp_path = "/a/goose/cooked/well"
+      assert_equal exp_path, subject.path_for({
+        'some'  => 'a',
+        :thing  => 'goose',
+        'splat' => ['cooked', 'well'],
+        'captures' => 'some-captures'
+      })
+    end
+
+    should "append anchors" do
+      exp_path = "/a/goose/cooked/well#an-anchor"
+      assert_equal exp_path, subject.path_for({
+        'some'  => 'a',
+        :thing  => 'goose',
+        'splat' => ['cooked', 'well'],
+        '#'     => 'an-anchor'
+      })
+    end
+
+    should "ignore empty anchors" do
+      exp_path = "/a/goose/cooked/well"
+      assert_equal exp_path, subject.path_for({
+        'some'  => 'a',
+        :thing  => 'goose',
+        'splat' => ['cooked', 'well'],
+        '#'     => nil
+      })
+
+      exp_path = "/a/goose/cooked/well"
+      assert_equal exp_path, subject.path_for({
+        'some'  => 'a',
+        :thing  => 'goose',
+        'splat' => ['cooked', 'well'],
+        '#'     => ''
+      })
+    end
+
     should "generate given ordered params only" do
       exp_path = "/a/:thing/*/*"
       assert_equal exp_path, subject.path_for('a')
@@ -103,7 +141,12 @@ class Deas::Url
     end
 
     should "not alter the given params" do
-      params = {'some' => 'thing'}
+      params = {
+        'some' => 'thing',
+        :captures => 'captures',
+        :splat => 'splat',
+        '#' => 'anchor'
+      }
       exp_params = params.dup
 
       subject.path_for(params)

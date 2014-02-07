@@ -25,13 +25,14 @@ module Deas
 
     def apply_hashed(path, params)
       # don't alter the given params
-      hash = params.dup
+      h = params.dup
 
       # ignore captures in applying params
-      captures = hash.delete(:captures) || hash.delete('captures') || []
-      splat    = hash.delete(:splat)    || hash.delete('splat')    || []
+      captures = h.delete(:captures) || h.delete('captures') || []
+      splat    = h.delete(:splat)    || h.delete('splat')    || []
+      anchor   = h.delete(:'#')      || h.delete('#')        || nil
 
-      apply_extra(apply_named(apply_splat(@path, splat), hash), hash)
+      apply_anchor(apply_extra(apply_named(apply_splat(path, splat), h), h), anchor)
     end
 
     def apply_splat(path, params)
@@ -51,6 +52,10 @@ module Deas
 
     def apply_extra(path, params)
       params.empty? ? path : "#{path}?#{Deas::Cgi.http_query(params)}"
+    end
+
+    def apply_anchor(path, anchor)
+      anchor.to_s.empty? ? path : "#{path}##{anchor}"
     end
 
   end
