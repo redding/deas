@@ -44,7 +44,7 @@ module Deas
     end
 
     def redirect(path, *halt_args)
-      RedirectArgs.new(path, halt_args)
+      throw(:halt, RedirectArgs.new(path, halt_args))
     end
 
     class RedirectArgs < Struct.new(:path, :halt_args)

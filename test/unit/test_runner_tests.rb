@@ -52,7 +52,7 @@ class Deas::TestRunner
     end
 
     should "build redirect args if redirect is called" do
-      value = subject.redirect '/some/path'
+      value = catch(:halt){ subject.redirect '/some/path' }
       assert_kind_of RedirectArgs, value
       [:path, :halt_args].each do |meth|
         assert_respond_to meth, value
