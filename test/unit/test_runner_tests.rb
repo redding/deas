@@ -99,6 +99,16 @@ class Deas::TestRunner
       assert_equal 'some/template', value.template_name
     end
 
+    should "build partial args if partial is called" do
+      value = subject.partial 'some/partial', :some => 'locals'
+      assert_kind_of PartialArgs, value
+      [:partial_name, :locals].each do |meth|
+        assert_respond_to meth, value
+      end
+      assert_equal 'some/partial', value.partial_name
+      assert_equal({:some => 'locals'}, value.locals)
+    end
+
     should "build send file args if send file is called" do
       value = subject.send_file 'some/file/path'
       assert_kind_of SendFileArgs, value

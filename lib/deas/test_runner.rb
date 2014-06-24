@@ -72,6 +72,11 @@ module Deas
     end
     RenderArgs = Struct.new(:template_name, :options, :block)
 
+    def partial(partial_name, locals = nil)
+      PartialArgs.new(partial_name, locals)
+    end
+    PartialArgs = Struct.new(:partial_name, :locals)
+
     def send_file(file_path, options = nil, &block)
       SendFileArgs.new(file_path, options, block)
     end

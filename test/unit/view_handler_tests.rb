@@ -23,17 +23,23 @@ module Deas::ViewHandler
     should have_cmeths :before_run,  :prepend_before_run,  :before_run_callbacks
     should have_cmeths :after_run,   :prepend_after_run,   :after_run_callbacks
 
-    should "raise a NotImplementedError if run! is not overwritten" do
+    should "complain if run! is not overwritten" do
       assert_raises(NotImplementedError){ subject.run! }
     end
 
-    should "be able to render templates" do
+    should "render templates" do
       render_args = test_runner(RenderViewHandler).run
       assert_equal "my_template",        render_args.template_name
       assert_equal({ :some => :option }, render_args.options)
     end
 
-    should "be able to send files" do
+    should "render partial templates" do
+      partial_args = test_runner(PartialViewHandler).run
+      assert_equal "my_partial",        partial_args.partial_name
+      assert_equal({:some => 'locals'}, partial_args.locals)
+    end
+
+    should "send files" do
       send_file_args = test_runner(SendFileViewHandler).run
       assert_equal "my_file.txt",        send_file_args.file_path
       assert_equal({ :some => :option }, send_file_args.options)
