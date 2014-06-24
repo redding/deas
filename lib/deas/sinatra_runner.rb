@@ -9,14 +9,18 @@ module Deas
       self.new(*args).run
     end
 
+    attr_reader :app_settings
+
     def initialize(handler_class, sinatra_call)
       @sinatra_call  = sinatra_call
       @app_settings  = @sinatra_call.settings
-      @logger        = @sinatra_call.settings.logger
-      @params        = normalize_params(@sinatra_call.params)
+
       @request       = @sinatra_call.request
       @response      = @sinatra_call.response
+      @params        = normalize_params(@sinatra_call.params)
+      @logger        = @sinatra_call.settings.logger
       @session       = @sinatra_call.session
+
       super(handler_class)
     end
 

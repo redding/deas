@@ -6,15 +6,16 @@ module Deas
 
   class TestRunner < Runner
 
-    attr_reader :handler, :return_value
+    attr_reader :app_settings, :return_value
 
     def initialize(handler_class, args = nil)
       args = (args || {}).dup
       @app_settings = OpenStruct.new(args.delete(:app_settings))
-      @logger       = args.delete(:logger) || Deas::NullLogger.new
-      @params       = normalize_params(args.delete(:params) || {})
+
       @request      = args.delete(:request)
       @response     = args.delete(:response)
+      @params       = normalize_params(args.delete(:params) || {})
+      @logger       = args.delete(:logger) || Deas::NullLogger.new
       @session      = args.delete(:session)
 
       super(handler_class)
@@ -54,31 +55,26 @@ module Deas
     def content_type(value, opts={})
       ContentTypeArgs.new(value, opts)
     end
-
     ContentTypeArgs = Struct.new(:value, :opts)
 
     def status(value)
       StatusArgs.new(value)
     end
-
     StatusArgs = Struct.new(:value)
 
     def headers(value)
       HeadersArgs.new(value)
     end
-
     HeadersArgs = Struct.new(:value)
 
     def render(template_name, options = nil, &block)
       RenderArgs.new(template_name, options, block)
     end
-
     RenderArgs = Struct.new(:template_name, :options, :block)
 
     def send_file(file_path, options = nil, &block)
       SendFileArgs.new(file_path, options, block)
     end
-
     SendFileArgs = Struct.new(:file_path, :options, :block)
 
     private

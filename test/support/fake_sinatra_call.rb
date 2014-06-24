@@ -9,15 +9,16 @@ class FakeSinatraCall
   attr_accessor :request, :response, :params, :settings, :session, :logger
 
   def initialize(settings={})
-    @request = FakeRequest.new('GET','/something', {}, OpenStruct.new)
-    @params   = @request.params
-    @session  = @request.session
-    @response = FakeResponse.new
-    @logger   = Deas::NullLogger.new
     @settings = OpenStruct.new(settings.merge({
       :deas_template_scope => Deas::Template::Scope,
       :deas_default_charset => 'utf-8'
     }))
+
+    @request = FakeRequest.new('GET','/something', {}, OpenStruct.new)
+    @response = FakeResponse.new
+    @params   = @request.params
+    @logger   = Deas::NullLogger.new
+    @session  = @request.session
   end
 
   def halt(*args)
@@ -33,9 +34,6 @@ class FakeSinatraCall
   def headers(*args);      args; end
 
   # return the template name for each nested calls
-
-  RenderArgs = Struct.new(:template_name, :opts, :block_call_result)
-
   def erb(template_name, opts, &block)
     if block
       RenderArgs.new(template_name, opts, block.call)
@@ -43,6 +41,16 @@ class FakeSinatraCall
       RenderArgs.new(template_name, opts, nil)
     end
   end
+  RenderArgs = Struct.new(:template_name, :opts, :block_call_result)
+
+  def send_file(file_path, opts, &block)
+    if block
+      SendFileArgs.new(file_path, opts, block.call)
+    else
+      SendFileArgs.new(file_path, opts, nil)
+    end
+  end
+  SendFileArgs = Struct.new(:file_path, :options, :block_call_result)
 
 end
 

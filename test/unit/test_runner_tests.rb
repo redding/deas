@@ -2,6 +2,7 @@ require 'assert'
 require 'deas/test_runner'
 
 require 'rack/test'
+require 'deas/runner'
 require 'test/support/view_handlers'
 
 class Deas::TestRunner
@@ -13,18 +14,22 @@ class Deas::TestRunner
     end
     subject{ @runner }
 
-    should have_readers :handler, :return_value
+    should have_readers :app_settings, :return_value
+    should have_imeths :run
 
-    should "build a handler instance" do
-      assert_kind_of TestRunnerViewHandler, subject.handler
+    should "be a Runner" do
+      assert subject.class < Deas::Runner
     end
 
-    should "default the handler settings" do
+    should "know its app_settings" do
       assert_kind_of OpenStruct, subject.app_settings
-      assert_kind_of Deas::NullLogger, subject.logger
-      assert_equal Hash.new, subject.params
+    end
+
+    should "default its settings" do
       assert_nil subject.request
       assert_nil subject.response
+      assert_equal Hash.new, subject.params
+      assert_kind_of Deas::NullLogger, subject.logger
       assert_nil subject.session
     end
 

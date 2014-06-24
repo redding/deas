@@ -1,6 +1,7 @@
 require 'assert'
-require 'test/support/view_handlers'
 require 'deas/runner'
+
+require 'test/support/view_handlers'
 
 class Deas::Runner
 
@@ -11,37 +12,32 @@ class Deas::Runner
     end
     subject{ @runner }
 
-    should have_reader :app_settings
+    should have_readers :handler_class, :handler
     should have_readers :request, :response, :params, :logger, :session
-    should have_imeths :halt, :redirect, :content_type, :status
+    should have_imeths :halt, :redirect, :content_type, :status, :headers
     should have_imeths :render, :send_file
 
-    should "raise NotImplementedError with #send_file" do
-      assert_raises(NotImplementedError){ subject.send_file }
+    should "know its handler and handler class" do
+      assert_equal TestViewHandler, subject.handler_class
+      assert_instance_of subject.handler_class, subject.handler
     end
 
-    should "raise NotImplementedError with #halt" do
+    should "not set any settings" do
+      assert_nil subject.request
+      assert_nil subject.response
+      assert_nil subject.params
+      assert_nil subject.logger
+      assert_nil subject.session
+    end
+
+    should "not implement any actions" do
       assert_raises(NotImplementedError){ subject.halt }
-    end
-
-    should "raise NotImplementedError with #redirect" do
       assert_raises(NotImplementedError){ subject.redirect }
-    end
-
-    should "raise NotImplementedError with #content_type" do
       assert_raises(NotImplementedError){ subject.content_type }
-    end
-
-    should "raise NotImplementedError with #status" do
       assert_raises(NotImplementedError){ subject.status }
-    end
-
-    should "raise NotImplementedError with #headers" do
       assert_raises(NotImplementedError){ subject.headers }
-    end
-
-    should "raise NotImplementedError with #render" do
       assert_raises(NotImplementedError){ subject.render }
+      assert_raises(NotImplementedError){ subject.send_file }
     end
 
   end

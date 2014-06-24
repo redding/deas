@@ -1,8 +1,9 @@
 require 'assert'
+require 'deas/sinatra_runner'
+
 require 'test/support/fake_sinatra_call'
 require 'test/support/view_handlers'
 require 'deas/template'
-require 'deas/sinatra_runner'
 
 class Deas::SinatraRunner
 
@@ -14,35 +15,23 @@ class Deas::SinatraRunner
     end
     subject{ @runner }
 
-    should have_imeths :run, :request, :response, :params, :logger, :session
-    should have_imeths :halt, :redirect, :content_type, :status, :render
+    should have_readers :app_settings
+    should have_imeths :run
 
-    should "return the sinatra_call's request with #request" do
+    should "get its settings from the sinatra call" do
       assert_equal @fake_sinatra_call.request, subject.request
-    end
-
-    should "return the sinatra_call's response with #response" do
       assert_equal @fake_sinatra_call.response, subject.response
-    end
-
-    should "return the sinatra_call's params with #params" do
       assert_equal @fake_sinatra_call.params, subject.params
-    end
-
-    should "return the sinatra_call's session with #session" do
+      assert_equal @fake_sinatra_call.settings.deas_logger, subject.logger
       assert_equal @fake_sinatra_call.session, subject.session
     end
 
-    should "return the sinatra_call's settings logger with #logger" do
-      assert_equal @fake_sinatra_call.settings.deas_logger, subject.logger
-    end
-
-    should "call the sinatra_call's halt with #halt" do
+    should "call the sinatra_call's halt with" do
       return_value = catch(:halt){ subject.halt('test') }
       assert_equal [ 'test' ], return_value
     end
 
-    should "call the sinatra_call's redirect method with #redirect" do
+    should "call the sinatra_call's redirect method with" do
       return_value = catch(:halt){ subject.redirect('http://google.com') }
       expected = [ 302, { 'Location' => 'http://google.com' } ]
 
@@ -61,7 +50,7 @@ class Deas::SinatraRunner
       assert_equal [422], subject.status(422)
     end
 
-    should "call the sinatra_call's status to set the response status" do
+    should "call the sinatra_call's headers to set the response headers" do
       exp_headers = {
         'a-header' => 'some value',
         'other'    => 'other'
@@ -69,7 +58,7 @@ class Deas::SinatraRunner
       assert_equal [exp_headers], subject.headers(exp_headers)
     end
 
-    should "render the template with a :view local and the handler layouts with #render" do
+    should "render the template with a :view local and the handler layouts" do
       exp_handler = FlagViewHandler.new(subject)
       exp_layouts = FlagViewHandler.layouts
       exp_result = Deas::Template.new(@fake_sinatra_call, 'index', {
@@ -78,6 +67,14 @@ class Deas::SinatraRunner
       }).render
 
       assert_equal exp_result, subject.render('index')
+    end
+
+    should "call the sinatra_call's send_file to set the send files" do
+      block_called = false
+      args = subject.send_file('a/file', {:some => 'opts'}, &proc{ block_called = true })
+      assert_equal 'a/file', args.file_path
+      assert_equal({:some => 'opts'}, args.options)
+      assert_true block_called
     end
 
   end

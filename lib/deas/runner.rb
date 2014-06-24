@@ -2,7 +2,7 @@ module Deas
 
   class Runner
 
-    attr_reader :app_settings
+    attr_reader :handler_class, :handler
     attr_reader :request, :response, :params, :logger, :session
 
     def initialize(handler_class)

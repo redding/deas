@@ -40,7 +40,9 @@ module Deas
     end
 
     class Scope
+
       attr_reader :sinatra_call
+
       def initialize(sinatra_call)
         @sinatra_call = sinatra_call
       end
@@ -71,6 +73,7 @@ module Deas
         self.sinatra_call == other_scope.sinatra_call
         self.class.included_modules == other_scope.class.included_modules
       end
+
     end
 
     class Partial < Template
