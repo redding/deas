@@ -15,7 +15,7 @@ class Deas::Runner
     should have_readers :handler_class, :handler
     should have_readers :request, :response, :params, :logger, :session
     should have_imeths :halt, :redirect, :content_type, :status, :headers
-    should have_imeths :render, :send_file
+    should have_imeths :render, :partial, :send_file
 
     should "know its handler and handler class" do
       assert_equal TestViewHandler, subject.handler_class
@@ -37,6 +37,7 @@ class Deas::Runner
       assert_raises(NotImplementedError){ subject.status }
       assert_raises(NotImplementedError){ subject.headers }
       assert_raises(NotImplementedError){ subject.render }
+      assert_raises(NotImplementedError){ subject.partial }
       assert_raises(NotImplementedError){ subject.send_file }
     end
 

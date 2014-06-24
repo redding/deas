@@ -96,6 +96,13 @@ module Deas
       assert_equal expected_body, last_response.body
     end
 
+    should "render partial templates" do
+      get '/partial.html'
+      expected_body = "Stuff: some-info\n"
+      assert_equal 200,           last_response.status
+      assert_equal expected_body, last_response.body
+    end
+
     should "return a 302 redirecting to the expected locations" do
       get '/redirect'
       expected_location = 'http://google.com'
