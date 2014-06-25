@@ -5,21 +5,17 @@ module Deas
 
   class SinatraRunner < Runner
 
-    def self.run(*args)
-      self.new(*args).run
-    end
-
     attr_reader :app_settings
 
     def initialize(handler_class, sinatra_call)
       @sinatra_call  = sinatra_call
       @app_settings  = @sinatra_call.settings
 
-      @request       = @sinatra_call.request
-      @response      = @sinatra_call.response
-      @params        = normalize_params(@sinatra_call.params)
-      @logger        = @sinatra_call.settings.logger
-      @session       = @sinatra_call.session
+      @request  = @sinatra_call.request
+      @response = @sinatra_call.response
+      @params   = NormalizedParams.new(@sinatra_call.params).value
+      @logger   = @sinatra_call.settings.logger
+      @session  = @sinatra_call.session
 
       super(handler_class)
     end
@@ -89,19 +85,9 @@ module Deas
       File.extname(template_name)[1..-1] || 'html'
     end
 
-    def normalize_params(params)
-      StringifiedKeys.new(params)
-    end
-
-    module StringifiedKeys
-      def self.new(value)
-        if value.is_a?(::Array)
-          value.map{ |i| StringifiedKeys.new(i) }
-        elsif Rack::Utils.params_hash_type?(value)
-          value.inject({}){ |h, (k, v)| h[k.to_s] = StringifiedKeys.new(v); h }
-        else
-          value
-        end
+    class NormalizedParams < Deas::Runner::NormalizedParams
+      def file_type?(value)
+        value.kind_of?(::Tempfile)
       end
     end
 

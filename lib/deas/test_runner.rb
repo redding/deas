@@ -12,11 +12,11 @@ module Deas
       args = (args || {}).dup
       @app_settings = OpenStruct.new(args.delete(:app_settings))
 
-      @request      = args.delete(:request)
-      @response     = args.delete(:response)
-      @params       = normalize_params(args.delete(:params) || {})
-      @logger       = args.delete(:logger) || Deas::NullLogger.new
-      @session      = args.delete(:session)
+      @request  = args.delete(:request)
+      @response = args.delete(:response)
+      @params   = NormalizedParams.new(args.delete(:params) || {}).value
+      @logger   = args.delete(:logger) || Deas::NullLogger.new
+      @session  = args.delete(:session)
 
       super(handler_class)
       args.each{|key, value| @handler.send("#{key}=", value) }
@@ -82,26 +82,9 @@ module Deas
     end
     SendFileArgs = Struct.new(:file_path, :options, :block)
 
-    private
-
-    def normalize_params(params)
-      Stringify.new(params)
-    end
-
-    module Stringify
-      def self.new(value)
-        if value.is_a?(::Array)
-          value.map{ |i| Stringify.new(i) }
-        elsif Rack::Utils.params_hash_type?(value)
-          value.inject({}){ |h, (k, v)| h[k.to_s] = Stringify.new(v); h }
-        elsif self.file_type?(value)
-          value
-        else
-          value.to_s
-        end
-      end
-
-      def self.file_type?(value)
+    class NormalizedParams < Deas::Runner::NormalizedParams
+      def file_type?(value)
+        value.kind_of?(::Tempfile) ||
         value.kind_of?(::File) ||
         value.kind_of?(::Rack::Multipart::UploadedFile) ||
         (defined?(::Rack::Test::UploadedFile) && value.kind_of?(::Rack::Test::UploadedFile))

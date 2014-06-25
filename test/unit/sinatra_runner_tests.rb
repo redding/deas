@@ -1,17 +1,35 @@
 require 'assert'
 require 'deas/sinatra_runner'
 
+require 'deas/runner'
+require 'deas/template'
 require 'test/support/fake_sinatra_call'
 require 'test/support/view_handlers'
-require 'deas/template'
 
 class Deas::SinatraRunner
 
   class UnitTests < Assert::Context
     desc "Deas::SinatraRunner"
     setup do
+      @runner_class = Deas::SinatraRunner
+    end
+    subject{ @runner_class }
+
+    should "be a Runner" do
+      assert subject < Deas::Runner
+    end
+
+  end
+
+  class InitTests < UnitTests
+    desc "when init"
+    setup do
+      @params = { 'value' => '1' }
+      @norm_params_spy = Deas::Runner::NormalizedParamsSpy.new
+      Assert.stub(NormalizedParams, :new){ |p| @norm_params_spy.new(p) }
+
       @fake_sinatra_call = FakeSinatraCall.new
-      @runner = Deas::SinatraRunner.new(FlagViewHandler, @fake_sinatra_call)
+      @runner = @runner_class.new(FlagViewHandler, @fake_sinatra_call)
     end
     subject{ @runner }
 
@@ -24,6 +42,11 @@ class Deas::SinatraRunner
       assert_equal @fake_sinatra_call.params, subject.params
       assert_equal @fake_sinatra_call.settings.deas_logger, subject.logger
       assert_equal @fake_sinatra_call.session, subject.session
+    end
+
+    should "call to normalize its params" do
+      assert_equal @fake_sinatra_call.params, @norm_params_spy.params
+      assert_true @norm_params_spy.value_called
     end
 
     should "call the sinatra_call's halt with" do
@@ -87,8 +110,8 @@ class Deas::SinatraRunner
 
   end
 
-  class RunTests < UnitTests
-    desc "run"
+  class RunTests < InitTests
+    desc "and run"
     setup do
       @return_value = @runner.run
       @handler = @runner.instance_variable_get("@handler")
@@ -111,41 +134,28 @@ class Deas::SinatraRunner
 
   end
 
-  class ParamsTests < UnitTests
-    desc "normalizing params"
+  class NormalizedParamsTests < UnitTests
+    desc "NormalizedParams"
+    setup do
+      @norm_params_class = Deas::SinatraRunner::NormalizedParams
+    end
 
-    should "convert any non-string hash keys to string keys" do
-      exp_params = {
-        'a' => 'aye',
-        'b' => 'bee',
-        'attachment' => {
-          'tempfile' => 'a-file',
-          'content_type' => 'whatever'
-        },
-        'attachments' => [
-          { 'tempfile' => 'a-file' },
-          { 'tempfile' => 'b-file' }
-        ]
-      }
-      assert_equal exp_params, runner_params({
-        :a  => 'aye',
-        'b' => 'bee',
-        'attachment' => {
-          :tempfile => 'a-file',
-          :content_type => 'whatever'
-        },
-        'attachments' => [
-          { :tempfile  => 'a-file' },
-          { 'tempfile' => 'b-file' }
-        ]
+    should "be a normalized params subclass" do
+      assert @norm_params_class < Deas::Runner::NormalizedParams
+    end
+
+    should "not convert Tempfile param values to strings" do
+      tempfile = Class.new(::Tempfile){ def initialize; end }.new
+      params = normalized({
+        'attachment' => { :tempfile => tempfile }
       })
+      assert_kind_of ::Tempfile, params['attachment']['tempfile']
     end
 
     private
 
-    def runner_params(params)
-      @fake_sinatra_call.params = params
-      Deas::SinatraRunner.new(FlagViewHandler, @fake_sinatra_call).params
+    def normalized(params)
+      @norm_params_class.new(params).value
     end
 
   end

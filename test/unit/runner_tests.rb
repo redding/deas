@@ -5,7 +5,7 @@ require 'test/support/view_handlers'
 
 class Deas::Runner
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::Runner"
     setup do
       @runner = Deas::Runner.new(TestViewHandler)
@@ -39,6 +39,71 @@ class Deas::Runner
       assert_raises(NotImplementedError){ subject.render }
       assert_raises(NotImplementedError){ subject.partial }
       assert_raises(NotImplementedError){ subject.send_file }
+    end
+
+  end
+
+  class NormalizedParamsTests < UnitTests
+    desc "NormalizedParams"
+
+    should "convert any non-Array or non-Hash values to strings" do
+      exp_params = {
+        'nil' => '',
+        'int' => '42',
+        'str' => 'string'
+      }
+      assert_equal exp_params, normalized({
+        'nil' => nil,
+        'int' => 42,
+        'str' => 'string'
+      })
+    end
+
+    should "recursively convert array values to strings" do
+      exp_params = {
+        'array' => ['', '42', 'string']
+      }
+      assert_equal exp_params, normalized({
+        'array' => [nil, 42, 'string']
+      })
+    end
+
+    should "recursively convert hash values to strings" do
+      exp_params = {
+        'values' => {
+          'nil' => '',
+          'int' => '42',
+          'str' => 'string'
+        }
+      }
+      assert_equal exp_params, normalized({
+        'values' => {
+          'nil' => nil,
+          'int' => 42,
+          'str' => 'string'
+        }
+      })
+    end
+
+    should "convert any non-string hash keys to string keys" do
+      exp_params = {
+        'nil' => '',
+        'vals' => { '42' => 'int', 'str' => 'string' }
+      }
+      assert_equal exp_params, normalized({
+        'nil' => '',
+        :vals => { 42 => :int, 'str' => 'string' }
+      })
+    end
+
+    private
+
+    def normalized(params)
+      TestNormalizedParams.new(params).value
+    end
+
+    class TestNormalizedParams < Deas::Runner::NormalizedParams
+      def file_type?(value); false; end
     end
 
   end

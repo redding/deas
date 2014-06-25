@@ -3,6 +3,7 @@ require 'deas/test_runner'
 
 require 'rack/test'
 require 'deas/runner'
+require 'test/support/normalized_params_spy'
 require 'test/support/view_handlers'
 
 class Deas::TestRunner
@@ -10,16 +11,28 @@ class Deas::TestRunner
   class UnitTests < Assert::Context
     desc "Deas::TestRunner"
     setup do
-      @runner = Deas::TestRunner.new(TestRunnerViewHandler)
+      @runner_class = Deas::TestRunner
+    end
+    subject{ @runner_class }
+
+    should "be a Runner" do
+      assert subject < Deas::Runner
+    end
+
+  end
+
+  class InitTests < UnitTests
+    desc "when init"
+    setup do
+      @params = { 'value' => '1' }
+      @norm_params_spy = Deas::Runner::NormalizedParamsSpy.new
+      Assert.stub(NormalizedParams, :new){ |p| @norm_params_spy.new(p) }
+      @runner = @runner_class.new(TestRunnerViewHandler, :params => @params)
     end
     subject{ @runner }
 
     should have_readers :app_settings, :return_value
     should have_imeths :run
-
-    should "be a Runner" do
-      assert subject.class < Deas::Runner
-    end
 
     should "know its app_settings" do
       assert_kind_of OpenStruct, subject.app_settings
@@ -28,9 +41,19 @@ class Deas::TestRunner
     should "default its settings" do
       assert_nil subject.request
       assert_nil subject.response
-      assert_equal Hash.new, subject.params
+      assert_kind_of ::Hash, subject.params
       assert_kind_of Deas::NullLogger, subject.logger
       assert_nil subject.session
+    end
+
+    should "default its params" do
+      runner = @runner_class.new(TestRunnerViewHandler)
+      assert_equal ::Hash.new, runner.params
+    end
+
+    should "call to normalize its params" do
+      assert_equal @params, @norm_params_spy.params
+      assert_true @norm_params_spy.value_called
     end
 
     should "write any non-standard settings on the handler" do
@@ -120,70 +143,35 @@ class Deas::TestRunner
 
   end
 
-  class ParamsTests < UnitTests
-    desc "normalizing params"
-
-    should "convert any non-Array or non-Hash values to strings" do
-      exp_params = {
-        'nil' => '',
-        'int' => '42',
-        'str' => 'string'
-      }
-      assert_equal exp_params, runner_params({
-        'nil' => nil,
-        'int' => 42,
-        'str' => 'string'
-      })
+  class NormalizedParamsTests < UnitTests
+    desc "NormalizedParams"
+    setup do
+      @norm_params_class = Deas::TestRunner::NormalizedParams
     end
 
-    should "recursively convert array values to strings" do
-      exp_params = {
-        'array' => ['', '42', 'string']
-      }
-      assert_equal exp_params, runner_params({
-        'array' => [nil, 42, 'string']
-      })
+    should "be a normalized params subclass" do
+      assert @norm_params_class < Deas::Runner::NormalizedParams
     end
 
-    should "recursively convert hash values to strings" do
-      exp_params = {
-        'values' => {
-          'nil' => '',
-          'int' => '42',
-          'str' => 'string'
-        }
-      }
-      assert_equal exp_params, runner_params({
-        'values' => {
-          'nil' => nil,
-          'int' => 42,
-          'str' => 'string'
-        }
+    should "not convert Tempfile param values to strings" do
+      tempfile = Class.new(::Tempfile){ def initialize; end }.new
+      params = normalized({
+        'attachment' => { :tempfile => tempfile }
       })
-    end
-
-    should "convert any non-string hash keys to string keys" do
-      exp_params = {
-        'nil' => '',
-        'vals' => { '42' => 'int', 'str' => 'string' }
-      }
-      assert_equal exp_params, runner_params({
-        'nil' => '',
-        :vals => { 42 => :int, 'str' => 'string' }
-      })
+      assert_kind_of ::Tempfile, params['attachment']['tempfile']
     end
 
     should "not convert File param values to strings" do
       tempfile = File.new(TEST_SUPPORT_ROOT.join('routes.rb'))
-      params = runner_params({
+      params = normalized({
         'attachment' => { :tempfile => tempfile }
       })
-      assert_kind_of File, params['attachment']['tempfile']
+      assert_kind_of ::File, params['attachment']['tempfile']
     end
 
     should "not convert Rack::Multipart::UploadedFile param values to strings" do
       tempfile = Rack::Multipart::UploadedFile.new(TEST_SUPPORT_ROOT.join('routes.rb'))
-      params = runner_params({
+      params = normalized({
         'attachment' => { :tempfile => tempfile }
       })
       assert_kind_of Rack::Multipart::UploadedFile, params['attachment']['tempfile']
@@ -191,7 +179,7 @@ class Deas::TestRunner
 
     should "not convert Rack::Test::UploadedFile param values to strings" do
       tempfile = Rack::Test::UploadedFile.new(TEST_SUPPORT_ROOT.join('routes.rb'))
-      params = runner_params({
+      params = normalized({
         'attachment' => { :tempfile => tempfile }
       })
       assert_kind_of Rack::Test::UploadedFile, params['attachment']['tempfile']
@@ -199,8 +187,8 @@ class Deas::TestRunner
 
     private
 
-    def runner_params(params)
-      Deas::TestRunner.new(TestRunnerViewHandler, :params => params).params
+    def normalized(params)
+      @norm_params_class.new(params).value
     end
 
   end

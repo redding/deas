@@ -5,7 +5,7 @@ require 'deas/route'
 
 class Deas::Route
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::Route"
     setup do
       @handler_proxy = Deas::RouteProxy.new('TestViewHandler')
