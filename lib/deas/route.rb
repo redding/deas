@@ -1,6 +1,7 @@
 require 'deas/sinatra_runner'
 
 module Deas
+
   class Route
 
     attr_reader :method, :path, :handler_proxy, :handler_class
@@ -15,14 +16,16 @@ module Deas
 
     # TODO: unit test this??
     def run(sinatra_call)
+      runner = Deas::SinatraRunner.new(self.handler_class, sinatra_call)
       sinatra_call.request.env.tap do |env|
-        env['sinatra.params']          = sinatra_call.params
+        env['deas.params'] = runner.params
         env['deas.handler_class_name'] = self.handler_class.name
         env['deas.logging'].call "  Handler: #{env['deas.handler_class_name']}"
-        env['deas.logging'].call "  Params:  #{env['sinatra.params'].inspect}"
+        env['deas.logging'].call "  Params:  #{env['deas.params'].inspect}"
       end
-      Deas::SinatraRunner.run(self.handler_class, sinatra_call)
+      runner.run
     end
 
   end
+
 end

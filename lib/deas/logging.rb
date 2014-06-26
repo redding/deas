@@ -102,7 +102,7 @@ module Deas
         'method'  => request.request_method,
         'path'    => request.path,
         'handler' => env['deas.handler_class_name'],
-        'params'  => env['sinatra.params'],
+        'params'  => env['deas.params'],
         'time'    => env['deas.time_taken'],
         'status'  => status
       }
