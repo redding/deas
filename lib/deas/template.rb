@@ -66,7 +66,15 @@ module Deas
       alias :u :escape_url
 
       def logger
-        @sinatra_call.logger
+        @sinatra_call.settings.logger
+      end
+
+      def router
+        @sinatra_call.settings.router
+      end
+
+      def url_for(url)
+        "#{self.router.base_url}#{url}"
       end
 
       def ==(other_scope)

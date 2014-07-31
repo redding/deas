@@ -38,7 +38,7 @@ module Deas::Server
     attr_accessor :settings, :error_procs, :init_procs, :template_helpers
     attr_accessor :middlewares, :router
 
-    def initialize(values=nil)
+    def initialize(values = nil)
       # these are defaulted here because we want to use the Configuration
       # instance `root`. If we define a proc above, we will be using the
       # Configuration class `root`, which will not update these options as
@@ -206,6 +206,7 @@ module Deas::Server
     end
 
     def view_handler_ns(*args); self.router.view_handler_ns(*args); end
+    def base_url(*args);        self.router.base_url(*args);        end
 
     def url(*args, &block);     self.router.url(*args, &block);     end
     def url_for(*args, &block); self.router.url_for(*args, &block); end

@@ -9,16 +9,17 @@ class FakeSinatraCall
   attr_accessor :request, :response, :params, :settings, :session, :logger
 
   def initialize(settings={})
-    @settings = OpenStruct.new(settings.merge({
-      :deas_template_scope => Deas::Template::Scope,
-      :deas_default_charset => 'utf-8'
-    }))
-
     @request = FakeRequest.new('GET','/something', {}, OpenStruct.new)
     @response = FakeResponse.new
     @params   = @request.params
     @logger   = Deas::NullLogger.new
     @session  = @request.session
+
+    @settings = OpenStruct.new({
+      :deas_template_scope => Deas::Template::Scope,
+      :deas_default_charset => 'utf-8',
+      :router => Deas::Router.new
+    }.merge(settings))
   end
 
   def halt(*args)
