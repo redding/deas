@@ -5,7 +5,7 @@ require 'deas/view_handler'
 
 module Deas::ViewHandler
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     include Deas::TestHelpers
 
     desc "Deas::ViewHandler"
@@ -57,7 +57,7 @@ module Deas::ViewHandler
 
   end
 
-  class CallbackTests < BaseTests
+  class CallbackTests < UnitTests
     desc "callbacks"
     setup do
       @proc1 = proc{ '1' }
@@ -139,7 +139,7 @@ module Deas::ViewHandler
 
   end
 
-  class WithMethodFlagsTests < BaseTests
+  class WithMethodFlagsTests < UnitTests
     setup do
       @handler = test_handler(FlagViewHandler)
     end
@@ -167,7 +167,7 @@ module Deas::ViewHandler
 
   end
 
-  class HaltTests < BaseTests
+  class HaltTests < UnitTests
     desc "halt"
 
     should "return a response with the status code and the passed data" do
@@ -185,7 +185,7 @@ module Deas::ViewHandler
 
   end
 
-  class ContentTypeTests < BaseTests
+  class ContentTypeTests < UnitTests
     desc "content_type"
 
     should "should set the response content_type/charset" do
@@ -198,7 +198,7 @@ module Deas::ViewHandler
 
   end
 
-  class StatusTests < BaseTests
+  class StatusTests < UnitTests
     desc "status"
 
     should "should set the response status" do
@@ -210,7 +210,7 @@ module Deas::ViewHandler
 
   end
 
-  class HeadersTests < BaseTests
+  class HeadersTests < UnitTests
     desc "headers"
 
     should "should set the response status" do

@@ -9,7 +9,8 @@ TEST_SUPPORT_ROOT = ROOT.join('test/support')
 
 # require pry for debugging (`binding.pry`)
 require 'pry'
-require 'assert-mocha' if defined?(Assert)
+
+require 'test/support/factory'
 
 require 'fileutils'
 require 'logger'

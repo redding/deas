@@ -4,7 +4,7 @@ require 'deas/show_exceptions'
 
 class Deas::ShowExceptions
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::ShowExceptions"
     setup do
       exception = Sinatra::NotFound.new
