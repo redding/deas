@@ -11,13 +11,14 @@ class Deas::Router
     subject{ @router }
 
     should have_accessors :urls, :routes
-    should have_imeths :view_handler_ns
+    should have_imeths :view_handler_ns, :base_url
     should have_imeths :url, :url_for
     should have_imeths :get, :post, :put, :patch, :delete
     should have_imeths :route, :redirect
 
-    should "have no view_handler_ns, urls, or routes by default" do
+    should "have no view_handler_ns, base_url, urls, or routes by default" do
       assert_nil subject.view_handler_ns
+      assert_nil subject.base_url
       assert_empty subject.urls
       assert_empty subject.routes
     end
@@ -93,6 +94,22 @@ class Deas::Router
       # should ignore the ns when the leading colons are present
       route = subject.route(:post, '/no_ns_test', '::NoNsTest')
       assert_equal '::NoNsTest', route.handler_proxy.handler_class_name
+    end
+
+    should "set a base url" do
+      url = Factory.url
+      subject.base_url url
+
+      assert_equal url, subject.base_url
+    end
+
+    should "use the base url when adding routes" do
+      url = Factory.url
+      subject.base_url url
+      route = subject.get('/some-path', Object)
+
+      exp_path = "#{url}/some-path"
+      assert_equal exp_path, route.path
     end
 
     should "add a redirect route using #redirect" do
@@ -178,6 +195,15 @@ class Deas::Router
       route = subject.routes.last
 
       assert_equal url.path, route.path
+    end
+
+    should "use the base url when building named urls" do
+      url = Factory.url
+      subject.base_url url
+      subject.url('base_get_info', '/info/:for')
+
+      exp_path = "#{url}/info/now"
+      assert_equal exp_path, subject.url_for(:base_get_info, :for => 'now')
     end
 
   end

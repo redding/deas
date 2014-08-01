@@ -22,12 +22,12 @@ module Deas::Server
 
     # DSL for server handling settings
     should have_imeths :init, :error, :template_helpers, :template_helper?
-    should have_imeths :use, :set, :view_handler_ns, :verbose_logging, :logger
+    should have_imeths :use, :set, :verbose_logging, :logger
     should have_imeths :get, :post, :put, :patch, :delete
     should have_imeths :redirect, :route, :url, :url_for
 
     # DSL for server routing settings
-    should have_imeths :router, :view_handler_ns
+    should have_imeths :router, :view_handler_ns, :base_url
     should have_imeths :url, :url_for
     should have_imeths :get, :post, :put, :patch, :delete
     should have_imeths :route, :redirect
@@ -98,6 +98,8 @@ module Deas::Server
 
     should "have a router by default and allow overriding it" do
       assert_kind_of Deas::Router, subject.router
+      assert_equal subject.router.view_handler_ns, subject.view_handler_ns
+      assert_equal subject.router.base_url, subject.base_url
 
       new_router = Deas::Router.new
       subject.router new_router
