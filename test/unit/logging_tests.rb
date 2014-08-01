@@ -4,7 +4,7 @@ require 'deas/logging'
 
 module Deas::Logging
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::Logging"
     setup do
       @app = FakeSinatraCall.new
@@ -15,7 +15,7 @@ module Deas::Logging
 
   end
 
-  class VerboseLoggingTests < BaseTests
+  class VerboseLoggingTests < UnitTests
     desc "Deas::VerboseLogging"
     setup do
       @middleware = Deas::VerboseLogging.new(@app)
@@ -30,7 +30,7 @@ module Deas::Logging
 
   end
 
-  class SummaryLoggingTests < BaseTests
+  class SummaryLoggingTests < UnitTests
     desc "Deas::SummaryLogging"
     setup do
       @middleware = Deas::SummaryLogging.new(@app)
@@ -45,7 +45,7 @@ module Deas::Logging
 
   end
 
-  class SummaryLineTests < BaseTests
+  class SummaryLineTests < UnitTests
     desc "Deas::SummaryLine"
     subject{ Deas::SummaryLine }
 

@@ -4,7 +4,7 @@ require 'deas/redirect_proxy'
 
 class Deas::RedirectProxy
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::RedirectProxy"
     setup do
       @proxy = Deas::RedirectProxy.new('/somewhere')
@@ -19,7 +19,7 @@ class Deas::RedirectProxy
 
   end
 
-  class HandlerClassTests < BaseTests
+  class HandlerClassTests < UnitTests
     include Deas::TestHelpers
 
     desc "redir handler class"

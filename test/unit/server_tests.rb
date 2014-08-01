@@ -6,7 +6,7 @@ require 'deas/router'
 
 module Deas::Server
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::Server"
     setup do
       @server_class = Class.new{ include Deas::Server }

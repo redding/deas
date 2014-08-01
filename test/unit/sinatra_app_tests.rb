@@ -8,7 +8,7 @@ require 'deas/sinatra_app'
 
 module Deas::SinatraApp
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::SinatraApp"
     setup do
       proxy = Deas::RouteProxy.new('TestViewHandler')

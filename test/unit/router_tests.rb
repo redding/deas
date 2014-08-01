@@ -3,7 +3,7 @@ require 'deas/router'
 
 class Deas::Router
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::Router"
     setup do
       @router = Deas::Router.new
@@ -119,7 +119,7 @@ class Deas::Router
 
   end
 
-  class NamedUrlTests < BaseTests
+  class NamedUrlTests < UnitTests
     desc "when using named urls"
     setup do
       @router.url('get_info', '/info/:for')

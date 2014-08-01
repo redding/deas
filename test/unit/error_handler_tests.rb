@@ -4,7 +4,7 @@ require 'deas/error_handler'
 
 class Deas::ErrorHandler
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::ErrorHandler"
     setup do
       @exception = RuntimeError.new
@@ -18,7 +18,7 @@ class Deas::ErrorHandler
 
   end
 
-  class RunTests < BaseTests
+  class RunTests < UnitTests
     desc "run"
     setup do
       @error_procs = [ proc do |exception|
@@ -40,7 +40,7 @@ class Deas::ErrorHandler
 
   end
 
-  class RunWithMultipleProcsTests < BaseTests
+  class RunWithMultipleProcsTests < UnitTests
     desc "run with multiple procs"
     setup do
       @error_procs = [
@@ -74,7 +74,7 @@ class Deas::ErrorHandler
 
   end
 
-  class RunWithProcsThatHaltTests < BaseTests
+  class RunWithProcsThatHaltTests < UnitTests
     desc "run with a proc that halts"
     setup do
       @error_procs = [

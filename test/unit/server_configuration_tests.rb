@@ -8,7 +8,7 @@ require 'deas/router'
 
 class Deas::Server::Configuration
 
-  class BaseTests < Assert::Context
+  class UnitTests < Assert::Context
     desc "Deas::Server::Configuration"
     setup do
       @configuration = Deas::Server::Configuration.new
@@ -91,7 +91,7 @@ class Deas::Server::Configuration
 
   end
 
-  class ValidationTests < BaseTests
+  class ValidationTests < UnitTests
     desc "when successfully validated"
     setup do
       @initialized = false
