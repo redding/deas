@@ -52,7 +52,6 @@ module Deas::SinatraApp
         assert_equal true,                       settings.static
         assert_equal true,                       settings.reload_templates
         assert_instance_of Deas::NullLogger,     settings.logger
-        assert_instance_of Deas::Router,         settings.router
 
         # settings that are set but can't be changed
         assert_equal false, settings.logging

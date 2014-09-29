@@ -11,7 +11,7 @@ class Deas::Router
     subject{ @router }
 
     should have_accessors :urls, :routes
-    should have_imeths :view_handler_ns, :base_url
+    should have_imeths :view_handler_ns, :base_url, :prepend_base_url
     should have_imeths :url, :url_for
     should have_imeths :get, :post, :put, :patch, :delete
     should have_imeths :route, :redirect
@@ -103,12 +103,23 @@ class Deas::Router
       assert_equal url, subject.base_url
     end
 
-    should "use the base url when adding routes" do
+    should "prepend the base url to any url path" do
+      url_path = Factory.path
+      base_url = Factory.url
+
+      assert_equal url_path, subject.prepend_base_url(url_path)
+
+      subject.base_url base_url
+      assert_equal "#{base_url}#{url_path}", subject.prepend_base_url(url_path)
+    end
+
+    should "prepend the base url when adding routes" do
       url = Factory.url
       subject.base_url url
-      route = subject.get('/some-path', Object)
+      path = Factory.path
+      route = subject.get(path, Object)
 
-      exp_path = "#{url}/some-path"
+      exp_path = subject.prepend_base_url(path)
       assert_equal exp_path, route.path
     end
 
@@ -197,13 +208,14 @@ class Deas::Router
       assert_equal url.path, route.path
     end
 
-    should "use the base url when building named urls" do
+    should "prepend the base url when building named urls" do
       url = Factory.url
       subject.base_url url
-      subject.url('base_get_info', '/info/:for')
+      path = Factory.path
+      subject.url('base_get_info', path)
 
-      exp_path = "#{url}/info/now"
-      assert_equal exp_path, subject.url_for(:base_get_info, :for => 'now')
+      exp_path = subject.prepend_base_url(path)
+      assert_equal exp_path, subject.url_for(:base_get_info)
     end
 
   end

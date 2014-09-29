@@ -34,7 +34,6 @@ module Deas
         set :deas_error_procs,     server_config.error_procs
         set :deas_default_charset, server_config.default_charset
         set :logger,               server_config.logger
-        set :router,               server_config.router
 
         server_config.settings.each{ |set_args| set *set_args }
         server_config.middlewares.each{ |use_args| use *use_args }

@@ -65,14 +65,6 @@ module Deas
       end
       alias :u :escape_url
 
-      def router
-        @sinatra_call.settings.router
-      end
-
-      def url_for(url)
-        "#{self.router.base_url}#{url}"
-      end
-
       def ==(other_scope)
         self.sinatra_call == other_scope.sinatra_call
         self.class.included_modules == other_scope.class.included_modules
