@@ -65,10 +65,6 @@ module Deas
       end
       alias :u :escape_url
 
-      def logger
-        @sinatra_call.settings.logger
-      end
-
       def router
         @sinatra_call.settings.router
       end
