@@ -5,7 +5,8 @@ module Deas
   class Runner
 
     attr_reader :handler_class, :handler
-    attr_reader :request, :response, :params, :logger, :session
+    attr_reader :request, :response, :params
+    attr_reader :logger, :router, :session
 
     def initialize(handler_class)
       @handler_class = handler_class

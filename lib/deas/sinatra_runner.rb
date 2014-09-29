@@ -15,6 +15,7 @@ module Deas
       @response = @sinatra_call.response
       @params   = NormalizedParams.new(@sinatra_call.params).value
       @logger   = @sinatra_call.settings.logger
+      @router   = @sinatra_call.settings.router
       @session  = @sinatra_call.session
 
       super(handler_class)

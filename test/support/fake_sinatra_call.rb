@@ -18,6 +18,7 @@ class FakeSinatraCall
     @settings = OpenStruct.new({
       :deas_template_scope => Deas::Template::Scope,
       :deas_default_charset => 'utf-8',
+      :router => Deas::Router.new,
       :logger => @logger
     }.merge(settings))
   end
