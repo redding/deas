@@ -83,7 +83,6 @@ class Deas::Template
 
     should have_reader :sinatra_call
     should have_imeths :render, :partial, :escape_html, :h, :escape_url, :u
-    should have_imeths :router, :url_for
 
     should "call the sinatra_call's erb method with #render" do
       render_args = subject.render('my_template', {
@@ -124,19 +123,6 @@ class Deas::Template
       exp_val = "%2Fpath%2Fto%2Fsomewhere"
       assert_equal exp_val, subject.escape_url("/path/to/somewhere")
       assert_equal exp_val, subject.u("/path/to/somewhere")
-    end
-
-    should "expose the sinatra call (and deas server) router" do
-      assert_equal @fake_sinatra_call.settings.router, subject.router
-    end
-
-    should "build urls with #url_for" do
-      base_url = Factory.url
-      url = Factory.url
-      @fake_sinatra_call.settings.router.base_url(base_url)
-
-      exp = "#{base_url}#{url}"
-      assert_equal exp, subject.url_for(url)
     end
 
   end

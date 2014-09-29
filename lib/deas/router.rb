@@ -23,6 +23,10 @@ module Deas
       @base_url
     end
 
+    def prepend_base_url(url_path)
+      "#{base_url}#{url_path}"
+    end
+
     def url(name, path)
       if !path.kind_of?(::String)
         raise ArgumentError, "invalid path `#{path.inspect}` - "\
@@ -34,8 +38,7 @@ module Deas
     def url_for(name, *args)
       url = self.urls[name.to_sym]
       raise ArgumentError, "no route named `#{name.to_sym.inspect}`" unless url
-
-      "#{base_url}#{url.path_for(*args)}"
+      prepend_base_url(url.path_for(*args))
     end
 
     def get(path, handler_name);    self.route(:get,    path, handler_name); end
@@ -52,7 +55,7 @@ module Deas
 
       from_url = self.urls[from_path]
       from_url_path = from_url.path if from_url
-      add_route(http_method, "#{base_url}#{from_url_path || from_path}", proxy)
+      add_route(http_method, prepend_base_url(from_url_path || from_path), proxy)
     end
 
     def redirect(from_path, to_path = nil, &block)
