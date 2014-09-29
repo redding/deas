@@ -4,6 +4,7 @@ require 'deas/sinatra_runner'
 require 'deas/runner'
 require 'deas/template'
 require 'test/support/fake_sinatra_call'
+require 'test/support/normalized_params_spy'
 require 'test/support/view_handlers'
 
 class Deas::SinatraRunner
@@ -40,7 +41,7 @@ class Deas::SinatraRunner
       assert_equal @fake_sinatra_call.request, subject.request
       assert_equal @fake_sinatra_call.response, subject.response
       assert_equal @fake_sinatra_call.params, subject.params
-      assert_equal @fake_sinatra_call.settings.deas_logger, subject.logger
+      assert_equal @fake_sinatra_call.settings.logger, subject.logger
       assert_equal @fake_sinatra_call.session, subject.session
     end
 
@@ -81,11 +82,14 @@ class Deas::SinatraRunner
       assert_equal [exp_headers], subject.headers(exp_headers)
     end
 
-    should "render the template with a :view local and the handler layouts" do
+    should "render the template with :view/:logger locals and the handler layouts" do
       exp_handler = FlagViewHandler.new(subject)
       exp_layouts = FlagViewHandler.layouts
       exp_result = Deas::Template.new(@fake_sinatra_call, 'index', {
-        :locals => { :view => exp_handler },
+        :locals => {
+          :view => exp_handler,
+          :logger => @runner.logger
+        },
         :layout => exp_layouts
       }).render
 

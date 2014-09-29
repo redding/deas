@@ -60,7 +60,10 @@ module Deas
 
     def render(template_name, options = nil, &block)
       options ||= {}
-      options[:locals] = { :view => @handler }.merge(options[:locals] || {})
+      options[:locals] = {
+        :view => @handler,
+        :logger => @logger
+      }.merge(options[:locals] || {})
       options[:layout] ||= @handler_class.layouts
 
       self.content_type(get_content_type(template_name)) if self.content_type.nil?
