@@ -2,6 +2,7 @@ require 'assert'
 require 'deas/test_runner'
 
 require 'rack/test'
+require 'deas/router'
 require 'deas/runner'
 require 'test/support/normalized_params_spy'
 require 'test/support/view_handlers'
@@ -43,6 +44,7 @@ class Deas::TestRunner
       assert_nil subject.response
       assert_kind_of ::Hash, subject.params
       assert_kind_of Deas::NullLogger, subject.logger
+      assert_kind_of Deas::Router, subject.router
       assert_nil subject.session
     end
 

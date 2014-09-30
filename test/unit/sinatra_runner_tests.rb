@@ -42,6 +42,7 @@ class Deas::SinatraRunner
       assert_equal @fake_sinatra_call.response, subject.response
       assert_equal @fake_sinatra_call.params, subject.params
       assert_equal @fake_sinatra_call.settings.logger, subject.logger
+      assert_equal @fake_sinatra_call.settings.router, subject.router
       assert_equal @fake_sinatra_call.session, subject.session
     end
 

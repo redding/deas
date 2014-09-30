@@ -13,7 +13,8 @@ class Deas::Runner
     subject{ @runner }
 
     should have_readers :handler_class, :handler
-    should have_readers :request, :response, :params, :logger, :session
+    should have_readers :request, :response, :params
+    should have_readers :logger, :router, :session
     should have_imeths :halt, :redirect, :content_type, :status, :headers
     should have_imeths :render, :partial, :send_file
 
@@ -27,6 +28,7 @@ class Deas::Runner
       assert_nil subject.response
       assert_nil subject.params
       assert_nil subject.logger
+      assert_nil subject.router
       assert_nil subject.session
     end
 

@@ -59,6 +59,7 @@ module Deas
 
     def app_settings; @deas_runner.app_settings; end
     def logger;       @deas_runner.logger;       end
+    def router;       @deas_runner.router;       end
     def request;      @deas_runner.request;      end
     def response;     @deas_runner.response;     end
     def params;       @deas_runner.params;       end

@@ -1,5 +1,6 @@
 require 'ostruct'
 require 'rack/multipart'
+require 'deas/router'
 require 'deas/runner'
 
 module Deas
@@ -16,6 +17,7 @@ module Deas
       @response = args.delete(:response)
       @params   = NormalizedParams.new(args.delete(:params) || {}).value
       @logger   = args.delete(:logger) || Deas::NullLogger.new
+      @router   = args.delete(:router) || Deas::Router.new
       @session  = args.delete(:session)
 
       super(handler_class)
