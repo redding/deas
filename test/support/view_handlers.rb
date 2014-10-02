@@ -1,6 +1,6 @@
 require 'deas/view_handler'
 
-class TestViewHandler
+class EmptyViewHandler
   include Deas::ViewHandler
 
 end
@@ -13,6 +13,22 @@ class TestRunnerViewHandler
   def run!
     'run has run'
   end
+
+end
+
+class SinatraRunnerViewHandler
+  include Deas::ViewHandler
+
+  attr_reader :before_called, :after_called
+  attr_reader :init_bang_called, :run_bang_called
+
+  layout 'web'
+
+  before{ @before_called = true }
+  after{  @after_called  = true }
+
+  def init!; @init_bang_called = true; end
+  def run!;  @run_bang_called  = true; end
 
 end
 
@@ -38,45 +54,6 @@ class SendFileViewHandler
   def run!
     send_file "my_file.txt", :some => :option
   end
-end
-
-class FlagViewHandler
-  include Deas::ViewHandler
-  before{ @before_hook_called = true }
-  after{  @after_hook_called  = true }
-  layout 'web'
-
-  attr_reader :before_init_called, :init_bang_called, :after_init_called
-  attr_reader :before_run_called, :run_bang_called, :after_run_called
-  attr_reader :before_hook_called, :after_hook_called, :second_before_init_called
-
-  before_init do
-    @before_init_called = true
-  end
-  before_init do
-    @second_before_init_called = true
-  end
-
-  def init!
-    @init_bang_called = true
-  end
-
-  after_init do
-    @after_init_called = true
-  end
-
-  before_run do
-    @before_run_called = true
-  end
-
-  def run!
-    @run_bang_called = true
-  end
-
-  after_run do
-    @after_run_called = true
-  end
-
 end
 
 class HaltViewHandler

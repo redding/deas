@@ -8,7 +8,7 @@ class Deas::Route
   class UnitTests < Assert::Context
     desc "Deas::Route"
     setup do
-      @handler_proxy = Deas::RouteProxy.new('TestViewHandler')
+      @handler_proxy = Deas::RouteProxy.new('EmptyViewHandler')
       @route = Deas::Route.new(:get, '/test', @handler_proxy)
     end
     subject{ @route }
@@ -26,7 +26,7 @@ class Deas::Route
       assert_nil subject.handler_class
 
       assert_nothing_raised{ subject.validate! }
-      assert_equal TestViewHandler, subject.handler_class
+      assert_equal EmptyViewHandler, subject.handler_class
     end
 
     should "complain given an invalid handler class" do

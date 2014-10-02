@@ -12,7 +12,7 @@ module Deas::SinatraApp
   class UnitTests < Assert::Context
     desc "Deas::SinatraApp"
     setup do
-      proxy = Deas::RouteProxy.new('TestViewHandler')
+      proxy = Deas::RouteProxy.new('EmptyViewHandler')
       @route = Deas::Route.new(:get, '/something', proxy)
       @router = Deas::Router.new
       @router.routes = [ @route ]

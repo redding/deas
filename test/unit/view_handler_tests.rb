@@ -10,21 +10,64 @@ module Deas::ViewHandler
 
     desc "Deas::ViewHandler"
     setup do
-      @handler = test_handler(TestViewHandler)
+      @handler_class = TestViewHandler
+    end
+    subject{ @handler_class }
+
+    should have_imeths :layout, :layouts
+    should have_imeths :before, :prepend_before, :before_callbacks
+    should have_imeths :after,  :prepend_after,  :after_callbacks
+    should have_imeths :before_init, :prepend_before_init, :before_init_callbacks
+    should have_imeths :after_init,  :prepend_after_init,  :after_init_callbacks
+    should have_imeths :before_run,  :prepend_before_run,  :before_run_callbacks
+    should have_imeths :after_run,   :prepend_after_run,   :after_run_callbacks
+
+    should "specify layouts" do
+      subject.layout 'layouts/app'
+      assert_equal ['layouts/app'], subject.layouts
+
+      subject.layouts 'layouts/web', 'layouts/search'
+      assert_equal ['layouts/app', 'layouts/web', 'layouts/search'], subject.layouts
+    end
+
+  end
+
+  class InitTests < UnitTests
+    desc "when init"
+    setup do
+      @handler = test_handler(@handler_class)
     end
     subject{ @handler }
 
     should have_imeths :init, :init!, :run, :run!
-    should have_cmeths :layout, :layouts
-    should have_cmeths :before, :prepend_before, :before_callbacks
-    should have_cmeths :after,  :prepend_after,  :after_callbacks
-    should have_cmeths :before_init, :prepend_before_init, :before_init_callbacks
-    should have_cmeths :after_init,  :prepend_after_init,  :after_init_callbacks
-    should have_cmeths :before_run,  :prepend_before_run,  :before_run_callbacks
-    should have_cmeths :after_run,   :prepend_after_run,   :after_run_callbacks
+
+    should "have called `init!` and it's callbacks" do
+      assert_equal true, subject.before_init_called
+      assert_equal true, subject.second_before_init_called
+      assert_equal true, subject.init_bang_called
+      assert_equal true, subject.after_init_called
+    end
+
+    should "not have called `run!` or it's callbacks when initialized" do
+      assert_nil subject.before_run_called
+      assert_nil subject.run_bang_called
+      assert_nil subject.after_run_called
+    end
+
+  end
+
+  class RunTests < InitTests
+    desc "and run"
+
+    should "call `run!` and it's callbacks" do
+      subject.run
+      assert_equal true, subject.before_run_called
+      assert_equal true, subject.run_bang_called
+      assert_equal true, subject.after_run_called
+    end
 
     should "complain if run! is not overwritten" do
-      assert_raises(NotImplementedError){ subject.run! }
+      assert_raises(NotImplementedError){ test_runner(EmptyViewHandler).run }
     end
 
     should "render templates" do
@@ -45,20 +88,9 @@ module Deas::ViewHandler
       assert_equal({ :some => :option }, send_file_args.options)
     end
 
-    should "allow specifying the layouts using #layout or #layouts" do
-      handler_class = Class.new{ include Deas::ViewHandler }
-
-      handler_class.layout 'layouts/app'
-      assert_equal ['layouts/app'], handler_class.layouts
-
-      handler_class.layouts 'layouts/web', 'layouts/search'
-      assert_equal ['layouts/app', 'layouts/web', 'layouts/search'], handler_class.layouts
-    end
-
   end
 
   class CallbackTests < UnitTests
-    desc "callbacks"
     setup do
       @proc1 = proc{ '1' }
       @proc2 = proc{ '2' }
@@ -139,34 +171,6 @@ module Deas::ViewHandler
 
   end
 
-  class WithMethodFlagsTests < UnitTests
-    setup do
-      @handler = test_handler(FlagViewHandler)
-    end
-
-    should "have called `init!` and it's callbacks" do
-      assert_equal true, subject.before_init_called
-      assert_equal true, subject.second_before_init_called
-      assert_equal true, subject.init_bang_called
-      assert_equal true, subject.after_init_called
-    end
-
-    should "not have called `run!` or it's callbacks when initialized" do
-      assert_nil subject.before_run_called
-      assert_nil subject.run_bang_called
-      assert_nil subject.after_run_called
-    end
-
-    should "call `run!` and it's callbacks when it's `run`" do
-      subject.run
-
-      assert_equal true, subject.before_run_called
-      assert_equal true, subject.run_bang_called
-      assert_equal true, subject.after_run_called
-    end
-
-  end
-
   class HaltTests < UnitTests
     desc "halt"
 
@@ -223,6 +227,28 @@ module Deas::ViewHandler
 
       assert_equal exp_headers, headers_args.value
     end
+
+  end
+
+  class TestViewHandler
+    include Deas::ViewHandler
+
+    attr_reader :before_called, :after_called
+    attr_reader :before_init_called, :second_before_init_called
+    attr_reader :init_bang_called, :after_init_called
+    attr_reader :before_run_called, :run_bang_called, :after_run_called
+
+    before{ @before_called = true }
+    after{  @after_called  = true }
+
+    before_init{ @before_init_called        = true }
+    before_init{ @second_before_init_called = true }
+    after_init{  @after_init_called         = true }
+    before_run{  @before_run_called         = true }
+    after_run{   @after_run_called          = true }
+
+    def init!; @init_bang_called = true; end
+    def run!;  @run_bang_called = true;  end
 
   end
 

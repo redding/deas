@@ -96,7 +96,7 @@ class Deas::Server::Configuration
     setup do
       @initialized = false
       @other_initialized = false
-      proxy = Deas::RouteProxy.new('TestViewHandler')
+      proxy = Deas::RouteProxy.new('EmptyViewHandler')
       @route = Deas::Route.new(:get, '/something', proxy)
       @router = Deas::Router.new
       @router.routes = [ @route ]
@@ -132,7 +132,7 @@ class Deas::Server::Configuration
 
       subject.validate!
 
-      assert_equal TestViewHandler, @route.handler_class
+      assert_equal EmptyViewHandler, @route.handler_class
     end
 
     should "default the :erb :outvar setting in the SinatraApp it creates" do

@@ -8,7 +8,7 @@ class Deas::Runner
   class UnitTests < Assert::Context
     desc "Deas::Runner"
     setup do
-      @runner = Deas::Runner.new(TestViewHandler)
+      @runner = Deas::Runner.new(EmptyViewHandler)
     end
     subject{ @runner }
 
@@ -19,7 +19,7 @@ class Deas::Runner
     should have_imeths :render, :partial, :send_file
 
     should "know its handler and handler class" do
-      assert_equal TestViewHandler, subject.handler_class
+      assert_equal EmptyViewHandler, subject.handler_class
       assert_instance_of subject.handler_class, subject.handler
     end
 
