@@ -30,7 +30,7 @@ class Deas::SinatraRunner
       Assert.stub(NormalizedParams, :new){ |p| @norm_params_spy.new(p) }
 
       @fake_sinatra_call = FakeSinatraCall.new
-      @runner = @runner_class.new(FlagViewHandler, @fake_sinatra_call)
+      @runner = @runner_class.new(SinatraRunnerViewHandler, @fake_sinatra_call)
     end
     subject{ @runner }
 
@@ -84,8 +84,8 @@ class Deas::SinatraRunner
     end
 
     should "render the template with :view/:logger locals and the handler layouts" do
-      exp_handler = FlagViewHandler.new(subject)
-      exp_layouts = FlagViewHandler.layouts
+      exp_handler = SinatraRunnerViewHandler.new(subject)
+      exp_layouts = SinatraRunnerViewHandler.layouts
       exp_result = Deas::Template.new(@fake_sinatra_call, 'index', {
         :locals => {
           :view => exp_handler,
@@ -124,8 +124,8 @@ class Deas::SinatraRunner
     subject{ @handler }
 
     should "run the before and after hooks" do
-      assert_equal true, subject.before_hook_called
-      assert_equal true, subject.after_hook_called
+      assert_equal true, subject.before_called
+      assert_equal true, subject.after_called
     end
 
     should "run the handler's init and run" do

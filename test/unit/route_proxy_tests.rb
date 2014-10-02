@@ -8,7 +8,7 @@ class Deas::RouteProxy
   class UnitTests < Assert::Context
     desc "Deas::RouteProxy"
     setup do
-      @proxy = Deas::RouteProxy.new('TestViewHandler')
+      @proxy = Deas::RouteProxy.new('EmptyViewHandler')
     end
     subject{ @proxy }
 
@@ -16,11 +16,11 @@ class Deas::RouteProxy
     should have_imeths :handler_class
 
     should "know its handler class name" do
-      assert_equal 'TestViewHandler', subject.handler_class_name
+      assert_equal 'EmptyViewHandler', subject.handler_class_name
     end
 
     should "know its handler class" do
-      assert_equal TestViewHandler, subject.handler_class
+      assert_equal EmptyViewHandler, subject.handler_class
     end
 
     should "complain if there is no handler class with the given name" do
