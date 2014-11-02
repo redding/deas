@@ -40,14 +40,6 @@ class RenderViewHandler
   end
 end
 
-class PartialViewHandler
-  include Deas::ViewHandler
-
-  def run!
-    partial "my_partial", :some => 'locals'
-  end
-end
-
 class SendFileViewHandler
   include Deas::ViewHandler
 

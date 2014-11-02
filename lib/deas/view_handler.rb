@@ -54,7 +54,6 @@ module Deas
     def headers(*args);      @deas_runner.headers(*args);      end
 
     def render(*args, &block);    @deas_runner.render(*args, &block);    end
-    def partial(*args, &block);   @deas_runner.partial(*args, &block);   end
     def send_file(*args, &block); @deas_runner.send_file(*args, &block); end
 
     def app_settings; @deas_runner.app_settings; end
