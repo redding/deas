@@ -15,7 +15,7 @@ class Deas::TestRunner
     end
     subject{ @runner_class }
 
-    should "be a Runner" do
+    should "be a `Runner`" do
       assert subject < Deas::Runner
     end
 
