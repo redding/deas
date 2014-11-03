@@ -1,10 +1,9 @@
 require 'assert'
 require 'deas/sinatra_runner'
 
-require 'deas/runner'
+require 'deas/deas_runner'
 require 'deas/template'
 require 'test/support/fake_sinatra_call'
-require 'test/support/normalized_params_spy'
 require 'test/support/view_handlers'
 
 class Deas::SinatraRunner
@@ -16,7 +15,7 @@ class Deas::SinatraRunner
     end
     subject{ @runner_class }
 
-    should "be a Runner" do
+    should "be a `DeasRunner`" do
       assert subject < Deas::Runner
     end
 
@@ -25,12 +24,8 @@ class Deas::SinatraRunner
   class InitTests < UnitTests
     desc "when init"
     setup do
-      @params = { 'value' => '1' }
-      @norm_params_spy = Deas::Runner::NormalizedParamsSpy.new
-      Assert.stub(NormalizedParams, :new){ |p| @norm_params_spy.new(p) }
-
       @fake_sinatra_call = FakeSinatraCall.new
-      @runner = @runner_class.new(SinatraRunnerViewHandler, @fake_sinatra_call)
+      @runner = @runner_class.new(DeasRunnerViewHandler, @fake_sinatra_call)
     end
     subject{ @runner }
 
@@ -43,11 +38,6 @@ class Deas::SinatraRunner
       assert_equal @fake_sinatra_call.settings.logger, subject.logger
       assert_equal @fake_sinatra_call.settings.router, subject.router
       assert_equal @fake_sinatra_call.session,         subject.session
-    end
-
-    should "call to normalize its params" do
-      assert_equal @fake_sinatra_call.params, @norm_params_spy.params
-      assert_true @norm_params_spy.value_called
     end
 
     should "call the sinatra_call's halt with" do
@@ -83,8 +73,8 @@ class Deas::SinatraRunner
     end
 
     should "render the template with :view/:logger locals and the handler layouts" do
-      exp_handler = SinatraRunnerViewHandler.new(subject)
-      exp_layouts = SinatraRunnerViewHandler.layouts
+      exp_handler = DeasRunnerViewHandler.new(subject)
+      exp_layouts = DeasRunnerViewHandler.layouts
       exp_result = Deas::Template.new(@fake_sinatra_call, 'index', {
         :locals => {
           :view => exp_handler,
@@ -102,56 +92,6 @@ class Deas::SinatraRunner
       assert_equal 'a/file', args.file_path
       assert_equal({:some => 'opts'}, args.options)
       assert_true block_called
-    end
-
-  end
-
-  class RunTests < InitTests
-    desc "and run"
-    setup do
-      @return_value = @runner.run
-      @handler = @runner.instance_variable_get("@handler")
-    end
-    subject{ @handler }
-
-    should "run the before and after hooks" do
-      assert_equal true, subject.before_called
-      assert_equal true, subject.after_called
-    end
-
-    should "run the handler's init and run" do
-      assert_equal true, subject.init_bang_called
-      assert_equal true, subject.run_bang_called
-    end
-
-    should "return the handler's run! return value" do
-      assert_equal true, @return_value
-    end
-
-  end
-
-  class NormalizedParamsTests < UnitTests
-    desc "NormalizedParams"
-    setup do
-      @norm_params_class = Deas::SinatraRunner::NormalizedParams
-    end
-
-    should "be a normalized params subclass" do
-      assert @norm_params_class < Deas::Runner::NormalizedParams
-    end
-
-    should "not convert Tempfile param values to strings" do
-      tempfile = Class.new(::Tempfile){ def initialize; end }.new
-      params = normalized({
-        'attachment' => { :tempfile => tempfile }
-      })
-      assert_kind_of ::Tempfile, params['attachment']['tempfile']
-    end
-
-    private
-
-    def normalized(params)
-      @norm_params_class.new(params).value
     end
 
   end

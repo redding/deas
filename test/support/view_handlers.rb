@@ -16,7 +16,7 @@ class TestRunnerViewHandler
 
 end
 
-class SinatraRunnerViewHandler
+class DeasRunnerViewHandler
   include Deas::ViewHandler
 
   attr_reader :before_called, :after_called
