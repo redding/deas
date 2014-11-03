@@ -25,13 +25,15 @@ class Deas::SinatraRunner
     desc "when init"
     setup do
       @fake_sinatra_call = FakeSinatraCall.new
-      @runner = @runner_class.new(DeasRunnerViewHandler, @fake_sinatra_call)
+      @runner = @runner_class.new(DeasRunnerViewHandler, {
+        :sinatra_call => @fake_sinatra_call
+      })
     end
     subject{ @runner }
 
     should have_imeths :run
 
-    should "get its settings from the sinatra call" do
+    should "set its standard args from the sinatra call" do
       assert_equal @fake_sinatra_call.request,         subject.request
       assert_equal @fake_sinatra_call.response,        subject.response
       assert_equal @fake_sinatra_call.params,          subject.params

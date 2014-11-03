@@ -16,7 +16,10 @@ module Deas
 
     # TODO: unit test this??
     def run(sinatra_call)
-      runner = Deas::SinatraRunner.new(self.handler_class, sinatra_call)
+      args = {
+        :sinatra_call => sinatra_call
+      }
+      runner = Deas::SinatraRunner.new(self.handler_class, args)
       sinatra_call.request.env.tap do |env|
         env['deas.params'] = runner.params
         env['deas.handler_class_name'] = self.handler_class.name
