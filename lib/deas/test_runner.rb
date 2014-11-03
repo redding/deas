@@ -1,4 +1,3 @@
-require 'ostruct'
 require 'rack/multipart'
 require 'deas/router'
 require 'deas/runner'
@@ -7,11 +6,10 @@ module Deas
 
   class TestRunner < Runner
 
-    attr_reader :app_settings, :return_value
+    attr_reader :return_value
 
     def initialize(handler_class, args = nil)
       args = (args || {}).dup
-      @app_settings = OpenStruct.new(args.delete(:app_settings))
 
       super(handler_class, {
         :request  => args.delete(:request),

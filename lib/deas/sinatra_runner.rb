@@ -5,11 +5,8 @@ module Deas
 
   class SinatraRunner < Runner
 
-    attr_reader :app_settings
-
     def initialize(handler_class, sinatra_call)
       @sinatra_call = sinatra_call
-      @app_settings = @sinatra_call.settings
 
       super(handler_class, {
         :request  => @sinatra_call.request,

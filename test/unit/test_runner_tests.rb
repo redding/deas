@@ -41,12 +41,8 @@ class Deas::TestRunner
     end
     subject{ @runner }
 
-    should have_readers :app_settings, :return_value
+    should have_readers :return_value
     should have_imeths :run
-
-    should "know its app_settings" do
-      assert_kind_of OpenStruct, subject.app_settings
-    end
 
     should "super its standard args" do
       assert_equal 'a-request',  subject.request
