@@ -97,14 +97,6 @@ class Deas::SinatraRunner
       assert_equal exp_result, subject.render('index')
     end
 
-    should "render partials with locals" do
-      exp_result = Deas::Template::Partial.new(@fake_sinatra_call, 'info', {
-        :some => 'locals'
-      }).render
-
-      assert_equal exp_result, subject.partial('info', :some => 'locals')
-    end
-
     should "call the sinatra_call's send_file to set the send files" do
       block_called = false
       args = subject.send_file('a/file', {:some => 'opts'}, &proc{ block_called = true })
