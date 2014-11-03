@@ -30,7 +30,7 @@ class Deas::Router
       assert_instance_of Deas::Route, route
       assert_equal :get,         route.method
       assert_equal '/things',    route.path
-      assert_equal 'ListThings', route.handler_proxy.handler_class_name
+      assert_equal 'ListThings', route.route_proxy.handler_class_name
     end
 
     should "add a POST route using #post" do
@@ -40,7 +40,7 @@ class Deas::Router
       assert_instance_of Deas::Route, route
       assert_equal :post,         route.method
       assert_equal '/things',     route.path
-      assert_equal 'CreateThing', route.handler_proxy.handler_class_name
+      assert_equal 'CreateThing', route.route_proxy.handler_class_name
     end
 
     should "add a PUT route using #put" do
@@ -50,7 +50,7 @@ class Deas::Router
       assert_instance_of Deas::Route, route
       assert_equal :put,          route.method
       assert_equal '/things/:id', route.path
-      assert_equal 'UpdateThing', route.handler_proxy.handler_class_name
+      assert_equal 'UpdateThing', route.route_proxy.handler_class_name
     end
 
     should "add a PATCH route using #patch" do
@@ -60,7 +60,7 @@ class Deas::Router
       assert_instance_of Deas::Route, route
       assert_equal :patch,        route.method
       assert_equal '/things/:id', route.path
-      assert_equal 'UpdateThing', route.handler_proxy.handler_class_name
+      assert_equal 'UpdateThing', route.route_proxy.handler_class_name
     end
 
     should "add a DELETE route using #delete" do
@@ -70,7 +70,7 @@ class Deas::Router
       assert_instance_of Deas::Route, route
       assert_equal :delete,       route.method
       assert_equal '/things/:id', route.path
-      assert_equal 'DeleteThing', route.handler_proxy.handler_class_name
+      assert_equal 'DeleteThing', route.route_proxy.handler_class_name
     end
 
     should "allow defining any kind of route using #route" do
@@ -80,7 +80,7 @@ class Deas::Router
       assert_instance_of Deas::Route, route
       assert_equal :options,    route.method
       assert_equal '/get_info', route.path
-      assert_equal 'GetInfo',   route.handler_proxy.handler_class_name
+      assert_equal 'GetInfo',   route.route_proxy.handler_class_name
     end
 
     should "set a view handler namespace and use it when defining routes" do
@@ -89,11 +89,11 @@ class Deas::Router
 
       # should use the ns
       route = subject.route(:get, '/ns_test', 'NsTest')
-      assert_equal 'MyStuff::NsTest', route.handler_proxy.handler_class_name
+      assert_equal 'MyStuff::NsTest', route.route_proxy.handler_class_name
 
       # should ignore the ns when the leading colons are present
       route = subject.route(:post, '/no_ns_test', '::NoNsTest')
-      assert_equal '::NoNsTest', route.handler_proxy.handler_class_name
+      assert_equal '::NoNsTest', route.route_proxy.handler_class_name
     end
 
     should "set a base url" do
@@ -130,7 +130,7 @@ class Deas::Router
       assert_instance_of Deas::Route, route
       assert_equal :get,       route.method
       assert_equal '/invalid', route.path
-      assert_equal 'Deas::RedirectHandler', route.handler_proxy.handler_class_name
+      assert_equal 'Deas::RedirectHandler', route.route_proxy.handler_class_name
 
       route.validate!
       assert_not_nil route.handler_class

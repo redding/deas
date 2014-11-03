@@ -1,18 +1,21 @@
-require 'deas'
 require 'ostruct'
+require 'deas'
+require 'deas/router'
 
 class FakeSinatraCall
 
   # Mimic's the context that is accessible in a Sinatra' route. Should provide
   # any methods needed to replace using an actual Sinatra app.
 
-  attr_accessor :request, :response, :params, :settings, :session, :logger
+  attr_accessor :request, :response, :params, :logger, :router, :session
+  attr_accessor :settings
 
   def initialize(settings={})
-    @request = FakeRequest.new('GET','/something', {}, OpenStruct.new)
+    @request  = FakeRequest.new('GET','/something', {}, OpenStruct.new)
     @response = FakeResponse.new
     @params   = @request.params
     @logger   = Deas::NullLogger.new
+    @router   = Deas::Router.new
     @session  = @request.session
 
     @settings = OpenStruct.new({
@@ -58,5 +61,16 @@ end
 
 class FakeRequest < Struct.new(:http_method, :path, :params, :session)
   alias :request_method :http_method
+
+  attr_reader :logging_msgs
+
+  def env
+    @env ||= {
+      'deas.logging' => Proc.new do |msg|
+        @logging_msgs ||= []
+        @logging_msgs.push(msg)
+      end
+    }
+  end
 end
 FakeResponse = Struct.new(:status, :headers, :body)

@@ -4,14 +4,14 @@ require 'deas/exceptions'
 module Deas
   class RouteProxy
 
-    attr_reader :handler_class_name
+    attr_reader :handler_class_name, :handler_class
 
     def initialize(handler_class_name)
       @handler_class_name = handler_class_name
     end
 
-    def handler_class
-      constantize(@handler_class_name).tap do |handler_class|
+    def validate!
+      @handler_class = constantize(@handler_class_name).tap do |handler_class|
         raise(NoHandlerClassError.new(@handler_class_name)) if !handler_class
       end
     end
