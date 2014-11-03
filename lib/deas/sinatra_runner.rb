@@ -8,17 +8,17 @@ module Deas
     attr_reader :app_settings
 
     def initialize(handler_class, sinatra_call)
-      @sinatra_call  = sinatra_call
-      @app_settings  = @sinatra_call.settings
+      @sinatra_call = sinatra_call
+      @app_settings = @sinatra_call.settings
 
-      @request  = @sinatra_call.request
-      @response = @sinatra_call.response
-      @params   = NormalizedParams.new(@sinatra_call.params).value
-      @logger   = @sinatra_call.settings.logger
-      @router   = @sinatra_call.settings.router
-      @session  = @sinatra_call.session
-
-      super(handler_class)
+      super(handler_class, {
+        :request  => @sinatra_call.request,
+        :response => @sinatra_call.response,
+        :params   => NormalizedParams.new(@sinatra_call.params).value,
+        :logger   => @sinatra_call.settings.logger,
+        :router   => @sinatra_call.settings.router,
+        :session  => @sinatra_call.session,
+      })
     end
 
     def run

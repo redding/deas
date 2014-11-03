@@ -38,12 +38,12 @@ class Deas::SinatraRunner
     should have_imeths :run
 
     should "get its settings from the sinatra call" do
-      assert_equal @fake_sinatra_call.request, subject.request
-      assert_equal @fake_sinatra_call.response, subject.response
-      assert_equal @fake_sinatra_call.params, subject.params
+      assert_equal @fake_sinatra_call.request,         subject.request
+      assert_equal @fake_sinatra_call.response,        subject.response
+      assert_equal @fake_sinatra_call.params,          subject.params
       assert_equal @fake_sinatra_call.settings.logger, subject.logger
       assert_equal @fake_sinatra_call.settings.router, subject.router
-      assert_equal @fake_sinatra_call.session, subject.session
+      assert_equal @fake_sinatra_call.session,         subject.session
     end
 
     should "call to normalize its params" do

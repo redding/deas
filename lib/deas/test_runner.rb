@@ -13,14 +13,14 @@ module Deas
       args = (args || {}).dup
       @app_settings = OpenStruct.new(args.delete(:app_settings))
 
-      @request  = args.delete(:request)
-      @response = args.delete(:response)
-      @params   = NormalizedParams.new(args.delete(:params) || {}).value
-      @logger   = args.delete(:logger) || Deas::NullLogger.new
-      @router   = args.delete(:router) || Deas::Router.new
-      @session  = args.delete(:session)
-
-      super(handler_class)
+      super(handler_class, {
+        :request  => args.delete(:request),
+        :response => args.delete(:response),
+        :params   => NormalizedParams.new(args.delete(:params) || {}).value,
+        :logger   => args.delete(:logger),
+        :router   => args.delete(:router),
+        :session  => args.delete(:session)
+      })
       args.each{|key, value| @handler.send("#{key}=", value) }
 
       @return_value = catch(:halt){ @handler.init; nil }

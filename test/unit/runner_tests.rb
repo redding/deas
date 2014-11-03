@@ -1,6 +1,7 @@
 require 'assert'
 require 'deas/runner'
 
+require 'deas/router'
 require 'test/support/view_handlers'
 
 class Deas::Runner
@@ -8,7 +9,16 @@ class Deas::Runner
   class UnitTests < Assert::Context
     desc "Deas::Runner"
     setup do
-      @runner = Deas::Runner.new(EmptyViewHandler)
+      @runner_class = Deas::Runner
+    end
+    subject{ @runner_class }
+
+  end
+
+  class InitTests < UnitTests
+    desc "when init"
+    setup do
+      @runner = @runner_class.new(EmptyViewHandler)
     end
     subject{ @runner }
 
@@ -23,13 +33,18 @@ class Deas::Runner
       assert_instance_of subject.handler_class, subject.handler
     end
 
-    should "not set any settings" do
+    should "default its settings" do
       assert_nil subject.request
       assert_nil subject.response
-      assert_nil subject.params
-      assert_nil subject.logger
-      assert_nil subject.router
+      assert_kind_of ::Hash, subject.params
+      assert_kind_of Deas::NullLogger, subject.logger
+      assert_kind_of Deas::Router, subject.router
       assert_nil subject.session
+    end
+
+    should "default its params" do
+      runner = @runner_class.new(TestRunnerViewHandler)
+      assert_equal ::Hash.new, runner.params
     end
 
     should "not implement any actions" do

@@ -2,7 +2,6 @@ require 'assert'
 require 'deas/test_runner'
 
 require 'rack/test'
-require 'deas/router'
 require 'deas/runner'
 require 'test/support/normalized_params_spy'
 require 'test/support/view_handlers'
@@ -26,9 +25,19 @@ class Deas::TestRunner
     desc "when init"
     setup do
       @params = { 'value' => '1' }
+      @args = {
+        :request  => 'a-request',
+        :response => 'a-response',
+        :params   => @params,
+        :logger   => 'a-logger',
+        :router   => 'a-router',
+        :session  => 'a-session'
+      }
+
       @norm_params_spy = Deas::Runner::NormalizedParamsSpy.new
       Assert.stub(NormalizedParams, :new){ |p| @norm_params_spy.new(p) }
-      @runner = @runner_class.new(TestRunnerViewHandler, :params => @params)
+
+      @runner = @runner_class.new(TestRunnerViewHandler, @args)
     end
     subject{ @runner }
 
@@ -39,18 +48,13 @@ class Deas::TestRunner
       assert_kind_of OpenStruct, subject.app_settings
     end
 
-    should "default its settings" do
-      assert_nil subject.request
-      assert_nil subject.response
-      assert_kind_of ::Hash, subject.params
-      assert_kind_of Deas::NullLogger, subject.logger
-      assert_kind_of Deas::Router, subject.router
-      assert_nil subject.session
-    end
-
-    should "default its params" do
-      runner = @runner_class.new(TestRunnerViewHandler)
-      assert_equal ::Hash.new, runner.params
+    should "super its standard args" do
+      assert_equal 'a-request',  subject.request
+      assert_equal 'a-response', subject.response
+      assert_equal @params,      subject.params
+      assert_equal 'a-logger',   subject.logger
+      assert_equal 'a-router',   subject.router
+      assert_equal 'a-session',  subject.session
     end
 
     should "call to normalize its params" do
@@ -58,8 +62,8 @@ class Deas::TestRunner
       assert_true @norm_params_spy.value_called
     end
 
-    should "write any non-standard settings on the handler" do
-      runner = Deas::TestRunner.new(TestRunnerViewHandler, :custom_value => 42)
+    should "write any non-standard args on the handler" do
+      runner = @runner_class.new(TestRunnerViewHandler, :custom_value => 42)
       assert_equal 42, runner.handler.custom_value
     end
 
