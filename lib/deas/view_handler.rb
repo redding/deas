@@ -56,7 +56,6 @@ module Deas
     def render(*args, &block);    @deas_runner.render(*args, &block);    end
     def send_file(*args, &block); @deas_runner.send_file(*args, &block); end
 
-    def app_settings; @deas_runner.app_settings; end
     def logger;       @deas_runner.logger;       end
     def router;       @deas_runner.router;       end
     def request;      @deas_runner.request;      end

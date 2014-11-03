@@ -34,7 +34,6 @@ class Deas::SinatraRunner
     end
     subject{ @runner }
 
-    should have_readers :app_settings
     should have_imeths :run
 
     should "get its settings from the sinatra call" do
