@@ -1,4 +1,5 @@
 require 'rack/utils'
+require 'deas/router'
 
 module Deas
 
@@ -8,9 +9,17 @@ module Deas
     attr_reader :request, :response, :params
     attr_reader :logger, :router, :session
 
-    def initialize(handler_class)
+    def initialize(handler_class, args = nil)
       @handler_class = handler_class
       @handler = @handler_class.new(self)
+
+      a = args || {}
+      @request  = a[:request]
+      @response = a[:response]
+      @params   = a[:params] || {}
+      @logger   = a[:logger] || Deas::NullLogger.new
+      @router   = a[:router] || Deas::Router.new
+      @session  = a[:session]
     end
 
     def halt(*args);         raise NotImplementedError; end
