@@ -144,6 +144,11 @@ class Deas::Template
       assert_equal :"users/index/_listing", subject.name
     end
 
+    should "not add an underscore to it's template's basename if one already exists" do
+      partial = Deas::Template::Partial.new(@fake_sinatra_call, 'users/index/_listing')
+      assert_equal :"users/index/_listing", partial.name
+    end
+
     should "set it's locals option" do
       assert_equal({ :user => 'Joe Test' }, subject.options[:locals])
     end
