@@ -59,7 +59,13 @@ class Deas::Route
       assert_equal subject.handler_class, @runner_spy.handler_class
 
       exp_args = {
-        :sinatra_call => @fake_sinatra_call
+        :sinatra_call => @fake_sinatra_call,
+        :request      => @fake_sinatra_call.request,
+        :response     => @fake_sinatra_call.response,
+        :params       => @fake_sinatra_call.params,
+        :logger       => @fake_sinatra_call.settings.logger,
+        :router       => @fake_sinatra_call.settings.router,
+        :session      => @fake_sinatra_call.session
       }
       assert_equal exp_args, @runner_spy.args
 
@@ -102,13 +108,12 @@ class Deas::Route
       @handler_class, @args = handler_class, args
 
       @sinatra_call = args[:sinatra_call]
-
-      @request  = @sinatra_call.request
-      @response = @sinatra_call.response
-      @params   = @sinatra_call.params
-      @logger   = @sinatra_call.logger
-      @router   = @sinatra_call.router
-      @session  = @sinatra_call.session
+      @request      = args[:request]
+      @response     = args[:response]
+      @params       = args[:params]
+      @logger       = args[:logger]
+      @router       = args[:router]
+      @session      = args[:session]
     end
 
     def run

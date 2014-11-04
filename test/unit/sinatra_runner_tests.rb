@@ -33,15 +33,6 @@ class Deas::SinatraRunner
 
     should have_imeths :run
 
-    should "set its standard args from the sinatra call" do
-      assert_equal @fake_sinatra_call.request,         subject.request
-      assert_equal @fake_sinatra_call.response,        subject.response
-      assert_equal @fake_sinatra_call.params,          subject.params
-      assert_equal @fake_sinatra_call.settings.logger, subject.logger
-      assert_equal @fake_sinatra_call.settings.router, subject.router
-      assert_equal @fake_sinatra_call.session,         subject.session
-    end
-
     should "call the sinatra_call's halt with" do
       return_value = catch(:halt){ subject.halt('test') }
       assert_equal [ 'test' ], return_value

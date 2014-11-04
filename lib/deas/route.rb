@@ -17,7 +17,13 @@ module Deas
 
     def run(sinatra_call)
       args = {
-        :sinatra_call => sinatra_call
+        :sinatra_call => sinatra_call,
+        :request      => sinatra_call.request,
+        :response     => sinatra_call.response,
+        :params       => sinatra_call.params,
+        :logger       => sinatra_call.settings.logger,
+        :router       => sinatra_call.settings.router,
+        :session      => sinatra_call.session
       }
       runner = Deas::SinatraRunner.new(self.handler_class, args)
 
