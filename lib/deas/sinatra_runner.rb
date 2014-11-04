@@ -40,18 +40,18 @@ module Deas
       @sinatra_call.headers(*args)
     end
 
-    def render(template_name, options = nil, &block)
+    def render(template_name, opts = nil, &block)
       self.content_type(get_content_type(template_name)) if self.content_type.nil?
 
       # TODO: move to DeasRunner, don't pass sinatra call to create template
       # def render(template_name, *args, &block)
       #   super(template_name, *args, &block)
-      options ||= {}
+      options = opts || {}
       options[:locals] = {
         :view => self.handler,
         :logger => self.logger
       }.merge(options[:locals] || {})
-      options[:layout] ||= self.handler_class.layouts
+      options[:layout] = self.handler_class.layouts if !options.key?(:layout)
       Deas::Template.new(@sinatra_call, template_name, options).render(&block)
     end
 

@@ -75,8 +75,23 @@ class Deas::SinatraRunner
         },
         :layout => exp_layouts
       }).render
-
       assert_equal exp_result, subject.render('index')
+
+      exp_result = Deas::Template.new(@fake_sinatra_call, 'index', {
+        :locals => {
+          :view => 'a-view',
+          :some => 'thing',
+          :logger => @runner.logger
+        },
+        :layout => false
+      }).render
+      assert_equal exp_result, subject.render('index', {
+        :layout => false,
+        :locals => {
+          :view => 'a-view',
+          :some => 'thing'
+        }
+      })
     end
 
     should "call the sinatra_call's send_file to set the send files" do
