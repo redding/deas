@@ -6,17 +6,8 @@ module Deas
   class SinatraRunner < DeasRunner
 
     def initialize(handler_class, args = nil)
-      a = args || {}
-      @sinatra_call = a[:sinatra_call]
-
-      super(handler_class, {
-        :request  => @sinatra_call.request,
-        :response => @sinatra_call.response,
-        :params   => @sinatra_call.params,
-        :logger   => @sinatra_call.settings.logger,
-        :router   => @sinatra_call.settings.router,
-        :session  => @sinatra_call.session,
-      })
+      @sinatra_call = (args || {})[:sinatra_call]
+      super(handler_class, args)
     end
 
     # Helpers
