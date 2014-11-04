@@ -19,13 +19,13 @@ module Deas
         :router   => args.delete(:router),
         :session  => args.delete(:session)
       })
-      args.each{|key, value| @handler.send("#{key}=", value) }
+      args.each{|key, value| self.handler.send("#{key}=", value) }
 
-      @return_value = catch(:halt){ @handler.init; nil }
+      @return_value = catch(:halt){ self.handler.init; nil }
     end
 
     def run
-      @return_value ||= catch(:halt){ @handler.run }
+      @return_value ||= catch(:halt){ self.handler.run }
     end
 
     # Helpers

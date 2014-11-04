@@ -11,17 +11,17 @@ module Deas
     end
 
     def run
-      run_callbacks @handler_class.before_callbacks
-      @handler.init
-      response_data = @handler.run
-      run_callbacks @handler_class.after_callbacks
+      run_callbacks self.handler_class.before_callbacks
+      self.handler.init
+      response_data = self.handler.run
+      run_callbacks self.handler_class.after_callbacks
       response_data
     end
 
     private
 
     def run_callbacks(callbacks)
-      callbacks.each{|proc| @handler.instance_eval(&proc) }
+      callbacks.each{|proc| self.handler.instance_eval(&proc) }
     end
 
     class NormalizedParams < Deas::Runner::NormalizedParams
