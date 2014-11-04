@@ -2,6 +2,7 @@ require 'deas/view_handler'
 require 'deas/url'
 
 module Deas
+
   class RedirectProxy
 
     attr_reader :handler_class_name, :handler_class
@@ -39,5 +40,8 @@ module Deas
       @handler_class_name = @handler_class.name
     end
 
+    def validate!; end
+
   end
+
 end

@@ -1,7 +1,8 @@
 require 'assert'
+require 'deas/route_proxy'
+
 require 'deas/test_helpers'
 require 'test/support/view_handlers'
-require 'deas/route_proxy'
 
 class Deas::RouteProxy
 
@@ -12,20 +13,23 @@ class Deas::RouteProxy
     end
     subject{ @proxy }
 
-    should have_reader :handler_class_name
-    should have_imeths :handler_class
+    should have_readers :handler_class_name, :handler_class
+    should have_imeths :validate!
 
     should "know its handler class name" do
       assert_equal 'EmptyViewHandler', subject.handler_class_name
     end
 
-    should "know its handler class" do
+    should "set its handler class on `validate!`" do
+      assert_nil subject.handler_class
+
+      assert_nothing_raised{ subject.validate! }
       assert_equal EmptyViewHandler, subject.handler_class
     end
 
     should "complain if there is no handler class with the given name" do
       assert_raises(Deas::NoHandlerClassError) do
-        Deas::RouteProxy.new('SomethingNotDefined').handler_class
+        Deas::RouteProxy.new('SomethingNotDefined').validate!
       end
     end
 

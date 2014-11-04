@@ -1,25 +1,28 @@
 require 'assert'
-require 'test/support/view_handlers'
-require 'deas/route_proxy'
 require 'deas/route'
+
+require 'deas/sinatra_runner'
+require 'deas/route_proxy'
+require 'test/support/fake_sinatra_call'
+require 'test/support/view_handlers'
 
 class Deas::Route
 
   class UnitTests < Assert::Context
     desc "Deas::Route"
     setup do
-      @handler_proxy = Deas::RouteProxy.new('EmptyViewHandler')
-      @route = Deas::Route.new(:get, '/test', @handler_proxy)
+      @route_proxy = Deas::RouteProxy.new('EmptyViewHandler')
+      @route = Deas::Route.new(:get, '/test', @route_proxy)
     end
     subject{ @route }
 
-    should have_readers :method, :path, :handler_proxy, :handler_class
+    should have_readers :method, :path, :route_proxy, :handler_class
     should have_imeths :validate!, :run
 
-    should "know its method and path and handler_proxy" do
+    should "know its method, path and route proxy" do
       assert_equal :get, subject.method
       assert_equal '/test', subject.path
-      assert_equal @handler_proxy, subject.handler_proxy
+      assert_equal @route_proxy, subject.route_proxy
     end
 
     should "set its handler class on `validate!`" do
@@ -34,6 +37,82 @@ class Deas::Route
       assert_raises(Deas::NoHandlerClassError) do
         Deas::Route.new(:get, '/test', proxy).validate!
       end
+    end
+
+  end
+
+  class RunTests < UnitTests
+    desc "when run"
+    setup do
+      @fake_sinatra_call = FakeSinatraCall.new
+      @runner_spy = SinatraRunnerSpy.new
+      Assert.stub(Deas::SinatraRunner, :new) do |*args|
+        @runner_spy.build(*args)
+        @runner_spy
+      end
+
+      @route.validate!
+      @route.run(@fake_sinatra_call)
+    end
+
+    should "build and run a sinatra runner" do
+      assert_equal subject.handler_class, @runner_spy.handler_class
+
+      exp_args = {
+        :sinatra_call => @fake_sinatra_call
+      }
+      assert_equal exp_args, @runner_spy.args
+
+      assert_true @runner_spy.run_called
+    end
+
+    should "add the runner params to the request env" do
+      exp = @runner_spy.params
+      assert_equal exp, @fake_sinatra_call.request.env['deas.params']
+    end
+
+    should "add the handler class name to the request env" do
+      exp = subject.handler_class.name
+      assert_equal exp, @fake_sinatra_call.request.env['deas.handler_class_name']
+    end
+
+    should "log the handler and params" do
+      exp_msgs = [
+        "  Handler: #{subject.handler_class}",
+        "  Params:  #{@runner_spy.params.inspect}"
+      ]
+      assert_equal exp_msgs, @fake_sinatra_call.request.logging_msgs
+    end
+
+  end
+
+  class SinatraRunnerSpy
+
+    attr_reader :run_called
+    attr_reader :handler_class, :args
+    attr_reader :sinatra_call
+    attr_reader :request, :response, :params
+    attr_reader :logger, :router, :session
+
+    def initialize
+      @run_called = false
+    end
+
+    def build(handler_class, args)
+      @handler_class, @args = handler_class, args
+
+      @sinatra_call = args[:sinatra_call]
+
+      @request  = @sinatra_call.request
+      @response = @sinatra_call.response
+      @params   = @sinatra_call.params
+      @logger   = @sinatra_call.logger
+      @router   = @sinatra_call.router
+      @session  = @sinatra_call.session
+    end
+
+    def run
+      @run_called = true
     end
 
   end

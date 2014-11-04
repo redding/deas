@@ -1,6 +1,7 @@
 require 'assert'
-require 'deas/test_helpers'
 require 'deas/redirect_proxy'
+
+require 'deas/test_helpers'
 
 class Deas::RedirectProxy
 
@@ -12,6 +13,7 @@ class Deas::RedirectProxy
     subject{ @proxy }
 
     should have_readers :handler_class_name, :handler_class
+    should have_imeths :validate!
 
     should "know its handler class name" do
       assert_equal subject.handler_class.name, subject.handler_class_name
