@@ -24,7 +24,7 @@ class Deas::TemplateSource
     subject{ @source }
 
     should have_readers :path, :engines
-    should have_imeths :engine, :render
+    should have_imeths :engine, :render, :partial
 
     should "know its path" do
       assert_equal @source_path.to_s, subject.path
@@ -78,22 +78,44 @@ class Deas::TemplateSource
       @source.engine('json', JsonEngine)
     end
 
-    should "render a matching template using the configured engine" do
-      locals = { :something => Factory.string }
-      result = subject.render('test_template', TestServiceHandler, locals)
-      assert_equal 'test-engine', result
+    should "call `render` on the configured engine" do
+      result = subject.render('test_template', TestServiceHandler, {})
+      assert_equal 'render-test-engine', result
     end
 
     should "only try rendering template files its has engines for" do
       # there should be 2 files called "template" in `test/support` with diff
       # extensions
       result = subject.render('template', TestServiceHandler, {})
-      assert_equal 'json-engine', result
+      assert_equal 'render-json-engine', result
     end
 
     should "use the null template engine when an engine can't be found" do
       assert_raises(ArgumentError) do
         subject.render(Factory.string, TestServiceHandler, {})
+      end
+    end
+
+  end
+
+  class PartialTests < RenderTests
+    desc "using `partial`"
+
+    should "call `partial` on the configured engine" do
+      result = subject.partial('test_template', TestServiceHandler, {})
+      assert_equal 'partial-test-engine', result
+    end
+
+    should "only try rendering template files its has engines for" do
+      # there should be 2 files called "template" in `test/support` with diff
+      # extensions
+      result = subject.partial('template', TestServiceHandler, {})
+      assert_equal 'partial-json-engine', result
+    end
+
+    should "use the null template engine when an engine can't be found" do
+      assert_raises(ArgumentError) do
+        subject.partial(Factory.string, TestServiceHandler, {})
       end
     end
 
@@ -118,13 +140,19 @@ class Deas::TemplateSource
 
   class TestEngine < Deas::TemplateEngine
     def render(path, view_handler, locals)
-      'test-engine'
+      'render-test-engine'
+    end
+    def partial(path, view_handler, locals)
+      'partial-test-engine'
     end
   end
 
   class JsonEngine < Deas::TemplateEngine
     def render(path, view_handler, locals)
-      'json-engine'
+      'render-json-engine'
+    end
+    def partial(path, view_handler, locals)
+      'partial-json-engine'
     end
   end
 

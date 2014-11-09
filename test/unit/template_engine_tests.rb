@@ -18,7 +18,7 @@ class Deas::TemplateEngine
     subject{ @engine }
 
     should have_readers :source_path, :opts
-    should have_imeths :render
+    should have_imeths :render, :partial
 
     should "default its source path" do
       assert_equal Pathname.new(nil.to_s), subject.source_path
@@ -45,6 +45,12 @@ class Deas::TemplateEngine
       end
     end
 
+    should "raise NotImplementedError on `partial`" do
+      assert_raises NotImplementedError do
+        subject.partial(@path, @view_handler, @locals)
+      end
+    end
+
   end
 
   class NullTemplateEngineTests < Assert::Context
@@ -58,16 +64,25 @@ class Deas::TemplateEngine
       assert_kind_of Deas::TemplateEngine, subject
     end
 
-    should "read and return the given path in its source path on `render" do
+    should "read and return the given path in its source path on `render`" do
       exists_file = 'test/support/template.json'
       exp = File.read(subject.source_path.join(exists_file).to_s)
       assert_equal exp, subject.render(exists_file, @view_handler, @locals)
+    end
+
+    should "alias `render` to implement its `partial` method" do
+      exists_file = 'test/support/template.json'
+      exp = subject.render(exists_file, @view_handler, @locals)
+      assert_equal exp, subject.partial(exists_file, @view_handler, @locals)
     end
 
     should "complain if given a path that does not exist in its source path" do
       no_exists_file = '/does/not/exists'
       assert_raises ArgumentError do
         subject.render(no_exists_file, @view_handler, @locals)
+      end
+      assert_raises ArgumentError do
+        subject.partial(no_exists_file, @view_handler, @locals)
       end
     end
 

@@ -26,11 +26,18 @@ module Deas
     end
 
     def render(template_path, view_handler, locals)
-      engine = @engines[get_template_ext(template_path)]
-      engine.render(template_path, view_handler, locals)
+      get_engine(template_path).render(template_path, view_handler, locals)
+    end
+
+    def partial(template_path, view_handler, locals)
+      get_engine(template_path).partial(template_path, view_handler, locals)
     end
 
     private
+
+    def get_engine(template_path)
+      @engines[get_template_ext(template_path)]
+    end
 
     def get_template_ext(template_path)
       files = Dir.glob("#{File.join(@path, template_path.to_s)}.*")
