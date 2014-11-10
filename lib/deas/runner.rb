@@ -1,4 +1,5 @@
 require 'rack/utils'
+require 'deas/logger'
 require 'deas/router'
 require 'deas/template_source'
 
