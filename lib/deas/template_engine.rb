@@ -15,6 +15,10 @@ module Deas
       raise NotImplementedError
     end
 
+    def partial(path, view_handler, locals)
+      raise NotImplementedError
+    end
+
   end
 
   class NullTemplateEngine < TemplateEngine
@@ -26,6 +30,8 @@ module Deas
       end
       File.read(template_file)
     end
+
+    alias_method :partial, :render
 
   end
 
