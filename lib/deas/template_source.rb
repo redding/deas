@@ -1,3 +1,4 @@
+require 'deas/logger'
 require 'deas/template_engine'
 
 module Deas
@@ -10,9 +11,12 @@ module Deas
 
     attr_reader :path, :engines
 
-    def initialize(path)
+    def initialize(path, logger = nil)
       @path = path.to_s
-      @default_opts = { 'source_path' => @path }
+      @default_opts = {
+        'source_path' => @path,
+        'logger'      => logger || Deas::NullLogger.new
+      }
       @engines = Hash.new{ |h,k| Deas::NullTemplateEngine.new(@default_opts) }
     end
 

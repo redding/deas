@@ -2,6 +2,7 @@ require 'assert'
 require 'deas/template_engine'
 
 require 'pathname'
+require 'deas/logger'
 require 'test/support/factory'
 
 class Deas::TemplateEngine
@@ -17,7 +18,7 @@ class Deas::TemplateEngine
     end
     subject{ @engine }
 
-    should have_readers :source_path, :opts
+    should have_readers :source_path, :logger, :opts
     should have_imeths :render, :partial
 
     should "default its source path" do
@@ -27,6 +28,16 @@ class Deas::TemplateEngine
     should "allow custom source paths" do
       engine = Deas::TemplateEngine.new('source_path' => @source_path)
       assert_equal Pathname.new(@source_path.to_s), engine.source_path
+    end
+
+    should "default its logger" do
+      assert_instance_of Deas::NullLogger, subject.logger
+    end
+
+    should "allow custom source loggers" do
+      logger = 'a-logger'
+      engine = Deas::TemplateEngine.new('logger' => logger)
+      assert_equal logger, engine.logger
     end
 
     should "default the opts if none given" do
