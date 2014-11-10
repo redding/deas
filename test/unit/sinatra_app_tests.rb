@@ -1,11 +1,13 @@
 require 'assert'
+require 'deas/sinatra_app'
+
 require 'sinatra/base'
-require 'test/support/view_handlers'
+require 'deas/logger'
 require 'deas/route_proxy'
 require 'deas/route'
 require 'deas/router'
 require 'deas/server'
-require 'deas/sinatra_app'
+require 'test/support/view_handlers'
 
 module Deas::SinatraApp
 

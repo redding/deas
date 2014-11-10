@@ -2,6 +2,7 @@ require 'assert'
 require 'deas/server'
 
 require 'deas/exceptions'
+require 'deas/logger'
 require 'deas/router'
 require 'deas/template'
 require 'deas/template_source'

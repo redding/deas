@@ -1,6 +1,7 @@
 require 'assert'
 require 'deas/runner'
 
+require 'deas/logger'
 require 'deas/router'
 require 'test/support/view_handlers'
 

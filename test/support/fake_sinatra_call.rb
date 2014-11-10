@@ -1,5 +1,5 @@
 require 'ostruct'
-require 'deas'
+require 'deas/logger'
 require 'deas/router'
 require 'deas/template_source'
 
