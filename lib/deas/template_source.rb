@@ -29,28 +29,36 @@ module Deas
       @engines[input_ext.to_s] = engine_class.new(engine_opts)
     end
 
-    def render(template_path, view_handler, locals)
-      get_engine(template_path).render(template_path, view_handler, locals)
+    def render(template_name, view_handler, locals)
+      get_engine(template_name).render(template_name, view_handler, locals)
     end
 
-    def partial(template_path, view_handler, locals)
-      get_engine(template_path).partial(template_path, view_handler, locals)
+    def partial(template_name, view_handler, locals)
+      get_engine(template_name).partial(template_name, view_handler, locals)
+    end
+
+    def capture_render(template_name, view_handler, locals)
+      get_engine(template_name).capture_render(template_name, view_handler, locals)
+    end
+
+    def capture_partial(template_name, view_handler, locals)
+      get_engine(template_name).capture_partial(template_name, view_handler, locals)
     end
 
     private
 
-    def get_engine(template_path)
-      @engines[get_template_ext(template_path)]
+    def get_engine(template_name)
+      @engines[get_template_ext(template_name)]
     end
 
-    def get_template_ext(template_path)
-      files = Dir.glob("#{File.join(@path, template_path.to_s)}.*")
+    def get_template_ext(template_name)
+      files = Dir.glob("#{File.join(@path, template_name.to_s)}.*")
       files = files.reject{ |p| !@engines.keys.include?(parse_ext(p)) }
       parse_ext(files.first.to_s || '')
     end
 
-    def parse_ext(template_path)
-      File.extname(template_path)[1..-1]
+    def parse_ext(template_name)
+      File.extname(template_name)[1..-1]
     end
 
   end

@@ -11,15 +11,16 @@ class Deas::TemplateEngine
     desc "Deas::TemplateEngine"
     setup do
       @source_path = Factory.path
-      @path = Factory.path
+      @template_name = Factory.path
       @view_handler = 'a-view-handler'
       @locals = {}
+      @content = Proc.new{}
       @engine = Deas::TemplateEngine.new('some' => 'opts')
     end
     subject{ @engine }
 
     should have_readers :source_path, :logger, :opts
-    should have_imeths :render, :partial
+    should have_imeths :render, :partial, :capture_render, :capture_partial
 
     should "default its source path" do
       assert_equal Pathname.new(nil.to_s), subject.source_path
@@ -52,13 +53,25 @@ class Deas::TemplateEngine
 
     should "raise NotImplementedError on `render`" do
       assert_raises NotImplementedError do
-        subject.render(@path, @view_handler, @locals)
+        subject.render(@template_name, @view_handler, @locals)
       end
     end
 
     should "raise NotImplementedError on `partial`" do
       assert_raises NotImplementedError do
-        subject.partial(@path, @view_handler, @locals)
+        subject.partial(@template_name, @view_handler, @locals)
+      end
+    end
+
+    should "raise NotImplementedError on `capture_render`" do
+      assert_raises NotImplementedError do
+        subject.capture_render(@template_name, @view_handler, @locals, &@content)
+      end
+    end
+
+    should "raise NotImplementedError on `capture_partial`" do
+      assert_raises NotImplementedError do
+        subject.capture_partial(@template_name, @view_handler, @locals, &@content)
       end
     end
 
@@ -67,6 +80,9 @@ class Deas::TemplateEngine
   class NullTemplateEngineTests < Assert::Context
     desc "Deas::NullTemplateEngine"
     setup do
+      @v = 'a-view-handler'
+      @l = {}
+      @c = Proc.new{}
       @engine = Deas::NullTemplateEngine.new('source_path' => ROOT.to_s)
     end
     subject{ @engine }
@@ -78,22 +94,40 @@ class Deas::TemplateEngine
     should "read and return the given path in its source path on `render`" do
       exists_file = 'test/support/template.json'
       exp = File.read(subject.source_path.join(exists_file).to_s)
-      assert_equal exp, subject.render(exists_file, @view_handler, @locals)
+      assert_equal exp, subject.render(exists_file, @v, @l)
+    end
+
+    should "alias `render` to implement its `capture_render` method" do
+      exists_file = 'test/support/template.json'
+      exp = subject.render(exists_file, @v, @l)
+      assert_equal exp, subject.capture_render(exists_file, @v, @l, &@c)
     end
 
     should "alias `render` to implement its `partial` method" do
       exists_file = 'test/support/template.json'
-      exp = subject.render(exists_file, @view_handler, @locals)
-      assert_equal exp, subject.partial(exists_file, @view_handler, @locals)
+      exp = subject.render(exists_file, @v, @l)
+      assert_equal exp, subject.partial(exists_file, @v, @l)
+    end
+
+    should "alias `render` to implement its `capture_partial` method" do
+      exists_file = 'test/support/template.json'
+      exp = subject.render(exists_file, @v, @l)
+      assert_equal exp, subject.capture_partial(exists_file, @v, @l, &@c)
     end
 
     should "complain if given a path that does not exist in its source path" do
       no_exists_file = '/does/not/exists'
       assert_raises ArgumentError do
-        subject.render(no_exists_file, @view_handler, @locals)
+        subject.render(no_exists_file, @v, @l)
       end
       assert_raises ArgumentError do
-        subject.partial(no_exists_file, @view_handler, @locals)
+        subject.capture_render(no_exists_file, @v, @l, &@c)
+      end
+      assert_raises ArgumentError do
+        subject.partial(no_exists_file, @v, @l)
+      end
+      assert_raises ArgumentError do
+        subject.capture_partial(no_exists_file, @v, @l, &@c)
       end
     end
 
