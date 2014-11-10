@@ -7,6 +7,7 @@ require 'deas/logging'
 require 'deas/show_exceptions'
 require 'deas/router'
 require 'deas/sinatra_app'
+require 'deas/template_source'
 
 module Deas; end
 module Deas::Server
@@ -34,6 +35,7 @@ module Deas::Server
 
     option :verbose_logging, NsOptions::Boolean, :default => true
     option :logger,                              :default => proc{ Deas::NullLogger.new }
+    option :template_source,                     :default => proc{ Deas::NullTemplateSource.new }
 
     attr_accessor :settings, :error_procs, :init_procs, :template_helpers
     attr_accessor :middlewares, :router
@@ -196,6 +198,10 @@ module Deas::Server
 
     def default_charset(*args)
       self.configuration.default_charset *args
+    end
+
+    def template_source(*args)
+      self.configuration.template_source *args
     end
 
     # router handling

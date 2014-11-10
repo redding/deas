@@ -23,8 +23,8 @@ class Deas::Runner
     subject{ @runner }
 
     should have_readers :handler_class, :handler
-    should have_readers :request, :response, :params
-    should have_readers :logger, :router, :session
+    should have_readers :request, :response, :session
+    should have_readers :params, :logger, :router, :template_source
     should have_imeths :halt, :redirect, :content_type, :status, :headers
     should have_imeths :render, :send_file
 
@@ -36,10 +36,11 @@ class Deas::Runner
     should "default its settings" do
       assert_nil subject.request
       assert_nil subject.response
+      assert_nil subject.session
       assert_kind_of ::Hash, subject.params
       assert_kind_of Deas::NullLogger, subject.logger
       assert_kind_of Deas::Router, subject.router
-      assert_nil subject.session
+      assert_kind_of Deas::NullTemplateSource, subject.template_source
     end
 
     should "default its params" do

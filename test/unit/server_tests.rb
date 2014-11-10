@@ -3,6 +3,7 @@ require 'deas/server'
 
 require 'logger'
 require 'deas/router'
+require 'deas/template_source'
 
 module Deas::Server
 
@@ -22,7 +23,7 @@ module Deas::Server
 
     # DSL for server handling settings
     should have_imeths :init, :error, :template_helpers, :template_helper?
-    should have_imeths :use, :set, :verbose_logging, :logger
+    should have_imeths :use, :set, :verbose_logging, :logger, :template_source
     should have_imeths :get, :post, :put, :patch, :delete
     should have_imeths :redirect, :route, :url, :url_for
 
@@ -86,6 +87,10 @@ module Deas::Server
       stdout_logger = Logger.new(STDOUT)
       subject.logger stdout_logger
       assert_equal stdout_logger, config.logger
+
+      a_source = Deas::TemplateSource.new(Factory.path)
+      subject.template_source a_source
+      assert_equal a_source, config.template_source
 
       subject.default_charset 'latin1'
       assert_equal 'latin1', config.default_charset

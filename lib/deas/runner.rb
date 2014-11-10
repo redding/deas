@@ -1,25 +1,27 @@
 require 'rack/utils'
 require 'deas/router'
+require 'deas/template_source'
 
 module Deas
 
   class Runner
 
     attr_reader :handler_class, :handler
-    attr_reader :request, :response, :params
-    attr_reader :logger, :router, :session
+    attr_reader :request, :response, :session
+    attr_reader :params, :logger, :router, :template_source
 
     def initialize(handler_class, args = nil)
       @handler_class = handler_class
       @handler = @handler_class.new(self)
 
       a = args || {}
-      @request  = a[:request]
-      @response = a[:response]
-      @params   = a[:params] || {}
-      @logger   = a[:logger] || Deas::NullLogger.new
-      @router   = a[:router] || Deas::Router.new
-      @session  = a[:session]
+      @request         = a[:request]
+      @response        = a[:response]
+      @session         = a[:session]
+      @params          = a[:params] || {}
+      @logger          = a[:logger] || Deas::NullLogger.new
+      @router          = a[:router] || Deas::Router.new
+      @template_source = a[:template_source] || Deas::NullTemplateSource.new
     end
 
     def halt(*args);         raise NotImplementedError; end
