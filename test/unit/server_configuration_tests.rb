@@ -1,10 +1,11 @@
 require 'assert'
 require 'deas/server'
 
-require 'test/support/view_handlers'
 require 'deas/exceptions'
-require 'deas/template'
 require 'deas/router'
+require 'deas/template'
+require 'deas/template_source'
+require 'test/support/view_handlers'
 
 class Deas::Server::Configuration
 
@@ -24,7 +25,7 @@ class Deas::Server::Configuration
 
     # server handling options
 
-    should have_imeths :verbose_logging, :logger
+    should have_imeths :verbose_logging, :logger, :template_source
 
     should have_accessors :settings, :error_procs, :init_procs, :template_helpers
     should have_accessors :middlewares, :router
@@ -49,8 +50,9 @@ class Deas::Server::Configuration
     end
 
     should "default the handling options" do
-      assert_instance_of Deas::NullLogger, subject.logger
       assert_equal true, subject.verbose_logging
+      assert_instance_of Deas::NullLogger, subject.logger
+      assert_instance_of Deas::NullTemplateSource, subject.template_source
     end
 
     should "default its stored configuration" do

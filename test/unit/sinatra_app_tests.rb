@@ -42,17 +42,18 @@ module Deas::SinatraApp
 
     should "have it's configuration set based on the server configuration" do
       subject.settings.tap do |settings|
-        assert_equal 'staging',                  settings.environment
-        assert_equal 'path/to/somewhere',        settings.root.to_s
-        assert_equal 'path/to/somewhere/public', settings.public_folder.to_s
-        assert_equal 'path/to/somewhere/views',  settings.views.to_s
-        assert_equal true,                       settings.dump_errors
-        assert_equal false,                      settings.method_override
-        assert_equal false,                      settings.sessions
-        assert_equal true,                       settings.static
-        assert_equal true,                       settings.reload_templates
-        assert_instance_of Deas::NullLogger,     settings.logger
-        assert_instance_of Deas::Router,         settings.router
+        assert_equal 'staging',                      settings.environment
+        assert_equal 'path/to/somewhere',            settings.root.to_s
+        assert_equal 'path/to/somewhere/public',     settings.public_folder.to_s
+        assert_equal 'path/to/somewhere/views',      settings.views.to_s
+        assert_equal true,                           settings.dump_errors
+        assert_equal false,                          settings.method_override
+        assert_equal false,                          settings.sessions
+        assert_equal true,                           settings.static
+        assert_equal true,                           settings.reload_templates
+        assert_instance_of Deas::NullLogger,         settings.logger
+        assert_instance_of Deas::Router,             settings.router
+        assert_instance_of Deas::NullTemplateSource, settings.template_source
 
         # settings that are set but can't be changed
         assert_equal false, settings.logging

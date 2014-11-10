@@ -14,10 +14,11 @@ module Deas
       super(handler_class, {
         :request  => args.delete(:request),
         :response => args.delete(:response),
+        :session  => args.delete(:session),
         :params   => NormalizedParams.new(args.delete(:params) || {}).value,
         :logger   => args.delete(:logger),
         :router   => args.delete(:router),
-        :session  => args.delete(:session)
+        :template_source => args.delete(:template_source)
       })
       args.each{|key, value| self.handler.send("#{key}=", value) }
 

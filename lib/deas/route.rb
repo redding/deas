@@ -16,16 +16,16 @@ module Deas
     end
 
     def run(sinatra_call)
-      args = {
-        :sinatra_call => sinatra_call,
-        :request      => sinatra_call.request,
-        :response     => sinatra_call.response,
-        :params       => sinatra_call.params,
-        :logger       => sinatra_call.settings.logger,
-        :router       => sinatra_call.settings.router,
-        :session      => sinatra_call.session
-      }
-      runner = Deas::SinatraRunner.new(self.handler_class, args)
+      runner = Deas::SinatraRunner.new(self.handler_class, {
+        :sinatra_call    => sinatra_call,
+        :request         => sinatra_call.request,
+        :response        => sinatra_call.response,
+        :session         => sinatra_call.session,
+        :params          => sinatra_call.params,
+        :logger          => sinatra_call.settings.logger,
+        :router          => sinatra_call.settings.router,
+        :template_source => sinatra_call.settings.template_source
+      })
 
       sinatra_call.request.env.tap do |env|
         env['deas.params'] = runner.params

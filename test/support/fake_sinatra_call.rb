@@ -1,6 +1,7 @@
 require 'ostruct'
 require 'deas'
 require 'deas/router'
+require 'deas/template_source'
 
 class FakeSinatraCall
 
@@ -10,19 +11,21 @@ class FakeSinatraCall
   attr_accessor :request, :response, :params, :logger, :router, :session
   attr_accessor :settings
 
-  def initialize(settings={})
-    @request  = FakeRequest.new('GET','/something', {}, OpenStruct.new)
-    @response = FakeResponse.new
-    @params   = @request.params
-    @logger   = Deas::NullLogger.new
-    @router   = Deas::Router.new
-    @session  = @request.session
+  def initialize(settings = {})
+    @request         = FakeRequest.new('GET','/something', {}, OpenStruct.new)
+    @response        = FakeResponse.new
+    @session         = @request.session
+    @params          = @request.params
+    @logger          = Deas::NullLogger.new
+    @router          = Deas::Router.new
+    @template_source = Deas::NullTemplateSource.new
 
     @settings = OpenStruct.new({
       :deas_template_scope => Deas::Template::Scope,
       :deas_default_charset => 'utf-8',
-      :router => Deas::Router.new,
-      :logger => @logger
+      :logger => @logger,
+      :router => @router,
+      :template_source => @template_source
     }.merge(settings))
   end
 
