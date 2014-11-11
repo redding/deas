@@ -33,16 +33,12 @@ module Deas
       get_engine(template_name).render(template_name, view_handler, locals)
     end
 
-    def partial(template_name, view_handler, locals)
-      get_engine(template_name).partial(template_name, view_handler, locals)
+    def partial(template_name, locals)
+      get_engine(template_name).partial(template_name, locals)
     end
 
-    def capture_render(template_name, view_handler, locals)
-      get_engine(template_name).capture_render(template_name, view_handler, locals)
-    end
-
-    def capture_partial(template_name, view_handler, locals)
-      get_engine(template_name).capture_partial(template_name, view_handler, locals)
+    def capture_partial(template_name, locals, &content)
+      get_engine(template_name).capture_partial(template_name, locals, &content)
     end
 
     private
