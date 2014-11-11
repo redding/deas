@@ -1,6 +1,6 @@
 require 'deas/redirect_proxy'
-require 'deas/route_proxy'
 require 'deas/route'
+require 'deas/route_proxy'
 require 'deas/url'
 
 module Deas

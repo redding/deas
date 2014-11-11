@@ -1,5 +1,5 @@
-require 'deas/view_handler'
 require 'deas/exceptions'
+require 'deas/view_handler'
 
 module Deas
   class RouteProxy

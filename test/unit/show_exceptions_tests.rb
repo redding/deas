@@ -1,6 +1,7 @@
 require 'assert'
-require 'rack/utils'
 require 'deas/show_exceptions'
+
+require 'rack/utils'
 
 class Deas::ShowExceptions
 

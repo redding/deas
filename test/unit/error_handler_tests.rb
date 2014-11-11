@@ -1,6 +1,7 @@
 require 'assert'
-require 'test/support/fake_sinatra_call'
 require 'deas/error_handler'
+
+require 'test/support/fake_sinatra_call'
 
 class Deas::ErrorHandler
 
