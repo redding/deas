@@ -25,7 +25,7 @@ class Deas::TemplateSource
     subject{ @source }
 
     should have_readers :path, :engines
-    should have_imeths :engine
+    should have_imeths :engine, :engine_for?
     should have_imeths :render, :partial, :capture_partial
 
     should "know its path" do
@@ -83,6 +83,13 @@ class Deas::TemplateSource
         subject.engine 'rb', @test_engine
       end
       assert_kind_of Deas::NullTemplateEngine, subject.engines['rb']
+    end
+
+    should "know if it has an engine registered for a given template name" do
+      assert_false subject.engine_for?('test_template')
+
+      subject.engine 'test', @test_engine
+      assert_true subject.engine_for?('test_template')
     end
 
   end

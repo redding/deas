@@ -112,4 +112,44 @@ class Deas::SinatraRunner
 
   end
 
+  class InitWithEngineTests < UnitTests
+    desc "when init with a template source and matching engine"
+    setup do
+      @fake_sinatra_call = FakeSinatraCall.new
+      @runner = @runner_class.new(DeasRunnerViewHandler, {
+        :sinatra_call => @fake_sinatra_call,
+        :template_source => FakeTemplateSource.new
+      })
+    end
+    subject{ @runner }
+
+    should "render templates using the source" do
+      exp_handler = DeasRunnerViewHandler.new(subject)
+      exp_locals = {
+        :view => exp_handler,
+        :logger => @runner.logger,
+        :some => 'locals'
+      }
+      exp = ['render', 'info', @runner.handler, exp_locals]
+      assert_equal exp, subject.render('info', :locals => {
+        :some => 'locals'
+      })
+    end
+
+    should "render partials using the source" do
+      exp = ['partial', 'info', { :some => 'locals' }]
+      assert_equal exp, subject.partial('info', { :some => 'locals' })
+    end
+
+  end
+
+  class FakeTemplateSource
+    def engine_for?(template_name)
+      true
+    end
+
+    def render(*args);  ['render',  *args]; end
+    def partial(*args); ['partial', *args]; end
+  end
+
 end

@@ -33,7 +33,6 @@ class DeasTestServer
   get  '/session',  'UseSessionHandler'
 
   get  '/with_layout',           'WithLayoutHandler'
-  get  '/alt_with_layout',       'AlternateWithLayoutHandler'
   get  '/haml_with_layout',      'HamlWithLayoutHandler'
   get  '/with_haml_layout',      'WithHamlLayoutHandler'
   get  '/haml_with_haml_layout', 'HamlWithHamlLayoutHandler'
@@ -146,21 +145,6 @@ class WithLayoutHandler
 
   def run!
     render 'with_layout'
-  end
-
-end
-
-class AlternateWithLayoutHandler
-  include Deas::ViewHandler
-
-  def run!
-    render 'layout1' do
-      render 'layout2' do
-        render 'layout3' do
-          render 'with_layout'
-        end
-      end
-    end
   end
 
 end
