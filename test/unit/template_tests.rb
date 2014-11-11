@@ -100,7 +100,7 @@ class Deas::Template
     end
 
     should "call the sinatra_call's erb method with #partial" do
-      render_args = subject.partial('part', {
+      render_args = subject.partial('_part', {
         :something => true
       }, &Proc.new{ '#partial called this proc' })
 
@@ -130,7 +130,7 @@ class Deas::Template
   class PartialTests < UnitTests
     desc "Partial"
     setup do
-      @partial = Deas::Template::Partial.new(@fake_sinatra_call, 'users/index/listing', {
+      @partial = Deas::Template::Partial.new(@fake_sinatra_call, 'users/index/_listing', {
         :user => 'Joe Test'
       })
     end
@@ -138,15 +138,6 @@ class Deas::Template
 
     should "be a kind of Deas::Template" do
       assert_kind_of Deas::Template, subject
-    end
-
-    should "add an underscore to it's template's basename" do
-      assert_equal :"users/index/_listing", subject.name
-    end
-
-    should "not add an underscore to it's template's basename if one already exists" do
-      partial = Deas::Template::Partial.new(@fake_sinatra_call, 'users/index/_listing')
-      assert_equal :"users/index/_listing", partial.name
     end
 
     should "set it's locals option" do

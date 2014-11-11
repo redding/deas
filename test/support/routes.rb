@@ -198,7 +198,7 @@ end
 class PartialHandler
   include Deas::ViewHandler
 
-  def run!; partial 'info', :info => 'some-info'; end
+  def run!; partial '_info', :info => 'some-info'; end
 
 end
 
