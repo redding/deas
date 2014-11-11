@@ -76,6 +76,12 @@ module Deas::ViewHandler
       assert_equal({ :some => :option }, render_args.options)
     end
 
+    should "render partial templates" do
+      partial_args = test_runner(PartialViewHandler).run
+      assert_equal "my_partial",        partial_args.template_name
+      assert_equal({:some => 'locals'}, partial_args.locals)
+    end
+
     should "send files" do
       send_file_args = test_runner(SendFileViewHandler).run
       assert_equal "my_file.txt",        send_file_args.file_path
