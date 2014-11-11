@@ -76,10 +76,6 @@ module Deas
 
       def initialize(sinatra_call, name, locals = nil)
         options = { :locals => (locals || {}) }
-        name = name.to_s.tap do |n|
-          basename = File.basename(n)
-          n.sub!(/#{basename}\Z/, "_#{basename}") unless basename[0] == '_'[0]
-        end
         super sinatra_call, name, options
       end
 
