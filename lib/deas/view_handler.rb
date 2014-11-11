@@ -7,67 +7,72 @@ module Deas
     def self.included(klass)
       klass.class_eval do
         extend ClassMethods
+        include InstanceMethods
       end
     end
 
-    def initialize(runner)
-      @deas_runner = runner
-    end
+    module InstanceMethods
 
-    def init
-      self.run_callback 'before_init'
-      self.init!
-      self.run_callback 'after_init'
-    end
-
-    def init!
-    end
-
-    def run
-      self.run_callback 'before_run'
-      data = self.run!
-      self.run_callback 'after_run'
-      data
-    end
-
-    def run!
-      raise NotImplementedError
-    end
-
-    def inspect
-      reference = '0x0%x' % (self.object_id << 1)
-      "#<#{self.class}:#{reference} @request=#{self.request.inspect}>"
-    end
-
-    def ==(other_handler)
-      self.class == other_handler.class
-    end
-
-    protected
-
-    # Helpers
-
-    def halt(*args);         @deas_runner.halt(*args);         end
-    def redirect(*args);     @deas_runner.redirect(*args);     end
-    def content_type(*args); @deas_runner.content_type(*args); end
-    def status(*args);       @deas_runner.status(*args);       end
-    def headers(*args);      @deas_runner.headers(*args);      end
-
-    def render(*args, &block);    @deas_runner.render(*args, &block);    end
-    def partial(*args, &block);   @deas_runner.partial(*args, &block);   end
-    def send_file(*args, &block); @deas_runner.send_file(*args, &block); end
-
-    def logger;       @deas_runner.logger;       end
-    def router;       @deas_runner.router;       end
-    def request;      @deas_runner.request;      end
-    def response;     @deas_runner.response;     end
-    def params;       @deas_runner.params;       end
-    def session;      @deas_runner.session;      end
-
-    def run_callback(callback)
-      (self.class.send("#{callback}_callbacks") || []).each do |callback|
-        self.instance_eval(&callback)
+      def initialize(runner)
+        @deas_runner = runner
       end
+
+      def init
+        run_callback 'before_init'
+        self.init!
+        run_callback 'after_init'
+      end
+
+      def init!
+      end
+
+      def run
+        run_callback 'before_run'
+        data = self.run!
+        run_callback 'after_run'
+        data
+      end
+
+      def run!
+        raise NotImplementedError
+      end
+
+      def inspect
+        reference = '0x0%x' % (self.object_id << 1)
+        "#<#{self.class}:#{reference} @request=#{request.inspect}>"
+      end
+
+      def ==(other_handler)
+        self.class == other_handler.class
+      end
+
+      private
+
+      # Helpers
+
+      def halt(*args);         @deas_runner.halt(*args);         end
+      def redirect(*args);     @deas_runner.redirect(*args);     end
+      def content_type(*args); @deas_runner.content_type(*args); end
+      def status(*args);       @deas_runner.status(*args);       end
+      def headers(*args);      @deas_runner.headers(*args);      end
+
+      def render(*args, &block);    @deas_runner.render(*args, &block);    end
+      def partial(*args, &block);   @deas_runner.partial(*args, &block);   end
+      def send_file(*args, &block); @deas_runner.send_file(*args, &block); end
+
+      def logger;   @deas_runner.logger;   end
+      def router;   @deas_runner.router;   end
+      def request;  @deas_runner.request;  end
+      def response; @deas_runner.response; end
+      def params;   @deas_runner.params;   end
+      def session;  @deas_runner.session;  end
+
+      def run_callback(callback)
+        (self.class.send("#{callback}_callbacks") || []).each do |callback|
+          self.instance_eval(&callback)
+        end
+      end
+
     end
 
     module ClassMethods

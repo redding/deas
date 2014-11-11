@@ -219,11 +219,11 @@ class HandlerTestsHandler
 
   def init!
     @data = {}
-    set_data('logger_class_name'){ self.logger.class.name }
-    set_data('request_method'){ self.request.request_method.to_s }
-    set_data('response_firstheaderval'){ self.response.headers.sort.first.to_s }
-    set_data('params_a_param'){ self.params['a-param'] }
-    set_data('session_inspect'){ self.session.inspect }
+    set_data('logger_class_name'){ logger.class.name }
+    set_data('request_method'){ request.request_method.to_s }
+    set_data('response_firstheaderval'){ response.headers.sort.first.to_s }
+    set_data('params_a_param'){ params['a-param'] }
+    set_data('session_inspect'){ session.inspect }
   end
 
   def set_data(a, &block)

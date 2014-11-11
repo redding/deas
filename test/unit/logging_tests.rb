@@ -1,6 +1,7 @@
 require 'assert'
-require 'test/support/fake_sinatra_call'
 require 'deas/logging'
+
+require 'test/support/fake_sinatra_call'
 
 module Deas::Logging
 

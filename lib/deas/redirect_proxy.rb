@@ -1,5 +1,5 @@
-require 'deas/view_handler'
 require 'deas/url'
+require 'deas/view_handler'
 
 module Deas
 
