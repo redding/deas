@@ -20,7 +20,7 @@ class Deas::TemplateEngine
     subject{ @engine }
 
     should have_readers :source_path, :logger, :opts
-    should have_imeths :render, :partial, :capture_render, :capture_partial
+    should have_imeths :render, :partial, :capture_partial
 
     should "default its source path" do
       assert_equal Pathname.new(nil.to_s), subject.source_path
@@ -59,19 +59,13 @@ class Deas::TemplateEngine
 
     should "raise NotImplementedError on `partial`" do
       assert_raises NotImplementedError do
-        subject.partial(@template_name, @view_handler, @locals)
-      end
-    end
-
-    should "raise NotImplementedError on `capture_render`" do
-      assert_raises NotImplementedError do
-        subject.capture_render(@template_name, @view_handler, @locals, &@content)
+        subject.partial(@template_name, @locals)
       end
     end
 
     should "raise NotImplementedError on `capture_partial`" do
       assert_raises NotImplementedError do
-        subject.capture_partial(@template_name, @view_handler, @locals, &@content)
+        subject.capture_partial(@template_name, @locals, &@content)
       end
     end
 
@@ -97,22 +91,16 @@ class Deas::TemplateEngine
       assert_equal exp, subject.render(exists_file, @v, @l)
     end
 
-    should "alias `render` to implement its `capture_render` method" do
+    should "call `render` to implement its `partial` method" do
       exists_file = 'test/support/template.json'
-      exp = subject.render(exists_file, @v, @l)
-      assert_equal exp, subject.capture_render(exists_file, @v, @l, &@c)
+      exp = subject.render(exists_file, nil, @l)
+      assert_equal exp, subject.partial(exists_file, @l)
     end
 
-    should "alias `render` to implement its `partial` method" do
+    should "call `render` to implement its `capture_partial` method" do
       exists_file = 'test/support/template.json'
-      exp = subject.render(exists_file, @v, @l)
-      assert_equal exp, subject.partial(exists_file, @v, @l)
-    end
-
-    should "alias `render` to implement its `capture_partial` method" do
-      exists_file = 'test/support/template.json'
-      exp = subject.render(exists_file, @v, @l)
-      assert_equal exp, subject.capture_partial(exists_file, @v, @l, &@c)
+      exp = subject.render(exists_file, nil, @l)
+      assert_equal exp, subject.capture_partial(exists_file, @l, &@c)
     end
 
     should "complain if given a path that does not exist in its source path" do
@@ -121,13 +109,10 @@ class Deas::TemplateEngine
         subject.render(no_exists_file, @v, @l)
       end
       assert_raises ArgumentError do
-        subject.capture_render(no_exists_file, @v, @l, &@c)
+        subject.partial(no_exists_file, @l)
       end
       assert_raises ArgumentError do
-        subject.partial(no_exists_file, @v, @l)
-      end
-      assert_raises ArgumentError do
-        subject.capture_partial(no_exists_file, @v, @l, &@c)
+        subject.capture_partial(no_exists_file, @l, &@c)
       end
     end
 

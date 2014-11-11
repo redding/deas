@@ -26,7 +26,7 @@ class Deas::TemplateSource
 
     should have_readers :path, :engines
     should have_imeths :engine
-    should have_imeths :render, :partial, :capture_render, :capture_partial
+    should have_imeths :render, :partial, :capture_partial
 
     should "know its path" do
       assert_equal @source_path.to_s, subject.path
@@ -122,47 +122,24 @@ class Deas::TemplateSource
 
   end
 
-  class CaptureRenderTests < RenderOrPartialTests
-    desc "when capture rendering a template"
-
-    should "call `capture_render` on the configured engine" do
-      result = subject.capture_render('test_template', @v, @l, &@c)
-      assert_equal 'capture-render-test-engine', result
-    end
-
-    should "only try rendering template files its has engines for" do
-      # there should be 2 files called "template" in `test/support` with diff
-      # extensions
-      result = subject.capture_render('template', @v, @l, &@c)
-      assert_equal 'capture-render-json-engine', result
-    end
-
-    should "use the null template engine when an engine can't be found" do
-      assert_raises(ArgumentError) do
-        subject.capture_render(Factory.string, @v, @l, &@c)
-      end
-    end
-
-  end
-
   class PartialTests < RenderTests
     desc "when partial rendering a template"
 
     should "call `partial` on the configured engine" do
-      result = subject.partial('test_template', @v, @l)
+      result = subject.partial('test_template', @l)
       assert_equal 'partial-test-engine', result
     end
 
     should "only try rendering template files its has engines for" do
       # there should be 2 files called "template" in `test/support` with diff
       # extensions
-      result = subject.partial('template', @v, @l)
+      result = subject.partial('template', @l)
       assert_equal 'partial-json-engine', result
     end
 
     should "use the null template engine when an engine can't be found" do
       assert_raises(ArgumentError) do
-        subject.partial(Factory.string, @v, @l)
+        subject.partial(Factory.string, @l)
       end
     end
 
@@ -172,20 +149,20 @@ class Deas::TemplateSource
     desc "when capture partial rendering a template"
 
     should "call `capture_partial` on the configured engine" do
-      result = subject.capture_partial('test_template', @v, @l, &@c)
+      result = subject.capture_partial('test_template', @l, &@c)
       assert_equal 'capture-partial-test-engine', result
     end
 
     should "only try rendering template files its has engines for" do
       # there should be 2 files called "template" in `test/support` with diff
       # extensions
-      result = subject.capture_partial('template', @v, @l, &@c)
+      result = subject.capture_partial('template', @l, &@c)
       assert_equal 'capture-partial-json-engine', result
     end
 
     should "use the null template engine when an engine can't be found" do
       assert_raises(ArgumentError) do
-        subject.capture_partial(Factory.string, @v, @l, &@c)
+        subject.capture_partial(Factory.string, @l, &@c)
       end
     end
 
@@ -212,13 +189,10 @@ class Deas::TemplateSource
     def render(template_name, view_handler, locals)
       'render-test-engine'
     end
-    def partial(template_name, view_handler, locals)
+    def partial(template_name, locals)
       'partial-test-engine'
     end
-    def capture_render(template_name, view_handler, locals, &content)
-      'capture-render-test-engine'
-    end
-    def capture_partial(template_name, view_handler, locals, &content)
+    def capture_partial(template_name, locals, &content)
       'capture-partial-test-engine'
     end
   end
@@ -227,13 +201,10 @@ class Deas::TemplateSource
     def render(template_name, view_handler, locals)
       'render-json-engine'
     end
-    def partial(template_name, view_handler, locals)
+    def partial(template_name, locals)
       'partial-json-engine'
     end
-    def capture_render(template_name, view_handler, locals, &content)
-      'capture-render-json-engine'
-    end
-    def capture_partial(template_name, view_handler, locals, &content)
+    def capture_partial(template_name, locals, &content)
       'capture-partial-json-engine'
     end
   end

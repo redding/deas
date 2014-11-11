@@ -17,15 +17,11 @@ module Deas
       raise NotImplementedError
     end
 
-    def partial(template_name, view_handler, locals)
+    def partial(template_name, locals)
       raise NotImplementedError
     end
 
-    def capture_render(template_name, view_handler, locals, &content)
-      raise NotImplementedError
-    end
-
-    def capture_partial(template_name, view_handler, locals, &content)
+    def capture_partial(template_name, locals, &content)
       raise NotImplementedError
     end
 
@@ -41,9 +37,13 @@ module Deas
       File.read(template_file)
     end
 
-    alias_method :capture_render,  :render
-    alias_method :partial,         :render
-    alias_method :capture_partial, :render
+    def partial(template_name, locals)
+      render(template_name, nil, locals)
+    end
+
+    def capture_partial(template_name, locals, &content)
+      render(template_name, nil, locals)
+    end
 
   end
 
