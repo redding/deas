@@ -25,7 +25,8 @@ class Deas::TemplateSource
     subject{ @source }
 
     should have_readers :path, :engines
-    should have_imeths :engine, :render, :partial
+    should have_imeths :engine
+    should have_imeths :render, :partial, :capture_render, :capture_partial
 
     should "know its path" do
       assert_equal @source_path.to_s, subject.path
@@ -86,51 +87,105 @@ class Deas::TemplateSource
 
   end
 
-  class RenderTests < InitTests
-    desc "when rendering a template"
+  class RenderOrPartialTests < InitTests
     setup do
       @source.engine('test', TestEngine)
       @source.engine('json', JsonEngine)
+
+      @v = TestServiceHandler
+      @l = {}
+      @c = Proc.new{}
     end
 
+  end
+
+  class RenderTests < RenderOrPartialTests
+    desc "when rendering a template"
+
     should "call `render` on the configured engine" do
-      result = subject.render('test_template', TestServiceHandler, {})
+      result = subject.render('test_template', @v, @l)
       assert_equal 'render-test-engine', result
     end
 
     should "only try rendering template files its has engines for" do
       # there should be 2 files called "template" in `test/support` with diff
       # extensions
-      result = subject.render('template', TestServiceHandler, {})
+      result = subject.render('template', @v, @l)
       assert_equal 'render-json-engine', result
     end
 
     should "use the null template engine when an engine can't be found" do
       assert_raises(ArgumentError) do
-        subject.render(Factory.string, TestServiceHandler, {})
+        subject.render(Factory.string, @v, @l)
+      end
+    end
+
+  end
+
+  class CaptureRenderTests < RenderOrPartialTests
+    desc "when capture rendering a template"
+
+    should "call `capture_render` on the configured engine" do
+      result = subject.capture_render('test_template', @v, @l, &@c)
+      assert_equal 'capture-render-test-engine', result
+    end
+
+    should "only try rendering template files its has engines for" do
+      # there should be 2 files called "template" in `test/support` with diff
+      # extensions
+      result = subject.capture_render('template', @v, @l, &@c)
+      assert_equal 'capture-render-json-engine', result
+    end
+
+    should "use the null template engine when an engine can't be found" do
+      assert_raises(ArgumentError) do
+        subject.capture_render(Factory.string, @v, @l, &@c)
       end
     end
 
   end
 
   class PartialTests < RenderTests
-    desc "using `partial`"
+    desc "when partial rendering a template"
 
     should "call `partial` on the configured engine" do
-      result = subject.partial('test_template', TestServiceHandler, {})
+      result = subject.partial('test_template', @v, @l)
       assert_equal 'partial-test-engine', result
     end
 
     should "only try rendering template files its has engines for" do
       # there should be 2 files called "template" in `test/support` with diff
       # extensions
-      result = subject.partial('template', TestServiceHandler, {})
+      result = subject.partial('template', @v, @l)
       assert_equal 'partial-json-engine', result
     end
 
     should "use the null template engine when an engine can't be found" do
       assert_raises(ArgumentError) do
-        subject.partial(Factory.string, TestServiceHandler, {})
+        subject.partial(Factory.string, @v, @l)
+      end
+    end
+
+  end
+
+  class CapturePartialTests < RenderOrPartialTests
+    desc "when capture partial rendering a template"
+
+    should "call `capture_partial` on the configured engine" do
+      result = subject.capture_partial('test_template', @v, @l, &@c)
+      assert_equal 'capture-partial-test-engine', result
+    end
+
+    should "only try rendering template files its has engines for" do
+      # there should be 2 files called "template" in `test/support` with diff
+      # extensions
+      result = subject.capture_partial('template', @v, @l, &@c)
+      assert_equal 'capture-partial-json-engine', result
+    end
+
+    should "use the null template engine when an engine can't be found" do
+      assert_raises(ArgumentError) do
+        subject.capture_partial(Factory.string, @v, @l, &@c)
       end
     end
 
@@ -154,20 +209,32 @@ class Deas::TemplateSource
   end
 
   class TestEngine < Deas::TemplateEngine
-    def render(path, view_handler, locals)
+    def render(template_name, view_handler, locals)
       'render-test-engine'
     end
-    def partial(path, view_handler, locals)
+    def partial(template_name, view_handler, locals)
       'partial-test-engine'
+    end
+    def capture_render(template_name, view_handler, locals, &content)
+      'capture-render-test-engine'
+    end
+    def capture_partial(template_name, view_handler, locals, &content)
+      'capture-partial-test-engine'
     end
   end
 
   class JsonEngine < Deas::TemplateEngine
-    def render(path, view_handler, locals)
+    def render(template_name, view_handler, locals)
       'render-json-engine'
     end
-    def partial(path, view_handler, locals)
+    def partial(template_name, view_handler, locals)
       'partial-json-engine'
+    end
+    def capture_render(template_name, view_handler, locals, &content)
+      'capture-render-json-engine'
+    end
+    def capture_partial(template_name, view_handler, locals, &content)
+      'capture-partial-json-engine'
     end
   end
 

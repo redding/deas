@@ -13,11 +13,19 @@ module Deas
       @logger = @opts['logger'] || Deas::NullLogger.new
     end
 
-    def render(path, view_handler, locals)
+    def render(template_name, view_handler, locals)
       raise NotImplementedError
     end
 
-    def partial(path, view_handler, locals)
+    def partial(template_name, view_handler, locals)
+      raise NotImplementedError
+    end
+
+    def capture_render(template_name, view_handler, locals, &content)
+      raise NotImplementedError
+    end
+
+    def capture_partial(template_name, view_handler, locals, &content)
       raise NotImplementedError
     end
 
@@ -25,15 +33,17 @@ module Deas
 
   class NullTemplateEngine < TemplateEngine
 
-    def render(path, view_handler, locals)
-      template_file = self.source_path.join(path).to_s
+    def render(template_name, view_handler, locals)
+      template_file = self.source_path.join(template_name).to_s
       unless File.exists?(template_file)
         raise ArgumentError, "template file `#{template_file}` does not exist"
       end
       File.read(template_file)
     end
 
-    alias_method :partial, :render
+    alias_method :capture_render,  :render
+    alias_method :partial,         :render
+    alias_method :capture_partial, :render
 
   end
 
