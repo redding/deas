@@ -29,6 +29,10 @@ module Deas
       @engines[input_ext.to_s] = engine_class.new(engine_opts)
     end
 
+    def engine_for?(template_name)
+      @engines.keys.include?(get_template_ext(template_name))
+    end
+
     def render(template_name, view_handler, locals)
       get_engine(template_name).render(template_name, view_handler, locals)
     end

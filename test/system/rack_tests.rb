@@ -72,11 +72,6 @@ module Deas
       expected_body = "Layout 1\nLayout 2\nLayout 3\nWith Layouts View: WithLayoutHandler\n"
       assert_equal 200,           last_response.status
       assert_equal expected_body, last_response.body
-
-      get '/alt_with_layout'
-      expected_body = "Layout 1\nLayout 2\nLayout 3\nWith Layouts View: AlternateWithLayoutHandler\n"
-      assert_equal 200,           last_response.status
-      assert_equal expected_body, last_response.body
     end
 
     should "render mixed (erb and other) templates using layouts" do
