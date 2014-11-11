@@ -55,6 +55,10 @@ module Deas
       Deas::Template.new(@sinatra_call, template_name, options).render(&block)
     end
 
+    def partial(template_name, locals = nil)
+      Deas::Template::Partial.new(@sinatra_call, template_name, locals).render
+    end
+
     def send_file(*args, &block)
       @sinatra_call.send_file(*args, &block)
     end

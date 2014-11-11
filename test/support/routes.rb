@@ -37,6 +37,7 @@ class DeasTestServer
   get  '/haml_with_layout',      'HamlWithLayoutHandler'
   get  '/with_haml_layout',      'WithHamlLayoutHandler'
   get  '/haml_with_haml_layout', 'HamlWithHamlLayoutHandler'
+  get  '/partial.html',          'PartialHandler'
 
   get '/handler/tests.json', 'HandlerTestsHandler'
 
@@ -191,6 +192,13 @@ class HamlWithHamlLayoutHandler
   def run!
     render 'haml_with_layout'
   end
+
+end
+
+class PartialHandler
+  include Deas::ViewHandler
+
+  def run!; partial 'info', :info => 'some-info'; end
 
 end
 
