@@ -1,3 +1,8 @@
+# need to define class immediately b/c of circular requires:
+# - runner -> router -> route -> deas_runner -> runner
+module Deas; end
+class Deas::Runner; end
+
 require 'rack/utils'
 require 'deas/logger'
 require 'deas/router'

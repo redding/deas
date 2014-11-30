@@ -59,13 +59,13 @@ class Deas::Route
       assert_equal subject.handler_class, @runner_spy.handler_class
 
       exp_args = {
-        :sinatra_call    => @fake_sinatra_call,
-        :request         => @fake_sinatra_call.request,
-        :response        => @fake_sinatra_call.response,
-        :session         => @fake_sinatra_call.session,
-        :params          => @fake_sinatra_call.params,
-        :logger          => @fake_sinatra_call.settings.logger,
-        :router          => @fake_sinatra_call.settings.router,
+        :sinatra_call => @fake_sinatra_call,
+        :request      => @fake_sinatra_call.request,
+        :response     => @fake_sinatra_call.response,
+        :session      => @fake_sinatra_call.session,
+        :params       => @fake_sinatra_call.params,
+        :logger       => @fake_sinatra_call.settings.logger,
+        :router       => @fake_sinatra_call.settings.router,
         :template_source => @fake_sinatra_call.settings.template_source
       }
       assert_equal exp_args, @runner_spy.args
@@ -98,8 +98,8 @@ class Deas::Route
     attr_reader :run_called
     attr_reader :handler_class, :args
     attr_reader :sinatra_call
-    attr_reader :request, :response, :params
-    attr_reader :logger, :router, :session
+    attr_reader :request, :response, :session, :params
+    attr_reader :logger, :router, :template_source
 
     def initialize
       @run_called = false
@@ -108,13 +108,13 @@ class Deas::Route
     def build(handler_class, args)
       @handler_class, @args = handler_class, args
 
-      @sinatra_call    = args[:sinatra_call]
-      @request         = args[:request]
-      @response        = args[:response]
-      @session         = args[:session]
-      @params          = args[:params]
-      @logger          = args[:logger]
-      @router          = args[:router]
+      @sinatra_call = args[:sinatra_call]
+      @request      = args[:request]
+      @response     = args[:response]
+      @session      = args[:session]
+      @params       = args[:params]
+      @logger       = args[:logger]
+      @router       = args[:router]
       @template_source = args[:template_source]
     end
 

@@ -11,6 +11,7 @@ class Deas::TestRunner
   class UnitTests < Assert::Context
     desc "Deas::TestRunner"
     setup do
+      @handler_class = TestRunnerViewHandler
       @runner_class = Deas::TestRunner
     end
     subject{ @runner_class }
@@ -26,24 +27,30 @@ class Deas::TestRunner
     setup do
       @params = { 'value' => '1' }
       @args = {
-        :request         => 'a-request',
-        :response        => 'a-response',
-        :session         => 'a-session',
-        :params          => @params,
-        :logger          => 'a-logger',
-        :router          => 'a-router',
+        :request  => 'a-request',
+        :response => 'a-response',
+        :session  => 'a-session',
+        :params   => @params,
+        :logger   => 'a-logger',
+        :router   => 'a-router',
         :template_source => 'a-source'
       }
 
       @norm_params_spy = Deas::Runner::NormalizedParamsSpy.new
       Assert.stub(NormalizedParams, :new){ |p| @norm_params_spy.new(p) }
 
-      @runner = @runner_class.new(TestRunnerViewHandler, @args)
+      @runner = @runner_class.new(@handler_class, @args)
     end
     subject{ @runner }
 
     should have_readers :return_value
     should have_imeths :run
+
+    should "raise an invalid error when not passed a view handler" do
+      assert_raises(Deas::InvalidServiceHandlerError) do
+        @runner_class.new(Class.new)
+      end
+    end
 
     should "super its standard args" do
       assert_equal 'a-request',  subject.request
@@ -61,8 +68,16 @@ class Deas::TestRunner
     end
 
     should "write any non-standard args on the handler" do
-      runner = @runner_class.new(TestRunnerViewHandler, :custom_value => 42)
+      runner = @runner_class.new(@handler_class, :custom_value => 42)
       assert_equal 42, runner.handler.custom_value
+    end
+
+    should "not have called its service handlers before callbacks" do
+      assert_not_true subject.handler.before_called
+    end
+
+    should "have called init on its service handler" do
+      assert_true subject.handler.init_called
     end
 
     should "not set a return value on initialize" do

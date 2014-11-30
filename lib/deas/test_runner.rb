@@ -1,16 +1,23 @@
 require 'rack/multipart'
 require 'deas/router'
 require 'deas/runner'
+require 'deas/view_handler'
 
 module Deas
+
+  InvalidServiceHandlerError = Class.new(StandardError)
 
   class TestRunner < Runner
 
     attr_reader :return_value
 
     def initialize(handler_class, args = nil)
-      args = (args || {}).dup
+      if !handler_class.include?(Deas::ViewHandler)
+        raise InvalidServiceHandlerError, "#{handler_class.inspect} is not a"\
+                                          " Deas::ServiceHandler"
+      end
 
+      args = (args || {}).dup
       super(handler_class, {
         :request  => args.delete(:request),
         :response => args.delete(:response),

@@ -8,11 +8,13 @@ end
 class TestRunnerViewHandler
   include Deas::ViewHandler
 
+  attr_reader :before_called, :init_called
   attr_accessor :custom_value
 
-  def run!
-    'run has run'
-  end
+  before{ @before_called = true }
+
+  def init!; @init_called = true; end
+  def run!;  'run has run';       end
 
 end
 
