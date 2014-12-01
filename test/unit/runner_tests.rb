@@ -38,15 +38,10 @@ class Deas::Runner
       assert_nil subject.request
       assert_nil subject.response
       assert_nil subject.session
-      assert_kind_of ::Hash, subject.params
+      assert_equal ::Hash.new, subject.params
       assert_kind_of Deas::NullLogger, subject.logger
       assert_kind_of Deas::Router, subject.router
       assert_kind_of Deas::NullTemplateSource, subject.template_source
-    end
-
-    should "default its params" do
-      runner = @runner_class.new(TestRunnerViewHandler)
-      assert_equal ::Hash.new, runner.params
     end
 
     should "not implement any actions" do
