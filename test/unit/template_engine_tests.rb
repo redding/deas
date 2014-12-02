@@ -35,7 +35,7 @@ class Deas::TemplateEngine
       assert_instance_of Deas::NullLogger, subject.logger
     end
 
-    should "allow custom source loggers" do
+    should "allow custom loggers" do
       logger = 'a-logger'
       engine = Deas::TemplateEngine.new('logger' => logger)
       assert_equal logger, engine.logger

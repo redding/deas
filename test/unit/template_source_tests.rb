@@ -1,6 +1,7 @@
 require 'assert'
 require 'deas/template_source'
 
+require 'deas/logger'
 require 'deas/template_engine'
 
 class Deas::TemplateSource
@@ -54,11 +55,15 @@ class Deas::TemplateSource
       }
       assert_equal exp_opts, subject.engines['test'].opts
 
+      source = Deas::TemplateSource.new(@source_path)
+      source.engine 'test', @test_engine
+      assert_kind_of Deas::NullLogger, source.engines['test'].opts['logger']
+
       subject.engine 'test', @test_engine, 'an' => 'opt'
       exp_opts = {
         'source_path' => subject.path,
         'logger'      => @logger,
-        'an' => 'opt'
+        'an'          => 'opt'
       }
       assert_equal exp_opts, subject.engines['test'].opts
 
@@ -99,7 +104,7 @@ class Deas::TemplateSource
       @source.engine('test', TestEngine)
       @source.engine('json', JsonEngine)
 
-      @v = TestServiceHandler
+      @v = TestViewHandler
       @l = {}
       @c = Proc.new{}
     end
@@ -216,6 +221,6 @@ class Deas::TemplateSource
     end
   end
 
-  TestServiceHandler = Class.new
+  TestViewHandler = Class.new
 
 end
