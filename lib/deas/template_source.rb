@@ -14,8 +14,9 @@ module Deas
     def initialize(path, logger = nil)
       @path = path.to_s
       @default_opts = {
-        'source_path' => @path,
-        'logger'      => logger || Deas::NullLogger.new
+        'source_path'          => @path,
+        'logger'               => logger || Deas::NullLogger.new,
+        'deas_template_source' => self
       }
       @engines = Hash.new{ |h,k| Deas::NullTemplateEngine.new(@default_opts) }
     end

@@ -50,30 +50,30 @@ class Deas::TemplateSource
     should "register with default options" do
       subject.engine 'test', @test_engine
       exp_opts = {
-        'source_path' => subject.path,
-        'logger'      => @logger
+        'source_path'          => subject.path,
+        'logger'               => @logger,
+        'deas_template_source' => subject
       }
       assert_equal exp_opts, subject.engines['test'].opts
 
-      source = Deas::TemplateSource.new(@source_path)
-      source.engine 'test', @test_engine
-      assert_kind_of Deas::NullLogger, source.engines['test'].opts['logger']
-
       subject.engine 'test', @test_engine, 'an' => 'opt'
       exp_opts = {
-        'source_path' => subject.path,
-        'logger'      => @logger,
-        'an'          => 'opt'
+        'source_path'          => subject.path,
+        'logger'               => @logger,
+        'deas_template_source' => subject,
+        'an'                   => 'opt'
       }
       assert_equal exp_opts, subject.engines['test'].opts
 
       subject.engine('test', @test_engine, {
-        'source_path' => 'something',
-        'logger'      => 'another'
+        'source_path'          => 'something',
+        'logger'               => 'another',
+        'deas_template_source' => 'tempsource'
       })
       exp_opts = {
-        'source_path' => 'something',
-        'logger'      => 'another'
+        'source_path'          => 'something',
+        'logger'               => 'another',
+        'deas_template_source' => 'tempsource'
       }
       assert_equal exp_opts, subject.engines['test'].opts
 
