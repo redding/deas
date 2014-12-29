@@ -25,6 +25,10 @@ module Deas
       raise NotImplementedError
     end
 
+    def compile(template_content, locals)
+      raise NotImplementedError
+    end
+
   end
 
   class NullTemplateEngine < TemplateEngine
@@ -43,6 +47,10 @@ module Deas
 
     def capture_partial(template_name, locals, &content)
       render(template_name, nil, locals)
+    end
+
+    def compile(template_content, locals)
+      template_content  # no-op, pass-thru - just return the given content
     end
 
   end
