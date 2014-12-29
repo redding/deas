@@ -20,7 +20,7 @@ class Deas::TemplateEngine
     subject{ @engine }
 
     should have_readers :source_path, :logger, :opts
-    should have_imeths :render, :partial, :capture_partial
+    should have_imeths :render, :partial, :capture_partial, :compile
 
     should "default its source path" do
       assert_equal Pathname.new(nil.to_s), subject.source_path
@@ -69,6 +69,12 @@ class Deas::TemplateEngine
       end
     end
 
+    should "raise NotImplementedError on `compile`" do
+      assert_raises NotImplementedError do
+        subject.compile(Factory.text, @locals)
+      end
+    end
+
   end
 
   class NullTemplateEngineTests < Assert::Context
@@ -114,6 +120,11 @@ class Deas::TemplateEngine
       assert_raises ArgumentError do
         subject.capture_partial(no_exists_file, @l, &@c)
       end
+    end
+
+    should "return any given content with its `compile` method" do
+      exp = Factory.string
+      assert_equal exp, subject.compile(exp, @l)
     end
 
   end
