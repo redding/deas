@@ -25,7 +25,7 @@ module Deas
       raise NotImplementedError
     end
 
-    def compile(template_content, locals)
+    def compile(template_name, compiled_content)
       raise NotImplementedError
     end
 
@@ -49,8 +49,8 @@ module Deas
       render(template_name, nil, locals)
     end
 
-    def compile(template_content, locals)
-      template_content  # no-op, pass-thru - just return the given content
+    def compile(template_name, compiled_content)
+      compiled_content  # no-op, pass-thru - just return the given content
     end
 
   end
