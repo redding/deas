@@ -104,7 +104,7 @@ class Deas::TemplateSource
       @source.engine('test', TestEngine)
       @source.engine('json', JsonEngine)
 
-      @v = TestViewHandler
+      @v = TestViewHandler.new
       @l = {}
       @c = Proc.new{}
     end
@@ -115,15 +115,15 @@ class Deas::TemplateSource
     desc "when rendering a template"
 
     should "call `render` on the configured engine" do
-      result = subject.render('test_template', @v, @l)
-      assert_equal 'render-test-engine', result
+      exp = "render-test-engine on test_template\n"
+      assert_equal exp, subject.render('test_template', @v, @l)
     end
 
     should "only try rendering template files its has engines for" do
       # there should be 2 files called "template" in `test/support` with diff
       # extensions
-      result = subject.render('template', @v, @l)
-      assert_equal 'render-json-engine', result
+      exp = 'render-json-engine'
+      assert_equal exp, subject.render('template', @v, @l)
     end
 
     should "use the null template engine when an engine can't be found" do
@@ -134,19 +134,34 @@ class Deas::TemplateSource
 
   end
 
+  class RenderLayoutsTests < RenderOrPartialTests
+    desc "when rendering a template in layouts"
+    setup do
+      @v = LayoutViewHandler.new
+    end
+
+    should "render view handlers with layouts" do
+      exp = "render-test-engine on test_layout1\n"\
+            "render-test-engine on test_layout2\n"\
+            "render-test-engine on test_template\n"
+      assert_equal exp, subject.render('test_template', @v, @l)
+    end
+
+  end
+
   class PartialTests < RenderTests
     desc "when partial rendering a template"
 
     should "call `partial` on the configured engine" do
-      result = subject.partial('test_template', @l)
-      assert_equal 'partial-test-engine', result
+      exp = 'partial-test-engine'
+      assert_equal exp, subject.partial('test_template', @l)
     end
 
     should "only try rendering template files its has engines for" do
       # there should be 2 files called "template" in `test/support` with diff
       # extensions
-      result = subject.partial('template', @l)
-      assert_equal 'partial-json-engine', result
+      exp = 'partial-json-engine'
+      assert_equal exp, subject.partial('template', @l)
     end
 
     should "use the null template engine when an engine can't be found" do
@@ -161,15 +176,15 @@ class Deas::TemplateSource
     desc "when capture partial rendering a template"
 
     should "call `capture_partial` on the configured engine" do
-      result = subject.capture_partial('test_template', @l, &@c)
-      assert_equal 'capture-partial-test-engine', result
+      exp = 'capture-partial-test-engine'
+      assert_equal exp, subject.capture_partial('test_template', @l, &@c)
     end
 
     should "only try rendering template files its has engines for" do
       # there should be 2 files called "template" in `test/support` with diff
       # extensions
-      result = subject.capture_partial('template', @l, &@c)
-      assert_equal 'capture-partial-json-engine', result
+      exp = 'capture-partial-json-engine'
+      assert_equal exp, subject.capture_partial('template', @l, &@c)
     end
 
     should "use the null template engine when an engine can't be found" do
@@ -198,8 +213,8 @@ class Deas::TemplateSource
   end
 
   class TestEngine < Deas::TemplateEngine
-    def render(template_name, view_handler, locals)
-      'render-test-engine'
+    def render(template_name, view_handler, locals, &content)
+      "render-test-engine on #{template_name}\n" + content.call.to_s
     end
     def partial(template_name, locals)
       'partial-test-engine'
@@ -210,7 +225,7 @@ class Deas::TemplateSource
   end
 
   class JsonEngine < Deas::TemplateEngine
-    def render(template_name, view_handler, locals)
+    def render(template_name, view_handler, locals, &content)
       'render-json-engine'
     end
     def partial(template_name, locals)
@@ -221,6 +236,12 @@ class Deas::TemplateSource
     end
   end
 
-  TestViewHandler = Class.new
+  TestViewHandler = Class.new do
+    def self.layouts; []; end
+  end
+
+  LayoutViewHandler = Class.new do
+    def self.layouts; ['test_layout1', 'test_layout2']; end
+  end
 
 end

@@ -35,7 +35,11 @@ module Deas
     end
 
     def render(template_name, view_handler, locals)
-      get_engine(template_name).render(template_name, view_handler, locals)
+      [ view_handler.class.layouts,
+        template_name
+      ].flatten.reverse.inject(proc{}) do |render_proc, name|
+        proc{ get_engine(name).render(name, view_handler, locals, &render_proc) }
+      end.call
     end
 
     def partial(template_name, locals)
