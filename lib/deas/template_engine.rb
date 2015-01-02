@@ -13,7 +13,7 @@ module Deas
       @logger = @opts['logger'] || Deas::NullLogger.new
     end
 
-    def render(template_name, view_handler, locals)
+    def render(template_name, view_handler, locals, &content)
       raise NotImplementedError
     end
 
@@ -33,7 +33,7 @@ module Deas
 
   class NullTemplateEngine < TemplateEngine
 
-    def render(template_name, view_handler, locals)
+    def render(template_name, view_handler, locals, &content)
       template_file = self.source_path.join(template_name).to_s
       unless File.exists?(template_file)
         raise ArgumentError, "template file `#{template_file}` does not exist"
