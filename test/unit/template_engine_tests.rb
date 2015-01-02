@@ -71,7 +71,7 @@ class Deas::TemplateEngine
 
     should "raise NotImplementedError on `compile`" do
       assert_raises NotImplementedError do
-        subject.compile(Factory.text, @locals)
+        subject.compile(@template_name, Factory.text)
       end
     end
 
@@ -124,7 +124,7 @@ class Deas::TemplateEngine
 
     should "return any given content with its `compile` method" do
       exp = Factory.string
-      assert_equal exp, subject.compile(exp, @l)
+      assert_equal exp, subject.compile(Factory.path, exp)
     end
 
   end
