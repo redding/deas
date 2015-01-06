@@ -20,7 +20,7 @@ class Deas::TemplateEngine
     subject{ @engine }
 
     should have_readers :source_path, :logger, :opts
-    should have_imeths :render, :partial, :capture_partial, :compile
+    should have_imeths :render, :partial, :compile
 
     should "default its source path" do
       assert_equal Pathname.new(nil.to_s), subject.source_path
@@ -63,12 +63,6 @@ class Deas::TemplateEngine
       end
     end
 
-    should "raise NotImplementedError on `capture_partial`" do
-      assert_raises NotImplementedError do
-        subject.capture_partial(@template_name, @locals, &@content)
-      end
-    end
-
     should "raise NotImplementedError on `compile`" do
       assert_raises NotImplementedError do
         subject.compile(@template_name, Factory.text)
@@ -103,12 +97,6 @@ class Deas::TemplateEngine
       assert_equal exp, subject.partial(exists_file, @l)
     end
 
-    should "call `render` to implement its `capture_partial` method" do
-      exists_file = 'test/support/template.json'
-      exp = subject.render(exists_file, nil, @l)
-      assert_equal exp, subject.capture_partial(exists_file, @l, &@c)
-    end
-
     should "complain if given a path that does not exist in its source path" do
       no_exists_file = '/does/not/exists'
       assert_raises ArgumentError do
@@ -116,9 +104,6 @@ class Deas::TemplateEngine
       end
       assert_raises ArgumentError do
         subject.partial(no_exists_file, @l)
-      end
-      assert_raises ArgumentError do
-        subject.capture_partial(no_exists_file, @l, &@c)
       end
     end
 
