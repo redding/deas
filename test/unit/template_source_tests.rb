@@ -27,7 +27,7 @@ class Deas::TemplateSource
 
     should have_readers :path, :engines
     should have_imeths :engine, :engine_for?
-    should have_imeths :render, :partial, :capture_partial
+    should have_imeths :render, :partial
 
     should "know its path" do
       assert_equal @source_path.to_s, subject.path
@@ -153,7 +153,7 @@ class Deas::TemplateSource
     desc "when partial rendering a template"
 
     should "call `partial` on the configured engine" do
-      exp = 'partial-test-engine'
+      exp = "partial-test-engine\n"
       assert_equal exp, subject.partial('test_template', @l)
     end
 
@@ -167,29 +167,6 @@ class Deas::TemplateSource
     should "use the null template engine when an engine can't be found" do
       assert_raises(ArgumentError) do
         subject.partial(Factory.string, @l)
-      end
-    end
-
-  end
-
-  class CapturePartialTests < RenderOrPartialTests
-    desc "when capture partial rendering a template"
-
-    should "call `capture_partial` on the configured engine" do
-      exp = 'capture-partial-test-engine'
-      assert_equal exp, subject.capture_partial('test_template', @l, &@c)
-    end
-
-    should "only try rendering template files its has engines for" do
-      # there should be 2 files called "template" in `test/support` with diff
-      # extensions
-      exp = 'capture-partial-json-engine'
-      assert_equal exp, subject.capture_partial('template', @l, &@c)
-    end
-
-    should "use the null template engine when an engine can't be found" do
-      assert_raises(ArgumentError) do
-        subject.capture_partial(Factory.string, @l, &@c)
       end
     end
 
@@ -214,10 +191,11 @@ class Deas::TemplateSource
 
   class TestEngine < Deas::TemplateEngine
     def render(template_name, view_handler, locals, &content)
-      "render-test-engine on #{template_name}\n" + content.call.to_s
+      "render-test-engine on #{template_name}\n" +
+      (content || proc{}).call.to_s
     end
-    def partial(template_name, locals)
-      'partial-test-engine'
+    def partial(template_name, locals, &content)
+      "partial-test-engine\n" + (content || proc{}).call.to_s
     end
     def capture_partial(template_name, locals, &content)
       'capture-partial-test-engine'

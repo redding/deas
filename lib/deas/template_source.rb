@@ -34,20 +34,16 @@ module Deas
       @engines.keys.include?(get_template_ext(template_name))
     end
 
-    def render(template_name, view_handler, locals)
+    def render(template_name, view_handler, locals, &content)
       [ view_handler.class.layouts,
         template_name
-      ].flatten.reverse.inject(proc{}) do |render_proc, name|
+      ].flatten.reverse.inject(content) do |render_proc, name|
         proc{ get_engine(name).render(name, view_handler, locals, &render_proc) }
       end.call
     end
 
-    def partial(template_name, locals)
-      get_engine(template_name).partial(template_name, locals)
-    end
-
-    def capture_partial(template_name, locals, &content)
-      get_engine(template_name).capture_partial(template_name, locals, &content)
+    def partial(template_name, locals, &content)
+      get_engine(template_name).partial(template_name, locals, &content)
     end
 
     private
