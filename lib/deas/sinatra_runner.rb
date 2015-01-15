@@ -1,5 +1,4 @@
 require 'deas/deas_runner'
-require 'deas/template'
 
 module Deas
 
@@ -40,29 +39,9 @@ module Deas
       @sinatra_call.headers(*args)
     end
 
-    def render(template_name, opts = nil)
+    def render(template_name, locals = nil)
       self.content_type(get_content_type(template_name)) if self.content_type.nil?
-
-      options = opts || {}
-      options[:locals] = {
-        :view => self.handler,
-        :logger => self.logger
-      }.merge(options[:locals] || {})
-      options[:layout] = self.handler_class.layouts if !options.key?(:layout)
-
-      if self.template_source.engine_for?(template_name)
-        self.template_source.render(template_name, self.handler, options[:locals])
-      else
-        Deas::Template.new(@sinatra_call, template_name, options).render
-      end
-    end
-
-    def partial(template_name, locals = nil)
-      if self.template_source.engine_for?(template_name)
-        self.template_source.partial(template_name, locals || {})
-      else
-        Deas::Template::Partial.new(@sinatra_call, template_name, locals).render
-      end
+      super
     end
 
     def send_file(*args, &block)

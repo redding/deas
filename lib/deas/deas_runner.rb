@@ -18,6 +18,14 @@ module Deas
       response_data
     end
 
+    def render(template_name, locals = nil)
+      self.template_source.render(template_name, self.handler, locals || {})
+    end
+
+    def partial(template_name, locals = nil)
+      self.template_source.partial(template_name, locals || {})
+    end
+
     private
 
     def run_callbacks(callbacks)

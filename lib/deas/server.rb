@@ -7,7 +7,6 @@ require 'deas/logging'
 require 'deas/router'
 require 'deas/show_exceptions'
 require 'deas/sinatra_app'
-require 'deas/template'
 require 'deas/template_source'
 
 module Deas; end
@@ -96,12 +95,6 @@ module Deas::Server
 
     def routes
       self.router.routes
-    end
-
-    def template_scope
-      Class.new(Deas::Template::Scope).tap do |klass|
-        klass.send(:include, *self.template_helpers)
-      end
     end
 
   end

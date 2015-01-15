@@ -30,7 +30,6 @@ module Deas
         set :show_exceptions,  false
 
         # custom settings
-        set :deas_template_scope,  server_config.template_scope
         set :deas_error_procs,     server_config.error_procs
         set :deas_default_charset, server_config.default_charset
         set :logger,               server_config.logger

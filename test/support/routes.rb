@@ -32,13 +32,7 @@ class DeasTestServer
   post '/session',  'SetSessionHandler'
   get  '/session',  'UseSessionHandler'
 
-  get  '/with_layout',           'WithLayoutHandler'
-  get  '/haml_with_layout',      'HamlWithLayoutHandler'
-  get  '/with_haml_layout',      'WithHamlLayoutHandler'
-  get  '/haml_with_haml_layout', 'HamlWithHamlLayoutHandler'
-  get  '/partial.html',          'PartialHandler'
-
-  get '/handler/tests.json', 'HandlerTestsHandler'
+  get '/handler/tests', 'HandlerTestsHandler'
 
   redirect '/route_redirect',   '/somewhere'
   redirect('/:prefix/redirect'){ "/#{params['prefix']}/somewhere" }
@@ -72,7 +66,7 @@ class ShowHandler
   end
 
   def run!
-    render 'show'
+    @message
   end
 
 end
@@ -96,7 +90,6 @@ class ShowLatinJsonHandler
 
   def run!
     content_type :json, :charset => 'latin1'
-    render 'show_json'
   end
 
 end
@@ -106,7 +99,7 @@ class ShowTextHandler
 
   def run!
     hdrs = {'Content-Type' => 'text/plain'}
-    halt 200, hdrs, render('show.json')
+    halt 200, hdrs, ''
   end
 
 end
@@ -136,53 +129,6 @@ class ErrorHandler
   def run!
     raise 'test'
   end
-
-end
-
-class WithLayoutHandler
-  include Deas::ViewHandler
-  layouts 'layout1', 'layout2', 'layout3'
-
-  def run!
-    render 'with_layout'
-  end
-
-end
-
-class HamlWithLayoutHandler
-  include Deas::ViewHandler
-  layouts 'layout1'
-
-  def run!
-    render 'haml_with_layout'
-  end
-
-end
-
-class WithHamlLayoutHandler
-  include Deas::ViewHandler
-  layouts 'haml_layout1'
-
-  def run!
-    render 'with_layout'
-  end
-
-end
-
-class HamlWithHamlLayoutHandler
-  include Deas::ViewHandler
-  layouts 'haml_layout1'
-
-  def run!
-    render 'haml_with_layout'
-  end
-
-end
-
-class PartialHandler
-  include Deas::ViewHandler
-
-  def run!; partial '_info', :info => 'some-info'; end
 
 end
 
@@ -234,8 +180,7 @@ class HandlerTestsHandler
   end
 
   def run!
-    require 'multi_json'
-    [200, {}, MultiJson.encode(@data)]
+    [200, {}, @data.inspect]
   end
 
 end

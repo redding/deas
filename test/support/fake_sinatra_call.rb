@@ -21,7 +21,6 @@ class FakeSinatraCall
     @template_source = Deas::NullTemplateSource.new
 
     @settings = OpenStruct.new({
-      :deas_template_scope => Deas::Template::Scope,
       :deas_default_charset => 'utf-8',
       :logger => @logger,
       :router => @router,
