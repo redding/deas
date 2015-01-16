@@ -94,4 +94,50 @@ class Deas::DeasRunner
 
   end
 
+  class RenderSetupTests < InitTests
+    setup do
+      @template_name = Factory.path
+      @locals = { Factory.string => Factory.string }
+    end
+
+  end
+
+  class RenderTests < RenderSetupTests
+    desc "render method"
+    setup do
+      @render_args = nil
+      Assert.stub(@runner.template_source, :render){ |*args| @render_args = args }
+    end
+
+    should "call to its template source render method" do
+      subject.render(@template_name, @locals)
+      exp = [@template_name, subject.handler, @locals]
+      assert_equal exp, @render_args
+
+      subject.render(@template_name)
+      exp = [@template_name, subject.handler, {}]
+      assert_equal exp, @render_args
+    end
+
+  end
+
+  class PartialTests < RenderSetupTests
+    desc "partial method"
+    setup do
+      @partial_args = nil
+      Assert.stub(@runner.template_source, :partial){ |*args| @partial_args = args }
+    end
+
+    should "call to its template source partial method" do
+      subject.partial(@template_name, @locals)
+      exp = [@template_name, @locals]
+      assert_equal exp, @partial_args
+
+      subject.partial(@template_name)
+      exp = [@template_name, {}]
+      assert_equal exp, @partial_args
+    end
+
+  end
+
 end

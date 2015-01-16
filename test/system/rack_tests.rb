@@ -19,10 +19,9 @@ module Deas
     should "return a 200 response with a GET to '/show'" do
       get '/show', 'message' => 'this is a test'
 
-      expected_body = "show page: this is a test\n" \
-                      "Stuff: Show Info\n"
-      assert_equal 200,           last_response.status
-      assert_equal expected_body, last_response.body
+      assert_equal 200, last_response.status
+      exp = "this is a test"
+      assert_equal exp, last_response.body
     end
 
     should "set the content type appropriately" do
@@ -65,37 +64,6 @@ module Deas
 
       assert_equal 500, last_response.status
       assert_equal "Oops, something went wrong", last_response.body
-    end
-
-    should "render erb templates using layouts" do
-      get '/with_layout'
-      expected_body = "Layout 1\nLayout 2\nLayout 3\nWith Layouts View: WithLayoutHandler\n"
-      assert_equal 200,           last_response.status
-      assert_equal expected_body, last_response.body
-    end
-
-    should "render mixed (erb and other) templates using layouts" do
-      get '/haml_with_layout'
-      expected_body = "Layout 1\n<span>HamlWithLayoutHandler</span>\n"
-      assert_equal 200,           last_response.status
-      assert_equal expected_body, last_response.body
-
-      get '/with_haml_layout'
-      expected_body = "Layout 1\nWith Layouts View: WithHamlLayoutHandler\n"
-      assert_equal 200,           last_response.status
-      assert_equal expected_body, last_response.body
-
-      get '/haml_with_haml_layout'
-      expected_body = "Layout 1\n<span>HamlWithHamlLayoutHandler</span>\n"
-      assert_equal 200,           last_response.status
-      assert_equal expected_body, last_response.body
-    end
-
-    should "render partial templates" do
-      get '/partial.html'
-      expected_body = "Stuff: some-info\n"
-      assert_equal 200,           last_response.status
-      assert_equal expected_body, last_response.body
     end
 
     should "return a 302 redirecting to the expected locations" do
@@ -146,18 +114,20 @@ module Deas
   class HandlerTests < RackTests
     desc "handler"
     setup do
-      get 'handler/tests.json?a-param=something'
+      get 'handler/tests?a-param=something'
 
-      require 'multi_json'
-      @data = MultiJson.decode(last_response.body || "")
+      @data_inspect = last_response.body
     end
 
     should "be able to access sinatra call data" do
-      assert_equal 'Logger',       @data['logger_class_name']
-      assert_equal 'GET',          @data['request_method']
-      assert_equal 'Content-Type', @data['response_firstheaderval']
-      assert_equal 'something',    @data['params_a_param']
-      assert_equal '{}',           @data['session_inspect']
+      exp = {
+        'logger_class_name'       => 'Logger',
+        'request_method'          => 'GET',
+        'response_firstheaderval' => 'Content-Type',
+        'params_a_param'          => 'something',
+        'session_inspect'         => '{}'
+      }
+      assert_equal exp.inspect, @data_inspect
     end
 
   end

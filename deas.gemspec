@@ -24,6 +24,5 @@ Gem::Specification.new do |gem|
 
   gem.add_development_dependency("assert", ["~> 2.12"])
   gem.add_development_dependency("assert-rack-test")
-  gem.add_development_dependency('haml')
 
 end

@@ -4,7 +4,6 @@ require 'deas/server'
 require 'deas/exceptions'
 require 'deas/logger'
 require 'deas/router'
-require 'deas/template'
 require 'deas/template_source'
 require 'test/support/view_handlers'
 
@@ -30,7 +29,7 @@ class Deas::Server::Configuration
 
     should have_accessors :settings, :error_procs, :init_procs, :template_helpers
     should have_accessors :middlewares, :router
-    should have_imeths :valid?, :validate!, :urls, :routes, :template_scope
+    should have_imeths :valid?, :validate!, :urls, :routes
 
     should "default the env to 'development'" do
       assert_equal 'development', subject.env
@@ -65,14 +64,6 @@ class Deas::Server::Configuration
       assert_empty subject.routes
       assert_empty subject.urls
       assert_kind_of Deas::Router, subject.router
-    end
-
-    should "build a template scope including its template helpers" do
-      config = Deas::Server::Configuration.new
-      config.template_helpers << (helper_module = Module.new)
-
-      assert_includes Deas::Template::Scope, config.template_scope.ancestors
-      assert_includes helper_module, config.template_scope.included_modules
     end
 
     should "not be valid until validate! has been run" do
