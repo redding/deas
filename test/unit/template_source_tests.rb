@@ -91,6 +91,7 @@ class Deas::TemplateSource
     end
 
     should "know if it has an engine registered for a given template name" do
+      assert_false subject.engine_for?(Factory.string)
       assert_false subject.engine_for?('test_template')
 
       subject.engine 'test', @test_engine
