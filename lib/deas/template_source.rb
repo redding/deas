@@ -18,7 +18,14 @@ module Deas
         'logger'               => logger || Deas::NullLogger.new,
         'deas_template_source' => self
       }
-      @engines = Hash.new{ |h,k| Deas::NullTemplateEngine.new(@default_opts) }
+      @engines = Hash.new{ |h, k| Deas::NullTemplateEngine.new(@default_opts) }
+      @ext_cache = Hash.new do |hash, template_name|
+        paths = Dir.glob("#{File.join(@path, template_name.to_s)}.*")
+        paths = paths.reject{ |p| !@engines.keys.include?(parse_ext(p)) }
+        if !(ext = parse_ext(paths.first.to_s)).nil?
+          hash[template_name] = ext
+        end
+      end
     end
 
     def engine(input_ext, engine_class, registered_opts = nil)
@@ -53,9 +60,7 @@ module Deas
     end
 
     def get_template_ext(template_name)
-      files = Dir.glob("#{File.join(@path, template_name.to_s)}.*")
-      files = files.reject{ |p| !@engines.keys.include?(parse_ext(p)) }
-      parse_ext(files.first.to_s || '')
+      @ext_cache[template_name]
     end
 
     def parse_ext(template_name)
