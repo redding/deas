@@ -73,20 +73,20 @@ module Deas::ViewHandler
 
     should "render templates" do
       render_args = test_runner(RenderViewHandler).run
-      assert_equal "my_template",        render_args.template_name
-      assert_equal({ :some => :option }, render_args.options)
+      assert_equal "my_template",      render_args.template_name
+      assert_equal({:some => 'local'}, render_args.locals)
     end
 
     should "render partial templates" do
       partial_args = test_runner(PartialViewHandler).run
-      assert_equal "my_partial",        partial_args.template_name
-      assert_equal({:some => 'locals'}, partial_args.locals)
+      assert_equal "my_partial",       partial_args.template_name
+      assert_equal({:some => 'local'}, partial_args.locals)
     end
 
     should "send files" do
       send_file_args = test_runner(SendFileViewHandler).run
-      assert_equal "my_file.txt",        send_file_args.file_path
-      assert_equal({ :some => :option }, send_file_args.options)
+      assert_equal "my_file.txt",      send_file_args.file_path
+      assert_equal({:some => :option}, send_file_args.options)
     end
 
   end

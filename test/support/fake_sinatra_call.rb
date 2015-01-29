@@ -40,16 +40,6 @@ class FakeSinatraCall
   def status(*args);       args; end
   def headers(*args);      args; end
 
-  # return the template name for each nested calls
-  def erb(template_name, opts, &block)
-    if block
-      RenderArgs.new(template_name, opts, block.call)
-    else
-      RenderArgs.new(template_name, opts, nil)
-    end
-  end
-  RenderArgs = Struct.new(:template_name, :opts, :block_call_result)
-
   def send_file(file_path, opts, &block)
     if block
       SendFileArgs.new(file_path, opts, block.call)

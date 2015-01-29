@@ -133,31 +133,40 @@ class Deas::TestRunner
     end
 
     should "build render args if render is called" do
-      value = subject.render 'some/template'
-      assert_kind_of RenderArgs, value
-      [:template_name, :options, :block].each do |meth|
-        assert_respond_to meth, value
+      template_name = Factory.path
+      locals = { Factory.string => Factory.string }
+      args = subject.render template_name, locals
+
+      assert_kind_of RenderArgs, args
+      [:template_name, :locals].each do |meth|
+        assert_respond_to meth, args
       end
-      assert_equal 'some/template', value.template_name
+      assert_equal template_name, args.template_name
+      assert_equal locals,        args.locals
     end
 
     should "build partial args if partial is called" do
-      value = subject.partial 'some/partial', :some => 'locals'
-      assert_kind_of PartialArgs, value
+      template_name = Factory.path
+      locals = { Factory.string => Factory.string }
+      args = subject.partial template_name, locals
+
+      assert_kind_of PartialArgs, args
       [:template_name, :locals].each do |meth|
-        assert_respond_to meth, value
+        assert_respond_to meth, args
       end
-      assert_equal 'some/partial', value.template_name
-      assert_equal({:some => 'locals'}, value.locals)
+      assert_equal template_name, args.template_name
+      assert_equal locals,        args.locals
     end
 
     should "build send file args if send file is called" do
-      value = subject.send_file 'some/file/path'
-      assert_kind_of SendFileArgs, value
+      path = Factory.path
+      args = subject.send_file path
+
+      assert_kind_of SendFileArgs, args
       [:file_path, :options, :block].each do |meth|
-        assert_respond_to meth, value
+        assert_respond_to meth, args
       end
-      assert_equal 'some/file/path', value.file_path
+      assert_equal path, args.file_path
     end
 
   end
