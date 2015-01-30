@@ -38,7 +38,7 @@ class RenderViewHandler
   include Deas::ViewHandler
 
   def run!
-    render "my_template", :some => :option
+    render "my_template", :some => 'local'
   end
 end
 
@@ -46,7 +46,7 @@ class PartialViewHandler
   include Deas::ViewHandler
 
   def run!
-    partial "my_partial", :some => 'locals'
+    partial "my_partial", :some => 'local'
   end
 end
 
