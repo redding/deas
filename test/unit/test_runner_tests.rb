@@ -3,6 +3,7 @@ require 'deas/test_runner'
 
 require 'rack/test'
 require 'deas/runner'
+require 'deas/template_source'
 require 'test/support/normalized_params_spy'
 require 'test/support/view_handlers'
 
@@ -145,6 +146,21 @@ class Deas::TestRunner
       assert_equal locals,        args.locals
     end
 
+    should "build source render args if source source render is called" do
+      source = Deas::TemplateSource.new(Factory.path)
+      template_name = Factory.path
+      locals = { Factory.string => Factory.string }
+      args = subject.source_render source, template_name, locals
+
+      assert_kind_of SourceRenderArgs, args
+      [:source, :template_name, :locals].each do |meth|
+        assert_respond_to meth, args
+      end
+      assert_equal source,        args.source
+      assert_equal template_name, args.template_name
+      assert_equal locals,        args.locals
+    end
+
     should "build partial args if partial is called" do
       template_name = Factory.path
       locals = { Factory.string => Factory.string }
@@ -154,6 +170,21 @@ class Deas::TestRunner
       [:template_name, :locals].each do |meth|
         assert_respond_to meth, args
       end
+      assert_equal template_name, args.template_name
+      assert_equal locals,        args.locals
+    end
+
+    should "build source partial args if source partial is called" do
+      source = Deas::TemplateSource.new(Factory.path)
+      template_name = Factory.path
+      locals = { Factory.string => Factory.string }
+      args = subject.source_partial source, template_name, locals
+
+      assert_kind_of SourcePartialArgs, args
+      [:source, :template_name, :locals].each do |meth|
+        assert_respond_to meth, args
+      end
+      assert_equal source,        args.source
       assert_equal template_name, args.template_name
       assert_equal locals,        args.locals
     end

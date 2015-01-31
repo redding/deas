@@ -19,11 +19,19 @@ module Deas
     end
 
     def render(template_name, locals = nil)
-      self.template_source.render(template_name, self.handler, locals || {})
+      source_render(self.template_source, template_name, locals)
+    end
+
+    def source_render(source, template_name, locals = nil)
+      source.render(template_name, self.handler, locals || {})
     end
 
     def partial(template_name, locals = nil)
-      self.template_source.partial(template_name, locals || {})
+      source_partial(self.template_source, template_name, locals)
+    end
+
+    def source_partial(source, template_name, locals = nil)
+      source.partial(template_name, locals || {})
     end
 
     private

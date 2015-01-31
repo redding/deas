@@ -2,6 +2,7 @@ require 'assert'
 require 'deas/deas_runner'
 
 require 'deas/runner'
+require 'deas/template_source'
 require 'test/support/normalized_params_spy'
 require 'test/support/view_handlers'
 
@@ -121,6 +122,26 @@ class Deas::DeasRunner
 
   end
 
+  class SourceRenderTests < RenderSetupTests
+    desc "source render method"
+    setup do
+      @source_render_args = nil
+      @source = Deas::TemplateSource.new(Factory.path)
+      Assert.stub(@source, :render){ |*args| @source_render_args = args }
+    end
+
+    should "call to the given source's render method" do
+      subject.source_render(@source, @template_name, @locals)
+      exp = [@template_name, subject.handler, @locals]
+      assert_equal exp, @source_render_args
+
+      subject.source_render(@source, @template_name)
+      exp = [@template_name, subject.handler, {}]
+      assert_equal exp, @source_render_args
+    end
+
+  end
+
   class PartialTests < RenderSetupTests
     desc "partial method"
     setup do
@@ -136,6 +157,26 @@ class Deas::DeasRunner
       subject.partial(@template_name)
       exp = [@template_name, {}]
       assert_equal exp, @partial_args
+    end
+
+  end
+
+  class SourcePartialTests < RenderSetupTests
+    desc "source partial method"
+    setup do
+      @source_partial_args = nil
+      @source = Deas::TemplateSource.new(Factory.path)
+      Assert.stub(@source, :partial){ |*args| @source_partial_args = args }
+    end
+
+    should "call to the given source's partial method" do
+      subject.source_partial(@source, @template_name, @locals)
+      exp = [@template_name, @locals]
+      assert_equal exp, @source_partial_args
+
+      subject.source_partial(@source, @template_name)
+      exp = [@template_name, {}]
+      assert_equal exp, @source_partial_args
     end
 
   end

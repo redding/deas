@@ -30,14 +30,16 @@ module Deas
       @template_source = a[:template_source] || Deas::NullTemplateSource.new
     end
 
-    def halt(*args);         raise NotImplementedError; end
-    def redirect(*args);     raise NotImplementedError; end
-    def content_type(*args); raise NotImplementedError; end
-    def status(*args);       raise NotImplementedError; end
-    def headers(*args);      raise NotImplementedError; end
-    def render(*args);       raise NotImplementedError; end
-    def partial(*args);      raise NotImplementedError; end
-    def send_file(*args);    raise NotImplementedError; end
+    def halt(*args);           raise NotImplementedError; end
+    def redirect(*args);       raise NotImplementedError; end
+    def content_type(*args);   raise NotImplementedError; end
+    def status(*args);         raise NotImplementedError; end
+    def headers(*args);        raise NotImplementedError; end
+    def render(*args);         raise NotImplementedError; end
+    def source_render(*args);  raise NotImplementedError; end
+    def partial(*args);        raise NotImplementedError; end
+    def source_partial(*args); raise NotImplementedError; end
+    def send_file(*args);      raise NotImplementedError; end
 
     class NormalizedParams
 

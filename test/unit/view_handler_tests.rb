@@ -2,6 +2,7 @@ require 'assert'
 require 'deas/view_handler'
 
 require 'deas/test_helpers'
+require 'deas/template_source'
 require 'test/support/view_handlers'
 
 module Deas::ViewHandler
@@ -77,8 +78,22 @@ module Deas::ViewHandler
       assert_equal({:some => 'local'}, render_args.locals)
     end
 
+    should "render templates on a given source" do
+      render_args = test_runner(SourceRenderViewHandler).run
+      assert_kind_of Deas::TemplateSource, render_args.source
+      assert_equal "my_template",      render_args.template_name
+      assert_equal({:some => 'local'}, render_args.locals)
+    end
+
     should "render partial templates" do
       partial_args = test_runner(PartialViewHandler).run
+      assert_equal "my_partial",       partial_args.template_name
+      assert_equal({:some => 'local'}, partial_args.locals)
+    end
+
+    should "render partial templates on a given source" do
+      partial_args = test_runner(SourcePartialViewHandler).run
+      assert_kind_of Deas::TemplateSource, partial_args.source
       assert_equal "my_partial",       partial_args.template_name
       assert_equal({:some => 'local'}, partial_args.locals)
     end
