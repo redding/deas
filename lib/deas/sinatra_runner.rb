@@ -39,7 +39,7 @@ module Deas
       @sinatra_call.headers(*args)
     end
 
-    def render(template_name, locals = nil)
+    def source_render(source, template_name, locals = nil)
       self.content_type(get_content_type(template_name)) if self.content_type.nil?
       super
     end
