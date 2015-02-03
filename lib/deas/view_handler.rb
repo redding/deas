@@ -14,7 +14,7 @@ module Deas
     module InstanceMethods
 
       def initialize(runner)
-        @runner = runner
+        @deas_runner = runner
       end
 
       def init
@@ -50,24 +50,24 @@ module Deas
 
       # Helpers
 
-      def halt(*args);         @runner.halt(*args);         end
-      def redirect(*args);     @runner.redirect(*args);     end
-      def content_type(*args); @runner.content_type(*args); end
-      def status(*args);       @runner.status(*args);       end
-      def headers(*args);      @runner.headers(*args);      end
+      def halt(*args);         @deas_runner.halt(*args);         end
+      def redirect(*args);     @deas_runner.redirect(*args);     end
+      def content_type(*args); @deas_runner.content_type(*args); end
+      def status(*args);       @deas_runner.status(*args);       end
+      def headers(*args);      @deas_runner.headers(*args);      end
 
-      def render(*args, &block);         @runner.render(*args, &block);         end
-      def source_render(*args, &block);  @runner.source_render(*args, &block);  end
-      def partial(*args, &block);        @runner.partial(*args, &block);        end
-      def source_partial(*args, &block); @runner.source_partial(*args, &block); end
-      def send_file(*args, &block);      @runner.send_file(*args, &block);      end
+      def render(*args, &block);         @deas_runner.render(*args, &block);         end
+      def source_render(*args, &block);  @deas_runner.source_render(*args, &block);  end
+      def partial(*args, &block);        @deas_runner.partial(*args, &block);        end
+      def source_partial(*args, &block); @deas_runner.source_partial(*args, &block); end
+      def send_file(*args, &block);      @deas_runner.send_file(*args, &block);      end
 
-      def logger;   @runner.logger;   end
-      def router;   @runner.router;   end
-      def request;  @runner.request;  end
-      def response; @runner.response; end
-      def params;   @runner.params;   end
-      def session;  @runner.session;  end
+      def logger;   @deas_runner.logger;   end
+      def router;   @deas_runner.router;   end
+      def request;  @deas_runner.request;  end
+      def response; @deas_runner.response; end
+      def params;   @deas_runner.params;   end
+      def session;  @deas_runner.session;  end
 
       def run_callback(callback)
         (self.class.send("#{callback}_callbacks") || []).each do |callback|
