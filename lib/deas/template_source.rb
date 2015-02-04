@@ -13,12 +13,12 @@ module Deas
 
     def initialize(path, logger = nil)
       @path = path.to_s
-      @default_opts = {
-        'source_path'          => @path,
-        'logger'               => logger || Deas::NullLogger.new,
-        'deas_template_source' => self
+      @default_engine_opts = {
+        'source_path'             => @path,
+        'logger'                  => logger || Deas::NullLogger.new,
+        'default_template_source' => self
       }
-      @engines = Hash.new{ |h, k| Deas::NullTemplateEngine.new(@default_opts) }
+      @engines = Hash.new{ |h, k| Deas::NullTemplateEngine.new(@default_engine_opts) }
       @ext_cache = Hash.new do |hash, template_name|
         paths = Dir.glob("#{File.join(@path, template_name.to_s)}.*")
         paths = paths.reject{ |p| !@engines.keys.include?(parse_ext(p)) }
@@ -33,7 +33,7 @@ module Deas
         raise DisallowedEngineExtError, "`#{input_ext}` is disallowed as an"\
                                         " engine extension."
       end
-      engine_opts = @default_opts.merge(registered_opts || {})
+      engine_opts = @default_engine_opts.merge(registered_opts || {})
       @engines[input_ext.to_s] = engine_class.new(engine_opts)
     end
 
