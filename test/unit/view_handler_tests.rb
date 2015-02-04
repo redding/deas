@@ -37,7 +37,8 @@ module Deas::ViewHandler
   class InitTests < UnitTests
     desc "when init"
     setup do
-      @handler = test_handler(@handler_class)
+      @runner = test_runner(@handler_class)
+      @handler = @runner.handler
     end
     subject{ @handler }
 
@@ -72,36 +73,46 @@ module Deas::ViewHandler
       assert_raises(NotImplementedError){ test_runner(EmptyViewHandler).run }
     end
 
-    should "render templates" do
-      render_args = test_runner(RenderViewHandler).run
-      assert_equal "my_template",      render_args.template_name
-      assert_equal({:some => 'local'}, render_args.locals)
-    end
-
-    should "render templates on a given source" do
-      render_args = test_runner(SourceRenderViewHandler).run
-      assert_kind_of Deas::TemplateSource, render_args.source
-      assert_equal "my_template",      render_args.template_name
-      assert_equal({:some => 'local'}, render_args.locals)
-    end
-
-    should "render partial templates" do
-      partial_args = test_runner(PartialViewHandler).run
-      assert_equal "my_partial",       partial_args.template_name
-      assert_equal({:some => 'local'}, partial_args.locals)
-    end
-
-    should "render partial templates on a given source" do
-      partial_args = test_runner(SourcePartialViewHandler).run
-      assert_kind_of Deas::TemplateSource, partial_args.source
-      assert_equal "my_partial",       partial_args.template_name
-      assert_equal({:some => 'local'}, partial_args.locals)
-    end
-
     should "send files" do
       send_file_args = test_runner(SendFileViewHandler).run
       assert_equal "my_file.txt",      send_file_args.file_path
       assert_equal({:some => :option}, send_file_args.options)
+    end
+
+  end
+
+  class RenderTests < RunTests
+    setup do
+      @template_name = Factory.path
+      @locals = { Factory.string => Factory.string }
+      @source = Deas::TemplateSource.new(Factory.path)
+
+      @render_args = nil
+      Assert.stub(@runner.template_source, :render){ |*args| @render_args = args }
+      @source_render_args = nil
+      Assert.stub(@source, :render){ |*args| @source_render_args = args }
+      @partial_args = nil
+      Assert.stub(@runner.template_source, :partial){ |*args| @partial_args = args }
+      @source_partial_args = nil
+      Assert.stub(@source, :partial){ |*args| @source_partial_args = args }
+    end
+
+    should "render templates" do
+      subject.send(:render, @template_name, @locals)
+      exp = [@template_name, subject, @locals]
+      assert_equal exp, @render_args
+
+      subject.send(:source_render, @source, @template_name, @locals)
+      exp = [@template_name, subject, @locals]
+      assert_equal exp, @source_render_args
+
+      subject.send(:partial, @template_name, @locals)
+      exp = [@template_name, @locals]
+      assert_equal exp, @partial_args
+
+      subject.send(:source_partial, @source, @template_name, @locals)
+      exp = [@template_name, @locals]
+      assert_equal exp, @source_partial_args
     end
 
   end

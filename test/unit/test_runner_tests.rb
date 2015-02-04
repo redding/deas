@@ -133,62 +133,6 @@ class Deas::TestRunner
       assert_equal exp_val, value.value
     end
 
-    should "build render args if render is called" do
-      template_name = Factory.path
-      locals = { Factory.string => Factory.string }
-      args = subject.render template_name, locals
-
-      assert_kind_of RenderArgs, args
-      [:template_name, :locals].each do |meth|
-        assert_respond_to meth, args
-      end
-      assert_equal template_name, args.template_name
-      assert_equal locals,        args.locals
-    end
-
-    should "build source render args if source source render is called" do
-      source = Deas::TemplateSource.new(Factory.path)
-      template_name = Factory.path
-      locals = { Factory.string => Factory.string }
-      args = subject.source_render source, template_name, locals
-
-      assert_kind_of SourceRenderArgs, args
-      [:source, :template_name, :locals].each do |meth|
-        assert_respond_to meth, args
-      end
-      assert_equal source,        args.source
-      assert_equal template_name, args.template_name
-      assert_equal locals,        args.locals
-    end
-
-    should "build partial args if partial is called" do
-      template_name = Factory.path
-      locals = { Factory.string => Factory.string }
-      args = subject.partial template_name, locals
-
-      assert_kind_of PartialArgs, args
-      [:template_name, :locals].each do |meth|
-        assert_respond_to meth, args
-      end
-      assert_equal template_name, args.template_name
-      assert_equal locals,        args.locals
-    end
-
-    should "build source partial args if source partial is called" do
-      source = Deas::TemplateSource.new(Factory.path)
-      template_name = Factory.path
-      locals = { Factory.string => Factory.string }
-      args = subject.source_partial source, template_name, locals
-
-      assert_kind_of SourcePartialArgs, args
-      [:source, :template_name, :locals].each do |meth|
-        assert_respond_to meth, args
-      end
-      assert_equal source,        args.source
-      assert_equal template_name, args.template_name
-      assert_equal locals,        args.locals
-    end
-
     should "build send file args if send file is called" do
       path = Factory.path
       args = subject.send_file path
@@ -198,6 +142,63 @@ class Deas::TestRunner
         assert_respond_to meth, args
       end
       assert_equal path, args.file_path
+    end
+
+  end
+
+  class RenderSetupTests < InitTests
+    setup do
+      @template_name = Factory.path
+      @locals = { Factory.string => Factory.string }
+      @source = Deas::TemplateSource.new(Factory.path)
+    end
+
+  end
+
+  class SourceRenderTests < RenderSetupTests
+    desc "source render method"
+    setup do
+      @source_render_args = nil
+      Assert.stub(@source, :render){ |*args| @source_render_args = args }
+    end
+
+    should "render the template, discard its output and build render args" do
+      args = subject.source_render(@source, @template_name, @locals)
+
+      exp = [@template_name, subject.handler, @locals]
+      assert_equal exp, @source_render_args
+
+      assert_kind_of RenderArgs, args
+      [:source, :template_name, :locals].each do |meth|
+        assert_respond_to meth, args
+      end
+      assert_equal @source,        args.source
+      assert_equal @template_name, args.template_name
+      assert_equal @locals,        args.locals
+    end
+
+  end
+
+  class SourcePartialTests < RenderSetupTests
+    desc "source partial method"
+    setup do
+      @source_partial_args = nil
+      Assert.stub(@source, :partial){ |*args| @source_partial_args = args }
+    end
+
+    should "render the template, discard its output build render args" do
+      args = subject.source_partial(@source, @template_name, @locals)
+
+      exp = [@template_name, @locals]
+      assert_equal exp, @source_partial_args
+
+      assert_kind_of RenderArgs, args
+      [:source, :template_name, :locals].each do |meth|
+        assert_respond_to meth, args
+      end
+      assert_equal @source,        args.source
+      assert_equal @template_name, args.template_name
+      assert_equal @locals,        args.locals
     end
 
   end

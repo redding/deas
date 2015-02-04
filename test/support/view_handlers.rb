@@ -35,40 +35,6 @@ class DeasRunnerViewHandler
 
 end
 
-class RenderViewHandler
-  include Deas::ViewHandler
-
-  def run!
-    render "my_template", :some => 'local'
-  end
-end
-
-class SourceRenderViewHandler
-  include Deas::ViewHandler
-
-  def run!
-    source = Deas::TemplateSource.new(Factory.path)
-    source_render source, "my_template", :some => 'local'
-  end
-end
-
-class PartialViewHandler
-  include Deas::ViewHandler
-
-  def run!
-    partial "my_partial", :some => 'local'
-  end
-end
-
-class SourcePartialViewHandler
-  include Deas::ViewHandler
-
-  def run!
-    source = Deas::TemplateSource.new(Factory.path)
-    source_partial source, "my_partial", :some => 'local'
-  end
-end
-
 class SendFileViewHandler
   include Deas::ViewHandler
 
