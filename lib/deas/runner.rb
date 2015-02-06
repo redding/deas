@@ -35,11 +35,26 @@ module Deas
     def content_type(*args);   raise NotImplementedError; end
     def status(*args);         raise NotImplementedError; end
     def headers(*args);        raise NotImplementedError; end
-    def render(*args);         raise NotImplementedError; end
-    def source_render(*args);  raise NotImplementedError; end
-    def partial(*args);        raise NotImplementedError; end
-    def source_partial(*args); raise NotImplementedError; end
     def send_file(*args);      raise NotImplementedError; end
+
+    # the render methods are used by both the deas and test runners
+    # so we implement here
+
+    def render(template_name, locals = nil)
+      source_render(self.template_source, template_name, locals)
+    end
+
+    def source_render(source, template_name, locals = nil)
+      source.render(template_name, self.handler, locals || {})
+    end
+
+    def partial(template_name, locals = nil)
+      source_partial(self.template_source, template_name, locals)
+    end
+
+    def source_partial(source, template_name, locals = nil)
+      source.partial(template_name, locals || {})
+    end
 
     class NormalizedParams
 

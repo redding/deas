@@ -18,22 +18,6 @@ module Deas
       response_data
     end
 
-    def render(template_name, locals = nil)
-      source_render(self.template_source, template_name, locals)
-    end
-
-    def source_render(source, template_name, locals = nil)
-      source.render(template_name, self.handler, locals || {})
-    end
-
-    def partial(template_name, locals = nil)
-      source_partial(self.template_source, template_name, locals)
-    end
-
-    def source_partial(source, template_name, locals = nil)
-      source.partial(template_name, locals || {})
-    end
-
     private
 
     def run_callbacks(callbacks)

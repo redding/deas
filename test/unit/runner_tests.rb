@@ -45,16 +45,12 @@ class Deas::Runner
       assert_kind_of Deas::NullTemplateSource, subject.template_source
     end
 
-    should "not implement any actions" do
+    should "not implement its non-rendering actions" do
       assert_raises(NotImplementedError){ subject.halt }
       assert_raises(NotImplementedError){ subject.redirect }
       assert_raises(NotImplementedError){ subject.content_type }
       assert_raises(NotImplementedError){ subject.status }
       assert_raises(NotImplementedError){ subject.headers }
-      assert_raises(NotImplementedError){ subject.render }
-      assert_raises(NotImplementedError){ subject.source_render }
-      assert_raises(NotImplementedError){ subject.partial }
-      assert_raises(NotImplementedError){ subject.source_partial }
       assert_raises(NotImplementedError){ subject.send_file }
     end
 
@@ -121,6 +117,92 @@ class Deas::Runner
 
     class TestNormalizedParams < Deas::Runner::NormalizedParams
       def file_type?(value); false; end
+    end
+
+  end
+
+  class RenderSetupTests < InitTests
+    setup do
+      @template_name = Factory.path
+      @locals = { Factory.string => Factory.string }
+    end
+
+  end
+
+  class RenderTests < RenderSetupTests
+    desc "render method"
+    setup do
+      @render_args = nil
+      Assert.stub(@runner.template_source, :render){ |*args| @render_args = args }
+    end
+
+    should "call to its template source render method" do
+      subject.render(@template_name, @locals)
+      exp = [@template_name, subject.handler, @locals]
+      assert_equal exp, @render_args
+
+      subject.render(@template_name)
+      exp = [@template_name, subject.handler, {}]
+      assert_equal exp, @render_args
+    end
+
+  end
+
+  class SourceRenderTests < RenderSetupTests
+    desc "source render method"
+    setup do
+      @source_render_args = nil
+      @source = Deas::TemplateSource.new(Factory.path)
+      Assert.stub(@source, :render){ |*args| @source_render_args = args }
+    end
+
+    should "call to the given source's render method" do
+      subject.source_render(@source, @template_name, @locals)
+      exp = [@template_name, subject.handler, @locals]
+      assert_equal exp, @source_render_args
+
+      subject.source_render(@source, @template_name)
+      exp = [@template_name, subject.handler, {}]
+      assert_equal exp, @source_render_args
+    end
+
+  end
+
+  class PartialTests < RenderSetupTests
+    desc "partial method"
+    setup do
+      @partial_args = nil
+      Assert.stub(@runner.template_source, :partial){ |*args| @partial_args = args }
+    end
+
+    should "call to its template source partial method" do
+      subject.partial(@template_name, @locals)
+      exp = [@template_name, @locals]
+      assert_equal exp, @partial_args
+
+      subject.partial(@template_name)
+      exp = [@template_name, {}]
+      assert_equal exp, @partial_args
+    end
+
+  end
+
+  class SourcePartialTests < RenderSetupTests
+    desc "source partial method"
+    setup do
+      @source_partial_args = nil
+      @source = Deas::TemplateSource.new(Factory.path)
+      Assert.stub(@source, :partial){ |*args| @source_partial_args = args }
+    end
+
+    should "call to the given source's partial method" do
+      subject.source_partial(@source, @template_name, @locals)
+      exp = [@template_name, @locals]
+      assert_equal exp, @source_partial_args
+
+      subject.source_partial(@source, @template_name)
+      exp = [@template_name, {}]
+      assert_equal exp, @source_partial_args
     end
 
   end
