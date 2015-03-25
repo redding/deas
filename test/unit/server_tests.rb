@@ -19,17 +19,18 @@ module Deas::Server
     # DSL for sinatra-based settings
     should have_imeths :env, :root, :public_root, :views_root
     should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
-    should have_imeths :static_files, :reload_templates, :default_charset
+    should have_imeths :static_files, :reload_templates
 
     # DSL for server handling settings
     should have_imeths :init, :error, :template_helpers, :template_helper?
-    should have_imeths :use, :set, :verbose_logging, :logger, :template_source
-    should have_imeths :get, :post, :put, :patch, :delete
-    should have_imeths :redirect, :route, :url, :url_for
+    should have_imeths :use, :set, :verbose_logging, :logger, :default_charset
+    should have_imeths :template_source
 
     # DSL for server routing settings
     should have_imeths :router, :view_handler_ns, :base_url
     should have_imeths :url, :url_for
+    should have_imeths :default_request_type_name, :add_request_type
+    should have_imeths :request_type_name
     should have_imeths :get, :post, :put, :patch, :delete
     should have_imeths :route, :redirect
 

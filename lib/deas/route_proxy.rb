@@ -1,18 +1,22 @@
 require 'deas/exceptions'
-require 'deas/view_handler'
+require 'deas/handler_proxy'
 
 module Deas
-  class RouteProxy
 
-    attr_reader :handler_class_name, :handler_class
+  class RouteProxy < HandlerProxy
 
-    def initialize(handler_class_name)
-      @handler_class_name = handler_class_name
+    def initialize(handler_class_name, view_handler_ns = nil)
+      raise(NoHandlerClassError.new(handler_class_name)) if handler_class_name.nil?
+
+      if view_handler_ns && !(handler_class_name =~ /^::/)
+        handler_class_name = "#{view_handler_ns}::#{handler_class_name}"
+      end
+      super(handler_class_name)
     end
 
     def validate!
-      @handler_class = constantize(@handler_class_name).tap do |handler_class|
-        raise(NoHandlerClassError.new(@handler_class_name)) if !handler_class
+      @handler_class = constantize(self.handler_class_name).tap do |handler_class|
+        raise(NoHandlerClassError.new(self.handler_class_name)) if !handler_class
       end
     end
 
@@ -27,4 +31,5 @@ module Deas
     end
 
   end
+
 end

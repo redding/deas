@@ -16,4 +16,6 @@ module Deas
     end
   end
 
+  HandlerProxyNotFound = Class.new(Error)
+
 end

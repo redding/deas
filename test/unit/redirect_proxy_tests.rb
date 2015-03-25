@@ -1,7 +1,10 @@
 require 'assert'
 require 'deas/redirect_proxy'
 
+require 'deas/handler_proxy'
 require 'deas/test_helpers'
+require 'deas/url'
+require 'deas/view_handler'
 
 class Deas::RedirectProxy
 
@@ -12,11 +15,8 @@ class Deas::RedirectProxy
     end
     subject{ @proxy }
 
-    should have_readers :handler_class_name, :handler_class
-    should have_imeths :validate!
-
-    should "know its handler class name" do
-      assert_equal subject.handler_class.name, subject.handler_class_name
+    should "be a HandlerProxy" do
+      assert_kind_of Deas::HandlerProxy, subject
     end
 
   end
@@ -24,7 +24,7 @@ class Deas::RedirectProxy
   class HandlerClassTests < UnitTests
     include Deas::TestHelpers
 
-    desc "redir handler class"
+    desc "handler class"
     setup do
       @handler_class = @proxy.handler_class
     end
@@ -58,7 +58,7 @@ class Deas::RedirectProxy
   end
 
   class HandlerTests < HandlerClassTests
-    desc "redir handler instance"
+    desc "handler instance"
     setup do
       @handler = test_handler(@handler_class)
     end
