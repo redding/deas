@@ -97,8 +97,7 @@ module Deas
       from_url = self.urls[from_path]
       from_url_path = from_url.path if from_url
 
-      # TODO: prepend base url
-      add_route(:get, from_url_path || from_path, proxies)
+      add_route(:get, prepend_base_url(from_url_path || from_path), proxies)
     end
 
     private
