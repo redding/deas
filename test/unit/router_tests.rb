@@ -77,6 +77,16 @@ class Deas::Router
       assert_equal exp_path, route.path
     end
 
+    should "prepend the base url when adding redirects" do
+      url = Factory.url
+      subject.base_url url
+      path = Factory.path
+      redirect = subject.redirect(path, Factory.path)
+
+      exp_path = subject.prepend_base_url(path)
+      assert_equal exp_path, redirect.path
+    end
+
     should "set a default request type name" do
       subject.default_request_type_name(exp = Factory.string)
       assert_equal exp, subject.default_request_type_name
