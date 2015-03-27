@@ -14,10 +14,9 @@ module Deas::SinatraApp
   class UnitTests < Assert::Context
     desc "Deas::SinatraApp"
     setup do
-      proxy = Deas::RouteProxy.new('EmptyViewHandler')
-      @route = Deas::Route.new(:get, '/something', proxy)
       @router = Deas::Router.new
-      @router.routes = [ @route ]
+      @route = @router.get('/something', 'EmptyViewHandler')
+      @proxy = @route.handler_proxies[@router.default_request_type_name]
 
       @configuration = Deas::Server::Configuration.new.tap do |c|
         c.env              = 'staging'

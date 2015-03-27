@@ -90,10 +90,9 @@ class Deas::Server::Configuration
     setup do
       @initialized = false
       @other_initialized = false
-      proxy = Deas::RouteProxy.new('EmptyViewHandler')
-      @route = Deas::Route.new(:get, '/something', proxy)
       @router = Deas::Router.new
-      @router.routes = [ @route ]
+      @route = @router.get('/something', 'EmptyViewHandler')
+      @proxy = @route.handler_proxies[@router.default_request_type_name]
 
       @configuration = Deas::Server::Configuration.new.tap do |c|
         c.env              = 'staging'
@@ -121,12 +120,11 @@ class Deas::Server::Configuration
       assert_equal true, @other_initialized
     end
 
-    should "call constantize! on all routes" do
-      assert_nil @route.handler_class
+    should "call validate! on all routes" do
+      assert_nil @proxy.handler_class
 
       subject.validate!
-
-      assert_equal EmptyViewHandler, @route.handler_class
+      assert_equal EmptyViewHandler, @proxy.handler_class
     end
 
     should "default the :erb :outvar setting in the SinatraApp it creates" do

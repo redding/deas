@@ -1,6 +1,7 @@
 require 'assert'
-require 'assert-rack-test'
 require 'deas'
+
+require 'assert-rack-test'
 
 module Deas
 
@@ -20,8 +21,7 @@ module Deas
       get '/show', 'message' => 'this is a test'
 
       assert_equal 200, last_response.status
-      exp = "this is a test"
-      assert_equal exp, last_response.body
+      assert_equal "this is a test", last_response.body
     end
 
     should "set the content type appropriately" do
@@ -42,6 +42,19 @@ module Deas
 
       get '/show-headers-text'
       assert_equal 'text/plain', last_response.headers['Content-Type']
+    end
+
+    should "render different handlers for the same meth/path based on the type" do
+      get '/req-type-show/regular', 'message' => 'this is a test request'
+      assert_equal 200, last_response.status
+      assert_equal "this is a test request", last_response.body
+
+      get '/req-type-show/mobile', 'message' => 'this is a test request'
+      assert_equal 200, last_response.status
+      assert_equal "[MOBILE] this is a test request", last_response.body
+
+      get '/req-type-show/other', 'message' => 'this is a test request'
+      assert_equal 404, last_response.status
     end
 
     should "allow halting with a custom response" do
@@ -115,7 +128,6 @@ module Deas
     desc "handler"
     setup do
       get 'handler/tests?a-param=something'
-
       @data_inspect = last_response.body
     end
 

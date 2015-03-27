@@ -11,7 +11,7 @@ module Deas
       assert_kind_of RuntimeError, Deas::Error.new
     end
 
-    should "provide a no handler class exception that subclasses `Error`" do
+    should "provide a no handler class exception" do
       assert Deas::NoHandlerClassError
 
       handler_class_name = 'AHandlerClass'
@@ -23,17 +23,22 @@ module Deas
       assert_equal exp_msg, e.message
     end
 
-    should "provide a server exception that subclasses `Error`" do
+    should "provide a server exception" do
       assert Deas::ServerError
       assert_kind_of Deas::Error, Deas::ServerError.new
     end
 
-    should "provide a server root exception that subclasses `ServerError`" do
+    should "provide a server root exception" do
       assert Deas::ServerRootError
 
       e = Deas::ServerRootError.new
       assert_kind_of Deas::ServerError, e
       assert_equal "server `root` not set but required", e.message
+    end
+
+    should "provide a handler proxy not found exception" do
+      assert Deas::HandlerProxyNotFound
+      assert_kind_of Deas::Error, Deas::HandlerProxyNotFound.new
     end
 
   end

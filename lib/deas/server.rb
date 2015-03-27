@@ -211,6 +211,10 @@ module Deas::Server
     def url(*args, &block);     self.router.url(*args, &block);     end
     def url_for(*args, &block); self.router.url_for(*args, &block); end
 
+    def default_request_type_name(*args); self.router.default_request_type_name(*args); end
+    def add_request_type(*args, &block);  self.router.add_request_type(*args, &block);  end
+    def request_type_name(*args);         self.router.request_type_name(*args);         end
+
     def get(*args, &block);    self.router.get(*args, &block);    end
     def post(*args, &block);   self.router.post(*args, &block);   end
     def put(*args, &block);    self.router.put(*args, &block);    end

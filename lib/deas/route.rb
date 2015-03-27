@@ -1,39 +1,29 @@
-require 'deas/sinatra_runner'
+require 'deas/exceptions'
 
 module Deas
 
   class Route
 
-    attr_reader :method, :path, :route_proxy, :handler_class
+    attr_reader :method, :path, :handler_proxies
 
-    def initialize(method, path, route_proxy)
-      @method, @path, @route_proxy = method, path, route_proxy
+    def initialize(method, path, handler_proxies)
+      @method, @path, @handler_proxies = method, path, handler_proxies
     end
 
     def validate!
-      @route_proxy.validate!
-      @handler_class = @route_proxy.handler_class
+      @handler_proxies.each do |request_type_name, proxy|
+        proxy.validate!
+      end
     end
 
     def run(sinatra_call)
-      runner = SinatraRunner.new(self.handler_class, {
-        :sinatra_call => sinatra_call,
-        :request      => sinatra_call.request,
-        :response     => sinatra_call.response,
-        :session      => sinatra_call.session,
-        :params       => sinatra_call.params,
-        :logger       => sinatra_call.settings.logger,
-        :router       => sinatra_call.settings.router,
-        :template_source => sinatra_call.settings.template_source
-      })
-
-      sinatra_call.request.env.tap do |env|
-        env['deas.params'] = runner.params
-        env['deas.handler_class_name'] = self.handler_class.name
-        env['deas.logging'].call "  Handler: #{env['deas.handler_class_name']}"
-        env['deas.logging'].call "  Params:  #{env['deas.params'].inspect}"
+      type = sinatra_call.settings.router.request_type_name(sinatra_call.request)
+      proxy = begin
+        @handler_proxies[type]
+      rescue HandlerProxyNotFound
+        sinatra_call.halt(404)
       end
-      runner.run
+      proxy.run(sinatra_call)
     end
 
   end

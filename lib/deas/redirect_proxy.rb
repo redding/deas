@@ -1,9 +1,10 @@
+require 'deas/handler_proxy'
 require 'deas/url'
 require 'deas/view_handler'
 
 module Deas
 
-  class RedirectProxy
+  class RedirectProxy < HandlerProxy
 
     attr_reader :handler_class_name, :handler_class
 
