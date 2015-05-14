@@ -37,6 +37,10 @@ module Deas
         raise NotImplementedError
       end
 
+      def layouts
+        self.class.layouts.map{ |proc| self.instance_eval(&proc) }
+      end
+
       def inspect
         reference = '0x0%x' % (self.object_id << 1)
         "#<#{self.class}:#{reference} @request=#{request.inspect}>"
@@ -62,6 +66,7 @@ module Deas
       def source_partial(*args, &block); @deas_runner.source_partial(*args, &block); end
       def send_file(*args, &block);      @deas_runner.send_file(*args, &block);      end
 
+      # TODO: make these public when built using the test helpers
       def logger;   @deas_runner.logger;   end
       def router;   @deas_runner.router;   end
       def request;  @deas_runner.request;  end
@@ -79,10 +84,14 @@ module Deas
 
     module ClassMethods
 
-      def layout(*args)
-        (@layouts ||= []).tap{ |l| l.push(*args) }
+      def layout(path = nil, &block)
+        value = !path.nil? ? Proc.new{ path } : block
+        self.layouts.push(value) if value
       end
-      alias :layouts :layout
+
+      def layouts
+        @layouts ||= []
+      end
 
       def before_callbacks; @before_callbacks ||= []; end
       def after_callbacks;  @after_callbacks  ||= []; end

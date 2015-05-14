@@ -46,7 +46,7 @@ module Deas
     end
 
     def render(template_name, view_handler, locals, &content)
-      [ view_handler.class.layouts,
+      [ view_handler.layouts,
         template_name
       ].flatten.reverse.inject(content) do |render_proc, name|
         proc{ get_engine(name).render(name, view_handler, locals, &render_proc) }
