@@ -1,7 +1,4 @@
 require 'deas/exceptions'
-require 'deas/redirect_proxy'
-require 'deas/route'
-require 'deas/route_proxy'
 require 'deas/url'
 
 module Deas
@@ -74,6 +71,7 @@ module Deas
         handler_names[self.default_request_type_name] = default_handler_name
       end
 
+      require 'deas/route_proxy'
       proxies = handler_names.inject({}) do |proxies, (req_type_name, handler_name)|
         proxies[req_type_name] = Deas::RouteProxy.new(handler_name, self.view_handler_ns)
         proxies
@@ -91,6 +89,7 @@ module Deas
         raise ArgumentError, "no url named `#{to_path.inspect}`"
       end
 
+      require 'deas/redirect_proxy'
       proxy = Deas::RedirectProxy.new(to_url || to_path, &block)
       proxies = { self.default_request_type_name => proxy }
 
@@ -108,6 +107,7 @@ module Deas
 
     def add_route(http_method, path, proxies)
       proxies = HandlerProxies.new(proxies, self.default_request_type_name)
+      require 'deas/route'
       Deas::Route.new(http_method, path, proxies).tap{ |r| self.routes.push(r) }
     end
 
