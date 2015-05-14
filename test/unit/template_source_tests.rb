@@ -219,11 +219,11 @@ class Deas::TemplateSource
   end
 
   TestViewHandler = Class.new do
-    def self.layouts; []; end
+    def layouts; []; end
   end
 
   LayoutViewHandler = Class.new do
-    def self.layouts; ['test_layout1', 'test_layout2']; end
+    def layouts; ['test_layout1', 'test_layout2']; end
   end
 
 end

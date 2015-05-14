@@ -26,10 +26,10 @@ module Deas::ViewHandler
 
     should "specify layouts" do
       subject.layout 'layouts/app'
-      assert_equal ['layouts/app'], subject.layouts
+      assert_equal ['layouts/app'], subject.layouts.map(&:call)
 
-      subject.layouts 'layouts/web', 'layouts/search'
-      assert_equal ['layouts/app', 'layouts/web', 'layouts/search'], subject.layouts
+      subject.layout { 'layouts/web' }
+      assert_equal ['layouts/app', 'layouts/web'], subject.layouts.map(&:call)
     end
 
   end
@@ -37,12 +37,13 @@ module Deas::ViewHandler
   class InitTests < UnitTests
     desc "when init"
     setup do
-      @runner = test_runner(@handler_class)
+      @runner  = test_runner(@handler_class)
       @handler = @runner.handler
     end
     subject{ @handler }
 
     should have_imeths :init, :init!, :run, :run!
+    should have_imeths :layouts
 
     should "have called `init!` and it's callbacks" do
       assert_equal true, subject.before_init_called
@@ -55,6 +56,21 @@ module Deas::ViewHandler
       assert_nil subject.before_run_called
       assert_nil subject.run_bang_called
       assert_nil subject.after_run_called
+    end
+
+  end
+
+  class LayoutsTests < InitTests
+    desc "with layouts"
+    setup do
+      @params = { 'n' => Factory.integer }
+      @runner  = test_runner(LayoutsViewHandler, :params => @params)
+      @handler = @runner.handler
+    end
+
+    should "build its layouts by instance eval'ing its class layout procs" do
+      exp = subject.class.layouts.map{ |proc| @handler.instance_eval(&proc) }
+      assert_equal exp, subject.layouts
     end
 
   end
@@ -276,6 +292,15 @@ module Deas::ViewHandler
 
     def init!; @init_bang_called = true; end
     def run!;  @run_bang_called = true;  end
+
+  end
+
+  class LayoutsViewHandler
+    include Deas::ViewHandler
+
+    layout '1.html'
+    layout { '2.html' }
+    layout { "#{params['n']}.html" }
 
   end
 
