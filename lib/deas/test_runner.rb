@@ -9,7 +9,7 @@ module Deas
 
   class TestRunner < Runner
 
-    attr_reader :return_value
+    attr_reader :response_value
 
     def initialize(handler_class, args = nil)
       if !handler_class.include?(Deas::ViewHandler)
@@ -29,11 +29,18 @@ module Deas
       })
       args.each{|key, value| self.handler.send("#{key}=", value) }
 
-      @return_value = catch(:halt){ self.handler.init; nil }
+      @response_value = catch(:halt){ self.handler.init; nil }
+    end
+
+    # TODO: remove eventually
+    def return_value
+      warn "calling `return_value` on a test runner is deprecated - " \
+           "switch to `response_value` instead"
+      self.response_value
     end
 
     def run
-      @return_value ||= catch(:halt){ self.handler.run }
+      @response_value ||= catch(:halt){ self.handler.run }
     end
 
     # Helpers
