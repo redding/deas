@@ -124,6 +124,8 @@ class Deas::TestRunner
         assert_respond_to meth, value
       end
       assert_equal 'something', value.value
+
+      assert_same value, subject.content_type
     end
 
     should "build status args if status is called" do
@@ -131,6 +133,8 @@ class Deas::TestRunner
       assert_kind_of StatusArgs, value
       assert_respond_to :value, value
       assert_equal 432, value.value
+
+      assert_same value, subject.status
     end
 
     should "build headers args if headers is called" do
@@ -139,6 +143,8 @@ class Deas::TestRunner
       assert_respond_to :value, value
       exp_val = {:some => 'thing'}
       assert_equal exp_val, value.value
+
+      assert_same value, subject.headers
     end
 
     should "build send file args if send file is called" do
