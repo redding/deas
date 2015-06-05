@@ -67,18 +67,27 @@ module Deas
       def redirect?; true; end
     end
 
-    def content_type(value, opts={})
-      ContentTypeArgs.new(value, opts)
+    def content_type(*args)
+      return @content_type_value if args.empty?
+      opts, value = [
+        args.last.kind_of?(Hash) ? args.pop : {},
+        args.last
+      ]
+      @content_type_value = ContentTypeArgs.new(value, opts)
     end
     ContentTypeArgs = Struct.new(:value, :opts)
 
-    def status(value)
-      StatusArgs.new(value)
+    def status(*args)
+      return @status_value if args.empty?
+      value = args.last
+      @status_value = StatusArgs.new(value)
     end
     StatusArgs = Struct.new(:value)
 
-    def headers(value)
-      HeadersArgs.new(value)
+    def headers(*args)
+      return @headers_value if args.empty?
+      value = args.last
+      @headers_value = HeadersArgs.new(value)
     end
     HeadersArgs = Struct.new(:value)
 
