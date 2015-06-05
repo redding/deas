@@ -33,15 +33,15 @@ class Deas::SinatraRunner
     should have_imeths :run
 
     should "call the sinatra_call's halt with" do
-      return_value = catch(:halt){ subject.halt('test') }
-      assert_equal [ 'test' ], return_value
+      response_value = catch(:halt){ subject.halt('test') }
+      assert_equal [ 'test' ], response_value
     end
 
     should "call the sinatra_call's redirect method with" do
-      return_value = catch(:halt){ subject.redirect('http://google.com') }
+      response_value = catch(:halt){ subject.redirect('http://google.com') }
       expected = [ 302, { 'Location' => 'http://google.com' } ]
 
-      assert_equal expected, return_value
+      assert_equal expected, response_value
     end
 
     should "call the sinatra_call's content_type method using the default_charset" do

@@ -44,8 +44,9 @@ class Deas::TestRunner
     end
     subject{ @runner }
 
-    should have_readers :return_value
+    should have_readers :response_value
     should have_imeths :run
+    should have_imeths :return_value # TODO: deprecated
 
     should "raise an invalid error when not passed a view handler" do
       assert_raises(Deas::InvalidServiceHandlerError) do
@@ -81,14 +82,21 @@ class Deas::TestRunner
       assert_true subject.handler.init_called
     end
 
-    should "not set a return value on initialize" do
-      assert_nil subject.return_value
+    should "not set a response value on initialize" do
+      assert_nil subject.response_value
     end
 
-    should "set its return value to the return value of `run!` on run" do
-      assert_nil subject.return_value
+    should "set its response value to the return value of `run!` on run" do
+      assert_nil subject.response_value
       subject.run
-      assert_equal subject.handler.run!, subject.return_value
+      assert_equal subject.handler.run!, subject.response_value
+    end
+
+    # TODO: deprecated
+    should "alias its response value at `return_value`" do
+      assert_equal subject.response_value, subject.return_value
+      subject.run
+      assert_equal subject.response_value, subject.return_value
     end
 
     should "build halt args if halt is called" do

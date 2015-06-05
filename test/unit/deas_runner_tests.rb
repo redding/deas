@@ -48,7 +48,7 @@ class Deas::DeasRunner
   class RunTests < InitTests
     desc "and run"
     setup do
-      @return_value = @runner.run
+      @response_value = @runner.run
       @handler = @runner.instance_variable_get("@handler")
     end
     subject{ @handler }
@@ -63,8 +63,8 @@ class Deas::DeasRunner
       assert_equal true, subject.run_bang_called
     end
 
-    should "return the handler's run! return value" do
-      assert_equal true, @return_value
+    should "use the handler's run! return value as its response value" do
+      assert_equal true, @response_value
     end
 
   end
