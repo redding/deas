@@ -27,6 +27,7 @@ module Deas::SinatraApp
         c.show_exceptions  = true
         c.static           = true
         c.reload_templates = true
+        c.default_encoding = 'latin1'
         c.router           = @router
       end
       @sinatra_app = Deas::SinatraApp.new(@configuration)
@@ -52,6 +53,7 @@ module Deas::SinatraApp
         assert_equal false,                          settings.sessions
         assert_equal true,                           settings.static
         assert_equal true,                           settings.reload_templates
+        assert_equal 'latin1',                       settings.default_encoding
         assert_instance_of Deas::NullLogger,         settings.logger
         assert_instance_of Deas::Router,             settings.router
         assert_instance_of Deas::NullTemplateSource, settings.template_source
@@ -60,6 +62,8 @@ module Deas::SinatraApp
         assert_equal false, settings.logging
         assert_equal false, settings.raise_errors
         assert_equal false, settings.show_exceptions
+
+        assert_includes "application/json", settings.add_charset
       end
     end
 

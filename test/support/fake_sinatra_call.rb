@@ -20,8 +20,11 @@ class FakeSinatraCall
     @router          = Deas::Router.new
     @template_source = Deas::NullTemplateSource.new
 
+    @content_type = nil
+    @status       = 200
+    @headers      = {}
+
     @settings = OpenStruct.new({
-      :deas_default_charset => 'utf-8',
       :logger => @logger,
       :router => @router,
       :template_source => @template_source
@@ -36,9 +39,25 @@ class FakeSinatraCall
     halt 302, { 'Location' => args[0] }
   end
 
-  def content_type(*args); args; end
-  def status(*args);       args; end
-  def headers(*args);      args; end
+  def content_type(*args)
+    return @content_type if args.empty?
+    opts, value = [
+      args.last.kind_of?(Hash) ? args.pop : {},
+      args.last
+    ]
+    opts_value = opts.keys.map{ |k| "#{k}=#{opts[k]}" }.join(';')
+    @content_type = [value, opts_value].reject{ |v| v.to_s.empty? }.join(';')
+  end
+
+  def status(*args)
+    return @status if args.empty?
+    @status = args.last
+  end
+
+  def headers(*args)
+    return @headers if args.empty?
+    @headers = args.last
+  end
 
   def send_file(file_path, opts, &block)
     if block

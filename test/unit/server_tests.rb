@@ -23,7 +23,7 @@ module Deas::Server
 
     # DSL for server handling settings
     should have_imeths :init, :error, :template_helpers, :template_helper?
-    should have_imeths :use, :set, :verbose_logging, :logger, :default_charset
+    should have_imeths :use, :set, :verbose_logging, :logger, :default_encoding
     should have_imeths :template_source
 
     # DSL for server routing settings
@@ -93,8 +93,8 @@ module Deas::Server
       subject.template_source a_source
       assert_equal a_source, config.template_source
 
-      subject.default_charset 'latin1'
-      assert_equal 'latin1', config.default_charset
+      subject.default_encoding 'latin1'
+      assert_equal 'latin1', config.default_encoding
     end
 
     should "add and query helper modules" do

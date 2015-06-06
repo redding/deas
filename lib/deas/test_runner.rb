@@ -68,26 +68,26 @@ module Deas
     end
 
     def content_type(*args)
-      return @content_type_value if args.empty?
+      return @content_type if args.empty?
       opts, value = [
         args.last.kind_of?(Hash) ? args.pop : {},
         args.last
       ]
-      @content_type_value = ContentTypeArgs.new(value, opts)
+      @content_type = ContentTypeArgs.new(value, opts)
     end
     ContentTypeArgs = Struct.new(:value, :opts)
 
     def status(*args)
-      return @status_value if args.empty?
+      return @status if args.empty?
       value = args.last
-      @status_value = StatusArgs.new(value)
+      @status = StatusArgs.new(value)
     end
     StatusArgs = Struct.new(:value)
 
     def headers(*args)
-      return @headers_value if args.empty?
+      return @headers if args.empty?
       value = args.last
-      @headers_value = HeadersArgs.new(value)
+      @headers = HeadersArgs.new(value)
     end
     HeadersArgs = Struct.new(:value)
 

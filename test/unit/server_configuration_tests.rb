@@ -21,7 +21,7 @@ class Deas::Server::Configuration
 
     should have_imeths :env, :root, :public_root, :views_root
     should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
-    should have_imeths :static_files, :reload_templates, :default_charset
+    should have_imeths :static_files, :reload_templates, :default_encoding
 
     # server handling options
 
@@ -79,8 +79,8 @@ class Deas::Server::Configuration
       assert_nothing_raised{ config.root '/path/to/root'; config.validate! }
     end
 
-    should "use `utf-8` as the default_charset by default" do
-      assert_equal 'utf-8', subject.default_charset
+    should "use `utf-8` as the default encoding by default" do
+      assert_equal 'utf-8', subject.default_encoding
     end
 
   end
