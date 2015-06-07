@@ -21,6 +21,7 @@ module Deas
         set :sessions,         server_config.sessions
         set :static,           server_config.static_files
         set :reload_templates, server_config.reload_templates
+        set :default_encoding, server_config.default_encoding
         set :logging,          false
 
         # raise_errors and show_exceptions prevent Deas error handlers from
@@ -30,11 +31,16 @@ module Deas
         set :show_exceptions,  false
 
         # custom settings
-        set :deas_error_procs,     server_config.error_procs
-        set :deas_default_charset, server_config.default_charset
-        set :logger,               server_config.logger
-        set :router,               server_config.router
-        set :template_source,      server_config.template_source
+        set :deas_error_procs, server_config.error_procs
+        set :logger,           server_config.logger
+        set :router,           server_config.router
+        set :template_source,  server_config.template_source
+
+        # TODO: rework with `server_config.default_encoding` once we move off of using Sinatra
+        # TODO: could maybe move into a deas-json mixin once off of Sinatra
+        # Add charset to json content type responses - by default only added to these:
+        # ["application/javascript", "application/xml", "application/xhtml+xml", /^text\//]
+        settings.add_charset << "application/json"
 
         server_config.settings.each{ |set_args| set *set_args }
         server_config.middlewares.each{ |use_args| use *use_args }

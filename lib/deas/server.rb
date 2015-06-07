@@ -29,7 +29,7 @@ module Deas::Server
     option :show_exceptions,  NsOptions::Boolean, :default => false
     option :static_files,     NsOptions::Boolean, :default => true
     option :reload_templates, NsOptions::Boolean, :default => false
-    option :default_charset,  String,             :default => 'utf-8'
+    option :default_encoding, String,             :default => 'utf-8'
 
     # server handling options
 
@@ -190,8 +190,8 @@ module Deas::Server
       self.configuration.logger *args
     end
 
-    def default_charset(*args)
-      self.configuration.default_charset *args
+    def default_encoding(*args)
+      self.configuration.default_encoding *args
     end
 
     def template_source(*args)

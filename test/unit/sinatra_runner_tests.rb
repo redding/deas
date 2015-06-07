@@ -39,21 +39,21 @@ class Deas::SinatraRunner
 
     should "call the sinatra_call's redirect method with" do
       response_value = catch(:halt){ subject.redirect('http://google.com') }
-      expected = [ 302, { 'Location' => 'http://google.com' } ]
+      exp = [ 302, { 'Location' => 'http://google.com' } ]
 
-      assert_equal expected, response_value
+      assert_equal exp, response_value
     end
 
-    should "call the sinatra_call's content_type method using the default_charset" do
-      expected = @fake_sinatra_call.content_type('text/plain', :charset => 'utf-8')
-      assert_equal expected, subject.content_type('text/plain')
-
-      expected = @fake_sinatra_call.content_type('text/plain', :charset => 'latin1')
-      assert_equal expected, subject.content_type('text/plain', :charset => 'latin1')
+    should "call the sinatra_call's content_type to set the response content type" do
+      args = ['txt', { :charset => 'latin1' }]
+      exp = @fake_sinatra_call.content_type(*args)
+      subject.content_type(*args)
+      assert_equal exp, subject.content_type
     end
 
     should "call the sinatra_call's status to set the response status" do
-      assert_equal [422], subject.status(422)
+      subject.status(422)
+      assert_equal 422, subject.status
     end
 
     should "call the sinatra_call's headers to set the response headers" do
@@ -61,15 +61,18 @@ class Deas::SinatraRunner
         'a-header' => 'some value',
         'other'    => 'other'
       }
-      assert_equal [exp_headers], subject.headers(exp_headers)
+      subject.headers(exp_headers)
+      assert_equal exp_headers, subject.headers
     end
 
     should "call the sinatra_call's send_file to set the send files" do
       block_called = false
-      args = subject.send_file('a/file', {:some => 'opts'}, &proc{ block_called = true })
-      assert_equal 'a/file', args.file_path
+      args = subject.send_file('a/file.txt', {:some => 'opts'}, &proc{ block_called = true })
+      assert_equal 'a/file.txt', args.file_path
       assert_equal({:some => 'opts'}, args.options)
       assert_true block_called
+
+      assert_equal 'txt', subject.content_type
     end
 
   end

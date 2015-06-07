@@ -20,15 +20,7 @@ module Deas
     end
 
     def content_type(*args)
-      return @sinatra_call.content_type if args.empty?
-
-      opts, value = [
-        args.last.kind_of?(::Hash) ? args.pop : {},
-        args.first
-      ]
-      @sinatra_call.content_type(value, {
-        :charset => @sinatra_call.settings.deas_default_charset
-      }.merge(opts || {}))
+      @sinatra_call.content_type(*args)
     end
 
     def status(*args)
@@ -40,18 +32,23 @@ module Deas
     end
 
     def source_render(source, template_name, locals = nil)
-      self.content_type(get_content_type(template_name)) if self.content_type.nil?
+      if self.content_type.nil?
+        self.content_type(get_content_type_ext(template_name) || 'html')
+      end
       super
     end
 
-    def send_file(*args, &block)
-      @sinatra_call.send_file(*args, &block)
+    def send_file(file_path, opts = nil, &block)
+      if self.content_type.nil?
+        self.content_type(get_content_type_ext(file_path))
+      end
+      @sinatra_call.send_file(file_path, opts || {}, &block)
     end
 
     private
 
-    def get_content_type(template_name)
-      File.extname(template_name)[1..-1] || 'html'
+    def get_content_type_ext(file_path)
+      File.extname(file_path)[1..-1]
     end
 
   end
