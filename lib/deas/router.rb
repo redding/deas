@@ -1,3 +1,4 @@
+require 'rack'
 require 'deas/exceptions'
 require 'deas/url'
 
@@ -8,17 +9,24 @@ module Deas
     DEFAULT_REQUEST_TYPE_NAME = 'default'
 
     attr_reader :request_types, :urls, :routes
+    attr_reader :escape_query_value_proc
 
     def initialize(&block)
       @request_types = []
       @urls, @routes = {}, []
       default_request_type_name(DEFAULT_REQUEST_TYPE_NAME)
+      escape_query_value{ |v| Rack::Utils.escape(v) }
       self.instance_eval(&block) if !block.nil?
     end
 
     def view_handler_ns(value = nil)
       @view_handler_ns = value if !value.nil?
       @view_handler_ns
+    end
+
+    def escape_query_value(&block)
+      raise(ArgumentError, "no block given") unless block
+      @escape_query_value_proc = block
     end
 
     def base_url(value = nil)
@@ -30,12 +38,12 @@ module Deas
       "#{base_url}#{url_path}"
     end
 
-    def url(name, path)
+    def url(name, path, options = nil)
       if !path.kind_of?(::String)
         raise ArgumentError, "invalid path `#{path.inspect}` - "\
                              "can only provide a url name with String paths"
       end
-      add_url(name.to_sym, path)
+      add_url(name.to_sym, path, options || {})
     end
 
     def url_for(name, *args)
@@ -101,8 +109,11 @@ module Deas
 
     private
 
-    def add_url(name, path)
-      self.urls[name] = Deas::Url.new(name, path)
+    def add_url(name, path, options)
+      options[:escape_query_value] ||= self.escape_query_value_proc
+      self.urls[name] = Deas::Url.new(name, path, {
+        :escape_query_value => options[:escape_query_value]
+      })
     end
 
     def add_route(http_method, path, proxies)

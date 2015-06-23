@@ -1,12 +1,20 @@
-require 'deas/cgi'
-
 module Deas
   class Url
 
-    attr_reader :name, :path
+    def self.http_query(hash, &escape_value_proc)
+      escape_value_proc ||= proc{ |v| v.to_s }
+      hash.map do |(key, value)|
+        "#{key}=#{escape_value_proc.call(value)}"
+      end.sort.join('&')
+    end
 
-    def initialize(name, path)
+    attr_reader :name, :path
+    attr_reader :escape_query_value_proc
+
+    def initialize(name, path, options = nil)
+      options ||= {}
       @name, @path = name, path
+      @escape_query_value_proc = options[:escape_query_value]
     end
 
     def path_for(*args)
@@ -51,7 +59,9 @@ module Deas
     end
 
     def apply_extra(path, params)
-      params.empty? ? path : "#{path}?#{Deas::Cgi.http_query(params)}"
+      return path if params.empty?
+      query_string = Deas::Url.http_query(params, &self.escape_query_value_proc)
+      "#{path}?#{query_string}"
     end
 
     def apply_anchor(path, anchor)
