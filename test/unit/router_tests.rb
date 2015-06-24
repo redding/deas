@@ -28,8 +28,10 @@ class Deas::Router
     subject{ @router }
 
     should have_readers :request_types, :urls, :routes
+    should have_readers :escape_query_value_proc
 
-    should have_imeths :view_handler_ns, :base_url, :prepend_base_url
+    should have_imeths :view_handler_ns, :escape_query_value
+    should have_imeths :base_url, :prepend_base_url
     should have_imeths :url, :url_for
     should have_imeths :default_request_type_name, :add_request_type
     should have_imeths :request_type_name
@@ -45,11 +47,23 @@ class Deas::Router
 
       exp = @router_class::DEFAULT_REQUEST_TYPE_NAME
       assert_equal exp, subject.default_request_type_name
+
+      value = "#%&?"
+      exp = Rack::Utils.escape(value)
+      assert_equal exp, subject.escape_query_value_proc.call(value)
     end
 
     should "set a view handler namespace" do
       subject.view_handler_ns(exp = Factory.string)
       assert_equal exp, subject.view_handler_ns
+    end
+
+    should "allow configuring a custom escape query value proc" do
+      escape_proc = proc{ Factory.string }
+      subject.escape_query_value(&escape_proc)
+      assert_equal escape_proc, subject.escape_query_value_proc
+
+      assert_raises(ArgumentError){ subject.escape_query_value }
     end
 
     should "set a base url" do
@@ -228,6 +242,16 @@ class Deas::Router
       assert_kind_of Deas::Url, url
       assert_equal :get_info, url.name
       assert_equal '/info/:for', url.path
+      assert_equal subject.escape_query_value_proc, url.escape_query_value_proc
+    end
+
+    should "define a url with a custom escape query value proc" do
+      name = Factory.string
+      escape_proc = proc{ Factory.string }
+      @router.url(name, Factory.path, :escape_query_value => escape_proc)
+
+      url = subject.urls[name.to_sym]
+      assert_equal escape_proc, url.escape_query_value_proc
     end
 
     should "complain if defining a url with a non-string path" do

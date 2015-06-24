@@ -8,11 +8,35 @@ class Deas::Url
   class UnitTests < Assert::Context
     desc "Deas::Url"
     setup do
+      @url_class = Deas::Url
+    end
+    subject{ @url_class }
+
+    should have_imeths :http_query
+
+    should "create http query strings" do
+      params = {
+        Factory.string        => Factory.string,
+        Factory.integer       => Factory.integer(3).times.map{ Factory.string },
+        Factory.string.to_sym => { Factory.string => Factory.string }
+      }
+      exp = params.map{ |(k, v)| "#{k}=#{v}" }.sort.join('&')
+      assert_equal exp, @url_class.http_query(params)
+
+      exp = params.map{ |(k, v)| "#{k}=#{v.inspect}" }.sort.join('&')
+      assert_equal exp, @url_class.http_query(params){ |v| v.inspect }
+    end
+
+  end
+
+  class InitTests < UnitTests
+    desc "when init"
+    setup do
       @url = Deas::Url.new(:get_info, '/info')
     end
     subject{ @url }
 
-    should have_readers :name, :path
+    should have_readers :name, :path, :escape_query_value_proc
     should have_imeth :path_for
 
     should "know its name and path info" do
@@ -20,12 +44,25 @@ class Deas::Url
       assert_equal '/info', subject.path
     end
 
+    should "know its escape query value proc" do
+      assert_nil subject.escape_query_value_proc
+
+      escape_proc = proc{ Factory.string }
+      url = Deas::Url.new(Factory.string, Factory.path, {
+        :escape_query_value => escape_proc
+      })
+      assert escape_proc, subject.escape_query_value_proc
+    end
+
   end
 
-  class PathForTests < UnitTests
+  class PathForTests < InitTests
     desc "when generating paths"
     setup do
       @url = Deas::Url.new(:some_thing, '/:some/:thing/*/*')
+      @url_with_escape = Deas::Url.new(:some_thing, '/:some/:thing/*/*', {
+        :escape_query_value => proc{ |v| Rack::Utils.escape(v) }
+      })
     end
 
     should "generate given named params only" do
@@ -51,13 +88,31 @@ class Deas::Url
     end
 
     should "append other (additional) params as query params" do
-      exp_path = "/a/goose/cooked/well?aye=a%20a%20a&bee=b"
+      exp_path = "/a/goose/cooked/well?aye=a&bee=b"
       assert_equal exp_path, subject.path_for({
         'some'  => 'a',
         :thing  => 'goose',
         'splat' => ['cooked', 'well'],
         'bee'   => 'b',
-        :aye    => 'a a a'
+        :aye    => 'a'
+      })
+    end
+
+    should "escape query values when built with an escape query value proc" do
+      exp_path = "/a/goose/cooked/well?aye=a?a&a"
+      assert_equal exp_path, subject.path_for({
+        'some'  => 'a',
+        :thing  => 'goose',
+        'splat' => ['cooked', 'well'],
+        :aye    => 'a?a&a'
+      })
+
+      exp_path = "/a/goose/cooked/well?aye=a%3Fa%26a"
+      assert_equal exp_path, @url_with_escape.path_for({
+        'some'  => 'a',
+        :thing  => 'goose',
+        'splat' => ['cooked', 'well'],
+        :aye    => 'a?a&a'
       })
     end
 
@@ -142,10 +197,10 @@ class Deas::Url
 
     should "not alter the given params" do
       params = {
-        'some' => 'thing',
+        'some'    => 'thing',
         :captures => 'captures',
-        :splat => 'splat',
-        '#' => 'anchor'
+        :splat    => 'splat',
+        '#'       => 'anchor'
       }
       exp_params = params.dup
 
