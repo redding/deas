@@ -32,13 +32,6 @@ module Deas
       @response_value = catch(:halt){ self.handler.init; nil }
     end
 
-    # TODO: remove eventually
-    def return_value
-      warn "calling `return_value` on a test runner is deprecated - " \
-           "switch to `response_value` instead"
-      self.response_value
-    end
-
     def run
       @response_value ||= catch(:halt){ self.handler.run }
     end

@@ -46,7 +46,6 @@ class Deas::TestRunner
 
     should have_readers :response_value
     should have_imeths :run
-    should have_imeths :return_value # TODO: deprecated
 
     should "raise an invalid error when not passed a view handler" do
       assert_raises(Deas::InvalidServiceHandlerError) do
@@ -90,13 +89,6 @@ class Deas::TestRunner
       assert_nil subject.response_value
       subject.run
       assert_equal subject.handler.run!, subject.response_value
-    end
-
-    # TODO: deprecated
-    should "alias its response value at `return_value`" do
-      assert_equal subject.response_value, subject.return_value
-      subject.run
-      assert_equal subject.response_value, subject.return_value
     end
 
     should "build halt args if halt is called" do
