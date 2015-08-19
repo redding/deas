@@ -30,8 +30,12 @@ module Deas
     end
 
     def base_url(value = nil)
-      @base_url = value if !value.nil?
+      set_base_url(value) if !value.nil?
       @base_url
+    end
+
+    def set_base_url(value)
+      @base_url = value
     end
 
     def prepend_base_url(url_path)
@@ -98,7 +102,7 @@ module Deas
       end
 
       require 'deas/redirect_proxy'
-      proxy = Deas::RedirectProxy.new(to_url || to_path, &block)
+      proxy = Deas::RedirectProxy.new(self, to_url || to_path, &block)
       proxies = { self.default_request_type_name => proxy }
 
       from_url = self.urls[from_path]
