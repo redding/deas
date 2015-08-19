@@ -11,7 +11,9 @@ class Deas::RedirectProxy
   class UnitTests < Assert::Context
     desc "Deas::RedirectProxy"
     setup do
-      @proxy = Deas::RedirectProxy.new('/somewhere')
+      @base_url = Factory.url
+      @router   = Deas::Router.new
+      @proxy    = Deas::RedirectProxy.new(@router, '/somewhere')
     end
     subject{ @proxy }
 
@@ -30,7 +32,7 @@ class Deas::RedirectProxy
     end
     subject{ @handler_class }
 
-    should have_accessor :redirect_path
+    should have_accessor :router, :redirect_path
     should have_imeth :name
 
     should "be a view handler" do
@@ -39,20 +41,24 @@ class Deas::RedirectProxy
       end
     end
 
-    should "know its name" do
-      assert_equal 'Deas::RedirectHandler', subject.name
+    should "store the given router" do
+      assert_equal @router, subject.router
     end
 
     should "store its redirect path as a proc" do
       assert_kind_of Proc, subject.redirect_path
 
       url = Deas::Url.new(:some_thing, '/:some/:thing')
-      handler_class = Deas::RedirectProxy.new(url).handler_class
+      handler_class = Deas::RedirectProxy.new(@router, url).handler_class
       assert_kind_of Proc, handler_class.redirect_path
 
       path_proc = proc{ '/somewhere' }
-      handler_class = Deas::RedirectProxy.new(&path_proc).handler_class
+      handler_class = Deas::RedirectProxy.new(@router, &path_proc).handler_class
       assert_kind_of Proc, handler_class.redirect_path
+    end
+
+    should "know its name" do
+      assert_equal 'Deas::RedirectHandler', subject.name
     end
 
   end
@@ -67,24 +73,45 @@ class Deas::RedirectProxy
     should have_reader :redirect_path
 
     should "know its redir path if from a path string" do
-      assert_equal '/somewhere', subject.redirect_path
+      exp_path = '/somewhere'
+      assert_equal exp_path, subject.redirect_path
+
+      @router.base_url(@base_url)
+      handler = test_handler(@handler_class)
+      exp = @router.prepend_base_url(exp_path)
+      assert_equal exp, handler.redirect_path
     end
 
     should "know its redir path if from Url" do
       url = Deas::Url.new(:some_thing, '/:some/:thing')
-      handler_class = Deas::RedirectProxy.new(url).handler_class
+      handler_class = Deas::RedirectProxy.new(@router, url).handler_class
       handler = test_handler(handler_class, {
         :params => { 'some' => 'a', 'thing' => 'goose' }
       })
 
-      assert_equal '/a/goose', handler.redirect_path
+      exp_path = '/a/goose'
+      assert_equal exp_path, handler.redirect_path
+
+      @router.base_url(@base_url)
+      handler = test_handler(handler_class, {
+        :params => { 'some' => 'a', 'thing' => 'goose' }
+      })
+      exp = @router.prepend_base_url(exp_path)
+      assert_equal exp, handler.redirect_path
     end
 
     should "know its redir path if from a block" do
-      handler_class = Deas::RedirectProxy.new(&proc{'/from-block-arg'}).handler_class
+      path_proc = proc{ '/from-block-arg' }
+      handler_class = Deas::RedirectProxy.new(@router, &path_proc).handler_class
       handler = test_handler(handler_class)
 
-      assert_equal '/from-block-arg', handler.redirect_path
+      exp_path = '/from-block-arg'
+      assert_equal exp_path , handler.redirect_path
+
+      @router.base_url(@base_url)
+      handler = test_handler(handler_class)
+      exp = @router.prepend_base_url(exp_path)
+      assert_equal exp, handler.redirect_path
     end
 
   end

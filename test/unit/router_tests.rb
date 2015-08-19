@@ -3,6 +3,7 @@ require 'deas/router'
 
 require 'deas/exceptions'
 require 'deas/route'
+require 'deas/test_helpers'
 require 'test/support/view_handlers'
 
 class Deas::Router
@@ -21,9 +22,12 @@ class Deas::Router
   end
 
   class InitTests < UnitTests
+    include Deas::TestHelpers
+
     desc "when init"
     setup do
-      @router = @router_class.new
+      @base_url = a_base_url = [Factory.url, nil].choice
+      @router = @router_class.new{ base_url a_base_url }
     end
     subject{ @router }
 
@@ -31,7 +35,7 @@ class Deas::Router
     should have_readers :escape_query_value_proc
 
     should have_imeths :view_handler_ns, :escape_query_value
-    should have_imeths :base_url, :prepend_base_url
+    should have_imeths :base_url, :set_base_url, :prepend_base_url
     should have_imeths :url, :url_for
     should have_imeths :default_request_type_name, :add_request_type
     should have_imeths :request_type_name
@@ -39,18 +43,19 @@ class Deas::Router
     should have_imeths :route, :redirect
 
     should "default its settings" do
-      assert_nil subject.view_handler_ns
-      assert_nil subject.base_url
-      assert_empty subject.request_types
-      assert_empty subject.urls
-      assert_empty subject.routes
+      router = @router_class.new
+      assert_nil router.view_handler_ns
+      assert_nil router.base_url
+      assert_empty router.request_types
+      assert_empty router.urls
+      assert_empty router.routes
 
       exp = @router_class::DEFAULT_REQUEST_TYPE_NAME
-      assert_equal exp, subject.default_request_type_name
+      assert_equal exp, router.default_request_type_name
 
       value = "#%&?"
       exp = Rack::Utils.escape(value)
-      assert_equal exp, subject.escape_query_value_proc.call(value)
+      assert_equal exp, router.escape_query_value_proc.call(value)
     end
 
     should "set a view handler namespace" do
@@ -69,9 +74,16 @@ class Deas::Router
     should "set a base url" do
       subject.base_url(exp = Factory.url)
       assert_equal exp, subject.base_url
+
+      subject.base_url(nil)
+      assert_not_nil subject.base_url
+
+      subject.set_base_url(nil)
+      assert_nil subject.base_url
     end
 
     should "prepend the base url to any url path" do
+      subject.set_base_url(nil)
       url_path = Factory.path
       base_url = Factory.url
 
@@ -94,11 +106,17 @@ class Deas::Router
     should "prepend the base url when adding redirects" do
       url = Factory.url
       subject.base_url url
-      path = Factory.path
-      redirect = subject.redirect(path, Factory.path)
+      path1 = Factory.path
+      path2 = Factory.path
+      redirect = subject.redirect(path1, path2)
 
-      exp_path = subject.prepend_base_url(path)
-      assert_equal exp_path, redirect.path
+      exp = subject.prepend_base_url(path1)
+      assert_equal exp, redirect.path
+
+      proxy = redirect.handler_proxies[subject.default_request_type_name]
+      handler = test_handler(proxy.handler_class)
+      exp = subject.prepend_base_url(path2)
+      assert_equal exp, handler.redirect_path
     end
 
     should "set a default request type name" do
@@ -174,7 +192,7 @@ class Deas::Router
       route = subject.routes.last
       assert_instance_of Deas::Route, route
       assert_equal @method, route.method
-      assert_equal @path1,  route.path
+      assert_equal subject.prepend_base_url(@path1), route.path
 
       proxies = route.handler_proxies
       assert_kind_of HandlerProxies, proxies
@@ -220,12 +238,16 @@ class Deas::Router
 
       route = subject.routes.last
       assert_instance_of Deas::Route, route
-      assert_equal :get,   route.method
-      assert_equal @path1, route.path
+      assert_equal :get, route.method
+      assert_equal subject.prepend_base_url(@path1), route.path
 
       proxy = route.handler_proxies[subject.default_request_type_name]
       assert_kind_of Deas::RedirectProxy, proxy
       assert_equal 'Deas::RedirectHandler', proxy.handler_class_name
+
+      handler = test_handler(proxy.handler_class)
+      exp = subject.prepend_base_url(@path2)
+      assert_equal exp, handler.redirect_path
     end
 
   end
@@ -261,13 +283,13 @@ class Deas::Router
     end
 
     should "build a path for a url given params" do
-      exp_path = "/info/now"
+      exp_path = subject.prepend_base_url("/info/now")
       assert_equal exp_path, subject.url_for(:get_info, :for => 'now')
       assert_equal exp_path, subject.url_for(:get_info, 'now')
     end
 
     should "'squash' duplicate forward-slashes when building urls" do
-      exp_path = "/info/now"
+      exp_path = subject.prepend_base_url("/info/now")
       assert_equal exp_path, subject.url_for(:get_info, :for => '/now')
       assert_equal exp_path, subject.url_for(:get_info, '/now')
     end
@@ -289,7 +311,8 @@ class Deas::Router
       url   = subject.urls[:get_info]
       route = subject.routes.last
 
-      assert_equal url.path, route.path
+      exp = subject.prepend_base_url(url.path)
+      assert_equal exp, route.path
     end
 
     should "route using a url name instead of a path" do
@@ -297,7 +320,8 @@ class Deas::Router
       url   = subject.urls[:get_info]
       route = subject.routes.last
 
-      assert_equal url.path, route.path
+      exp = subject.prepend_base_url(url.path)
+      assert_equal exp, route.path
     end
 
     should "prepend the base url when building named urls" do
