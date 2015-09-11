@@ -192,7 +192,7 @@ module Deas
         @settings = {}
         @init_procs, @error_procs, @template_helpers, @middlewares = [], [], [], []
         @router = Deas::Router.new
-        @valid = nil
+        @valid  = nil
       end
 
       def urls
@@ -201,6 +201,13 @@ module Deas
 
       def routes
         self.router.routes
+      end
+
+      def to_hash
+        super.merge({
+          :error_procs => self.error_procs,
+          :router      => self.router
+        })
       end
 
       def valid?
@@ -219,12 +226,6 @@ module Deas
 
         # validate the routes
         self.routes.each(&:validate!)
-
-        # set the :erb :outvar setting if it hasn't been set.  this is used
-        # by template helpers and plugins and needs to be queryable.  the actual
-        # value doesn't matter - it just needs to be set
-        self.settings[:erb] ||= {}
-        self.settings[:erb][:outvar] ||= '@_out_buf'
 
         # append the show exceptions and loggine middlewares last.  This ensures
         # that the logging and exception showing happens just before the app gets

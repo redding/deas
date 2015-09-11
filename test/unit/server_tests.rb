@@ -138,6 +138,7 @@ module Deas::Server
     should have_accessors :settings, :init_procs, :error_procs, :template_helpers
     should have_accessors :middlewares, :router
     should have_imeths :valid?, :validate!, :urls, :routes
+    should have_imeths :to_hash
 
     should "default the env to 'development'" do
       assert_equal 'development', subject.env
@@ -191,6 +192,13 @@ module Deas::Server
       assert_equal 'utf-8', subject.default_encoding
     end
 
+    should "include its error procs and router in its `to_hash`" do
+      config_hash = subject.to_hash
+
+      assert_equal subject.error_procs, config_hash[:error_procs]
+      assert_equal subject.router,      config_hash[:router]
+    end
+
   end
 
   class ValidationTests < ConfigurationTests
@@ -233,15 +241,6 @@ module Deas::Server
 
       subject.validate!
       assert_equal EmptyViewHandler, @proxy.handler_class
-    end
-
-    should "default the :erb :outvar setting in the SinatraApp it creates" do
-      assert_nil subject.settings[:erb]
-
-      subject.validate!
-
-      assert_kind_of ::Hash, subject.settings[:erb]
-      assert_equal '@_out_buf', subject.settings[:erb][:outvar]
     end
 
     should "add the Logging and ShowExceptions middleware to the end" do

@@ -2,7 +2,6 @@ require 'assert'
 require 'deas/sinatra_runner'
 
 require 'deas/deas_runner'
-require 'test/support/fake_sinatra_call'
 require 'test/support/view_handlers'
 
 class Deas::SinatraRunner
@@ -23,7 +22,7 @@ class Deas::SinatraRunner
   class InitTests < UnitTests
     desc "when init"
     setup do
-      @fake_sinatra_call = FakeSinatraCall.new
+      @fake_sinatra_call = Factory.sinatra_call
       @runner = @runner_class.new(DeasRunnerViewHandler, {
         :sinatra_call => @fake_sinatra_call
       })
