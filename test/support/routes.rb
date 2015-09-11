@@ -10,12 +10,12 @@ class DeasTestServer
 
   set :a_setting, 'something'
 
-  error do |exception|
+  error do |exception, context|
     case exception
     when Sinatra::NotFound
-      halt 404, "Couldn't be found"
+      [404, "Couldn't be found"]
     when Exception
-      halt 500, "Oops, something went wrong"
+      [500, "Oops, something went wrong"]
     end
   end
 

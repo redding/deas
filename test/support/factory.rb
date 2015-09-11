@@ -8,6 +8,14 @@ require 'test/support/fake_sinatra_call'
 module Factory
   extend Assert::Factory
 
+  def self.exception(klass = nil, message = nil)
+    klass ||= StandardError
+    message ||= Factory.text
+    exception = nil
+    begin; raise(klass, message); rescue klass => exception; end
+    exception
+  end
+
   def self.server_data(opts = nil)
     Deas::ServerData.new({
       :logger          => Deas::NullLogger.new,
