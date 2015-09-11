@@ -1,7 +1,4 @@
 require 'ostruct'
-require 'deas/logger'
-require 'deas/router'
-require 'deas/template_source'
 
 class FakeSinatraCall
 
@@ -11,7 +8,7 @@ class FakeSinatraCall
   attr_accessor :request, :response, :params, :logger, :router, :session
   attr_accessor :settings
 
-  def initialize(settings = {})
+  def initialize(settings = nil)
     @request         = FakeRequest.new('GET','/something', {}, OpenStruct.new)
     @response        = FakeResponse.new
     @session         = @request.session
@@ -25,10 +22,8 @@ class FakeSinatraCall
     @headers      = {}
 
     @settings = OpenStruct.new({
-      :logger => @logger,
-      :router => @router,
-      :template_source => @template_source
-    }.merge(settings))
+      :deas_server_data => Factory.server_data
+    }.merge(settings || {}))
   end
 
   def halt(*args)

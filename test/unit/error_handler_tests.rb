@@ -1,15 +1,13 @@
 require 'assert'
 require 'deas/error_handler'
 
-require 'test/support/fake_sinatra_call'
-
 class Deas::ErrorHandler
 
   class UnitTests < Assert::Context
     desc "Deas::ErrorHandler"
     setup do
       @exception = RuntimeError.new
-      @fake_sinatra_call  = FakeSinatraCall.new
+      @fake_sinatra_call = Factory.sinatra_call
       @error_handler = Deas::ErrorHandler.new(@exception, @fake_sinatra_call, [])
     end
     subject{ @error_handler }

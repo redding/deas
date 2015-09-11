@@ -7,6 +7,7 @@ require 'deas/route_proxy'
 require 'deas/route'
 require 'deas/router'
 require 'deas/server'
+require 'deas/server_data'
 require 'test/support/view_handlers'
 
 module Deas::SinatraApp
@@ -44,24 +45,29 @@ module Deas::SinatraApp
 
     should "have it's configuration set based on the server configuration" do
       subject.settings.tap do |settings|
-        assert_equal 'staging',                      settings.environment
-        assert_equal 'path/to/somewhere',            settings.root.to_s
-        assert_equal 'path/to/somewhere/public',     settings.public_folder.to_s
-        assert_equal 'path/to/somewhere/views',      settings.views.to_s
-        assert_equal true,                           settings.dump_errors
-        assert_equal false,                          settings.method_override
-        assert_equal false,                          settings.sessions
-        assert_equal true,                           settings.static
-        assert_equal true,                           settings.reload_templates
-        assert_equal 'latin1',                       settings.default_encoding
-        assert_instance_of Deas::NullLogger,         settings.logger
-        assert_instance_of Deas::Router,             settings.router
-        assert_instance_of Deas::NullTemplateSource, settings.template_source
+        assert_equal 'staging',                  settings.environment
+        assert_equal 'path/to/somewhere',        settings.root.to_s
+        assert_equal 'path/to/somewhere/public', settings.public_folder.to_s
+        assert_equal 'path/to/somewhere/views',  settings.views.to_s
+        assert_equal true,                       settings.dump_errors
+        assert_equal false,                      settings.method_override
+        assert_equal false,                      settings.sessions
+        assert_equal true,                       settings.static
+        assert_equal true,                       settings.reload_templates
+        assert_equal 'latin1',                   settings.default_encoding
 
         # settings that are set but can't be changed
         assert_equal false, settings.logging
         assert_equal false, settings.raise_errors
         assert_equal false, settings.show_exceptions
+
+        exp = Deas::ServerData.new(@configuration.to_hash)
+        sd = settings.deas_server_data
+        assert_instance_of Deas::ServerData,          sd
+        assert_instance_of exp.template_source.class, sd.template_source
+        assert_instance_of exp.logger.class,          sd.logger
+        assert_equal exp.error_procs, sd.error_procs
+        assert_equal exp.router,      sd.router
 
         assert_includes "application/json", settings.add_charset
       end
