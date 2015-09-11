@@ -5,6 +5,8 @@ module Deas
   module SinatraApp
 
     def self.new(server_config)
+      # This is generic server initialization stuff.  Eventually do this in the
+      # server's initialization logic more like Sanford does.
       server_config.validate!
 
       Sinatra.new do

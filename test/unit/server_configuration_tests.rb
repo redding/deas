@@ -27,7 +27,7 @@ class Deas::Server::Configuration
 
     should have_imeths :verbose_logging, :logger, :template_source
 
-    should have_accessors :settings, :error_procs, :init_procs, :template_helpers
+    should have_accessors :settings, :init_procs, :error_procs, :template_helpers
     should have_accessors :middlewares, :router
     should have_imeths :valid?, :validate!, :urls, :routes
 
