@@ -3,6 +3,7 @@ require 'deas/error_handler'
 require 'deas/server_data'
 
 module Deas
+
   module SinatraApp
 
     def self.new(server_config)
@@ -12,7 +13,6 @@ module Deas
       server_data = ServerData.new(server_config.to_hash)
 
       Sinatra.new do
-
         # built-in settings
         set :environment,      server_config.env
         set :root,             server_config.root
@@ -56,15 +56,32 @@ module Deas
 
         # error handling
         not_found do
+          # `self` is the sinatra call in this context
           env['sinatra.error'] ||= Sinatra::NotFound.new
-          ErrorHandler.run(env['sinatra.error'], self, server_data.error_procs)
+          ErrorHandler.run(env['sinatra.error'], {
+            :server_data   => server_data,
+            :request       => self.request,
+            :response      => self.response,
+            :handler_class => self.request.env['deas.handler_class'],
+            :handler       => self.request.env['deas.handler'],
+            :params        => self.request.env['deas.params'],
+          })
         end
         error do
-          ErrorHandler.run(env['sinatra.error'], self, server_data.error_procs)
+          # `self` is the sinatra call in this context
+          ErrorHandler.run(env['sinatra.error'], {
+            :server_data   => server_data,
+            :request       => self.request,
+            :response      => self.response,
+            :handler_class => self.request.env['deas.handler_class'],
+            :handler       => self.request.env['deas.handler'],
+            :params        => self.request.env['deas.params'],
+          })
         end
 
       end
     end
 
   end
+
 end

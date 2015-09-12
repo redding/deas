@@ -28,8 +28,12 @@ module Deas
       })
 
       runner.request.env.tap do |env|
-        # add these env settings that are needed for summary logging
+        # make runner data available to Rack (ie middlewares)
+        # this is specifically needed by the Logging middleware
+        # this is also needed by the Sinatra error handlers so they can provide
+        # error context.  This may change when we eventually remove Sinatra.
         env['deas.handler_class'] = self.handler_class
+        env['deas.handler']       = runner.handler
         env['deas.params']        = runner.params
 
         # this handles the verbose logging (it is a no-op if summary logging)

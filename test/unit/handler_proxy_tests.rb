@@ -61,12 +61,13 @@ class Deas::HandlerProxy
       assert_true @runner_spy.run_called
     end
 
-    should "add the handler class to the request env" do
+    should "add data to the request env to make it available to Rack" do
       exp = subject.handler_class
       assert_equal exp, @fake_sinatra_call.request.env['deas.handler_class']
-    end
 
-    should "add the runner params to the request env" do
+      exp = @runner_spy.handler
+      assert_equal exp, @fake_sinatra_call.request.env['deas.handler']
+
       exp = @runner_spy.params
       assert_equal exp, @fake_sinatra_call.request.env['deas.params']
     end
@@ -84,7 +85,7 @@ class Deas::HandlerProxy
   class SinatraRunnerSpy
 
     attr_reader :run_called
-    attr_reader :handler_class, :args
+    attr_reader :handler_class, :handler, :args
     attr_reader :sinatra_call
     attr_reader :request, :response, :session, :params
     attr_reader :logger, :router, :template_source
@@ -94,7 +95,9 @@ class Deas::HandlerProxy
     end
 
     def build(handler_class, args)
-      @handler_class, @args = handler_class, args
+      @handler_class = handler_class
+      @handler       = handler_class.new(self)
+      @args          = args
 
       @sinatra_call    = args[:sinatra_call]
       @request         = args[:request]
