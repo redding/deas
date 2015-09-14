@@ -16,14 +16,15 @@ module Deas
       end
     end
 
-    def run(sinatra_call)
-      type = sinatra_call.settings.router.request_type_name(sinatra_call.request)
+    def run(server_data, sinatra_call)
+      type = server_data.router.request_type_name(sinatra_call.request)
       proxy = begin
         @handler_proxies[type]
       rescue HandlerProxyNotFound
         sinatra_call.halt(404)
       end
-      proxy.run(sinatra_call)
+      # TODO: eventually stop sending sinatra call (part of phasing out Sinatra)
+      proxy.run(server_data, sinatra_call)
     end
 
   end

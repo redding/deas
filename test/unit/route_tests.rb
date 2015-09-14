@@ -3,7 +3,6 @@ require 'deas/route'
 
 require 'deas/exceptions'
 require 'deas/route_proxy'
-require 'test/support/fake_sinatra_call'
 require 'test/support/view_handlers'
 
 class Deas::Route
@@ -41,21 +40,22 @@ class Deas::Route
   class RunTests < UnitTests
     desc "when run"
     setup do
-      @fake_sinatra_call = FakeSinatraCall.new
+      @server_data       = Factory.server_data
+      @fake_sinatra_call = Factory.sinatra_call
     end
 
     should "run the proxy for the given request type name" do
-      Assert.stub(@fake_sinatra_call.settings.router, :request_type_name).with(
+      Assert.stub(@server_data.router, :request_type_name).with(
         @fake_sinatra_call.request
       ){ @req_type_name }
 
-      @route.run(@fake_sinatra_call)
+      @route.run(@server_data, @fake_sinatra_call)
       assert_true @proxy.run_called
     end
 
     should "halt 404 if it can't find a proxy for the given request type name" do
       halt_value = catch(:halt) do
-        @route.run(@fake_sinatra_call)
+        @route.run(@server_data, @fake_sinatra_call)
       end
       assert_equal [404], halt_value
     end
@@ -64,11 +64,12 @@ class Deas::Route
 
   class HandlerProxySpy
 
-    attr_reader :validate_called, :run_called, :sinatra_call
+    attr_reader :validate_called, :run_called, :server_data, :sinatra_call
 
     def initialize
       @run_called      = false
       @validate_called = false
+      @server_data     = nil
       @sinatra_call    = nil
     end
 
@@ -76,7 +77,8 @@ class Deas::Route
       @validate_called = true
     end
 
-    def run(sinatra_call)
+    def run(server_data, sinatra_call)
+      @server_data  = sinatra_call
       @sinatra_call = sinatra_call
       @run_called   = true
     end

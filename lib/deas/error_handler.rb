@@ -6,28 +6,59 @@ module Deas
       self.new(*args).run
     end
 
-    def initialize(exception, sinatra_call, error_procs)
-      @exception    = exception
-      @sinatra_call = sinatra_call
+    attr_reader :exception, :context, :error_procs
 
-      @error_procs = [*error_procs].compact
+    def initialize(exception, context_hash)
+      @exception   = exception
+      @context     = Context.new(context_hash)
+      @error_procs = context_hash[:server_data].error_procs.reverse
     end
 
+    # The exception that we are generating a response for can change in the case
+    # that the configured error proc raises an exception. If this occurs, a
+    # response will be generated for that exception, instead of the original
+    # one. This is designed to avoid "hidden" errors happening, this way the
+    # server will respond and log based on the last exception that occurred.
+
     def run
-      response = nil
-      @error_procs.each do |error_proc|
-        begin
-          result = @sinatra_call.instance_exec(@exception, &error_proc)
-          response = result if result
-        rescue Exception => proc_exception
+      @error_procs.inject(nil) do |response, error_proc|
+        result = begin
+          error_proc.call(@exception, @context)
+        rescue StandardError => proc_exception
           @exception = proc_exception
-          # reset the response if an exception occurs while evaulating the
-          # error procs -- a new exception will now be handled by the
-          # remaining procs
-          response = nil
+          response = nil # reset response
+        end
+        response || result
+      end
+    end
+
+    class Context
+
+      attr_reader :server_data
+      attr_reader :request, :response, :handler_class, :handler, :params
+
+      def initialize(args)
+        @server_data   = args[:server_data]
+        @request       = args[:request]
+        @response      = args[:response]
+        @handler_class = args[:handler_class]
+        @handler       = args[:handler]
+        @params        = args[:params]
+      end
+
+      def ==(other)
+        if other.kind_of?(self.class)
+          self.server_data   == other.server_data &&
+          self.handler_class == other.handler_class &&
+          self.request       == other.request &&
+          self.response      == other.response &&
+          self.handler       == other.handler &&
+          self.params        == other.params
+        else
+          super
         end
       end
-      response
+
     end
 
   end

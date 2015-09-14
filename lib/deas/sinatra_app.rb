@@ -1,21 +1,23 @@
 require 'sinatra/base'
 require 'deas/error_handler'
+require 'deas/server_data'
 
 module Deas
+
   module SinatraApp
 
     def self.new(server_config)
+      # This is generic server initialization stuff.  Eventually do this in the
+      # server's initialization logic more like Sanford does.
       server_config.validate!
+      server_data = ServerData.new(server_config.to_hash)
 
       Sinatra.new do
-
         # built-in settings
-        set :environment, server_config.env
-        set :root,        server_config.root
-
-        set :public_folder, server_config.public_root
-        set :views,         server_config.views_root
-
+        set :environment,      server_config.env
+        set :root,             server_config.root
+        set :public_folder,    server_config.public_root
+        set :views,            server_config.views_root
         set :dump_errors,      server_config.dump_errors
         set :method_override,  server_config.method_override
         set :sessions,         server_config.sessions
@@ -24,17 +26,17 @@ module Deas
         set :default_encoding, server_config.default_encoding
         set :logging,          false
 
-        # raise_errors and show_exceptions prevent Deas error handlers from
-        # being called and Deas' logging doesn't finish. They should always be
-        # false.
+        # TODO: sucks to have to do this but b/c or Rack there is no better way
+        # to make the server data available to middleware.  We should remove this
+        # once we remove Sinatra.  Whatever rack app implemenation will needs to
+        # provide the server data or maybe the server data *will be* the rack app.
+        # Not sure right now, just jotting down notes.
+        set :deas_server_data, server_data
+
+        # raise_errors and show_exceptions prevent Deas error handlers from being
+        # called and Deas' logging doesn't finish. They should always be false.
         set :raise_errors,     false
         set :show_exceptions,  false
-
-        # custom settings
-        set :deas_error_procs, server_config.error_procs
-        set :logger,           server_config.logger
-        set :router,           server_config.router
-        set :template_source,  server_config.template_source
 
         # TODO: rework with `server_config.default_encoding` once we move off of using Sinatra
         # TODO: could maybe move into a deas-json mixin once off of Sinatra
@@ -47,20 +49,39 @@ module Deas
 
         # routes
         server_config.routes.each do |route|
-          send(route.method, route.path){ route.run(self) }
+          # TODO: `self` is the sinatra_call; eventually stop sending it
+          # (part of phasing out Sinatra)
+          send(route.method, route.path){ route.run(server_data, self) }
         end
 
         # error handling
         not_found do
+          # `self` is the sinatra call in this context
           env['sinatra.error'] ||= Sinatra::NotFound.new
-          ErrorHandler.run(env['sinatra.error'], self, settings.deas_error_procs)
+          ErrorHandler.run(env['sinatra.error'], {
+            :server_data   => server_data,
+            :request       => self.request,
+            :response      => self.response,
+            :handler_class => self.request.env['deas.handler_class'],
+            :handler       => self.request.env['deas.handler'],
+            :params        => self.request.env['deas.params'],
+          })
         end
         error do
-          ErrorHandler.run(env['sinatra.error'], self, settings.deas_error_procs)
+          # `self` is the sinatra call in this context
+          ErrorHandler.run(env['sinatra.error'], {
+            :server_data   => server_data,
+            :request       => self.request,
+            :response      => self.response,
+            :handler_class => self.request.env['deas.handler_class'],
+            :handler       => self.request.env['deas.handler'],
+            :params        => self.request.env['deas.params'],
+          })
         end
 
       end
     end
 
   end
+
 end

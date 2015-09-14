@@ -1,106 +1,155 @@
 require 'assert'
 require 'deas/error_handler'
 
-require 'test/support/fake_sinatra_call'
-
 class Deas::ErrorHandler
 
   class UnitTests < Assert::Context
     desc "Deas::ErrorHandler"
     setup do
-      @exception = RuntimeError.new
-      @fake_sinatra_call  = FakeSinatraCall.new
-      @error_handler = Deas::ErrorHandler.new(@exception, @fake_sinatra_call, [])
+      # always make sure there are multiple error procs or tests can be false
+      # positives
+      @error_proc_spies = (Factory.integer(3) + 1).times.map{ ErrorProcSpy.new }
+      @server_data      = Factory.server_data(:error_procs => @error_proc_spies)
+      @request          = Factory.string
+      @response         = Factory.string
+      @handler_class    = Factory.string
+      @handler          = Factory.string
+      @params           = Factory.string
+
+      @context_hash = {
+        :server_data   => @server_data,
+        :request       => @request,
+        :response      => @response,
+        :handler_class => @handler_class,
+        :handler       => @handler,
+        :params        => @params,
+      }
+
+      @handler_class = Deas::ErrorHandler
+    end
+    subject{ @handler_class }
+
+    should have_imeths :run
+
+  end
+
+  class InitTests < UnitTests
+    desc "when init"
+    setup do
+      @exception = Factory.exception
+      @error_handler = @handler_class.new(@exception, @context_hash)
     end
     subject{ @error_handler }
 
-    should have_instance_methods :run
-    should have_class_methods :run
+    should have_readers :exception, :context, :error_procs
+    should have_imeths :run
 
-  end
+    should "know its attrs" do
+      assert_equal @exception, subject.exception
 
-  class RunTests < UnitTests
-    desc "run"
-    setup do
-      @error_procs = [ proc do |exception|
-        settings.exception_that_occurred = exception
-        "my return value"
-      end ]
+      exp = Context.new(@context_hash)
+      assert_equal exp, subject.context
 
-      @error_handler = Deas::ErrorHandler.new(@exception, @fake_sinatra_call, @error_procs)
-      @response = @error_handler.run
-    end
-
-    should "run the proc in the context of the app" do
-      assert_equal @exception, @fake_sinatra_call.settings.exception_that_occurred
-    end
-
-    should "return whatever the proc returns" do
-      assert_equal "my return value", @response
+      exp = @server_data.error_procs.reverse
+      assert_equal exp, subject.error_procs
     end
 
   end
 
-  class RunWithMultipleProcsTests < UnitTests
-    desc "run with multiple procs"
+  class RunTests < InitTests
+    desc "and run"
     setup do
-      @error_procs = [
-        proc do |exception|
-          settings.first_proc_run = true
-          'first'
-        end,
-        proc do |exception|
-          settings.second_proc_run = true
-          'second'
-        end,
-        proc do |exception|
-          settings.third_proc_run = true
-          nil
-        end
-      ]
-
-      @error_handler = Deas::ErrorHandler.new(@exception, @fake_sinatra_call, @error_procs)
       @response = @error_handler.run
     end
 
-    should "run all the error procs" do
-      assert_equal true, @fake_sinatra_call.settings.first_proc_run
-      assert_equal true, @fake_sinatra_call.settings.second_proc_run
-      assert_equal true, @fake_sinatra_call.settings.third_proc_run
+    should "call each of its procs" do
+      subject.error_procs.each do |proc_spy|
+        assert_true proc_spy.called
+        assert_equal subject.exception, proc_spy.exception
+        assert_equal subject.context,   proc_spy.context
+      end
     end
 
     should "return the last non-nil response" do
-      assert_equal 'second', @response
+      assert_nil @response
+
+      exp = Factory.string
+      subject.error_procs.first.response = exp
+      assert_equal exp, subject.run
     end
 
   end
 
-  class RunWithProcsThatHaltTests < UnitTests
-    desc "run with a proc that halts"
+  class RunWithProcsThatRaiseTests < InitTests
+    desc "and run with procs that raise exceptions"
     setup do
-      @error_procs = [
-        proc do |exception|
-          settings.first_proc_run = true
-          halt 401
-        end,
-        proc do |exception|
-          settings.second_proc_run = true
-        end
-      ]
+      @first_exception, @last_exception = Factory.exception, Factory.exception
+      @error_handler.error_procs.first.raise_exception = @first_exception
+      @error_handler.error_procs.last.raise_exception  = @last_exception
 
-      @error_handler = Deas::ErrorHandler.new(@exception, @fake_sinatra_call, @error_procs)
-      @response = catch(:halt){ @error_handler.run }
+      @error_handler.run
     end
 
-    should "run error procs until one halts" do
-      assert_equal true, @fake_sinatra_call.settings.first_proc_run
-      assert_nil @fake_sinatra_call.settings.second_proc_run
+    should "call each of its procs" do
+      subject.error_procs.each{ |proc_spy| assert_true proc_spy.called }
     end
 
-    should "return whatever was halted" do
-      assert_equal [ 401 ], @response
+    should "call each proc with the most recently raised exception" do
+      assert_equal @exception,       @error_handler.error_procs.first.exception
+      assert_equal @first_exception, @error_handler.error_procs.last.exception
     end
 
+    should "alter the handler's exception to be the last raised exception" do
+      assert_equal @last_exception, subject.exception
+    end
+
+  end
+
+  class ContextTests < UnitTests
+    desc "Context"
+    setup do
+      @context = Context.new(@context_hash)
+    end
+    subject{ @context }
+
+    should have_readers :server_data
+    should have_readers :request, :response, :handler_class, :handler, :params
+
+    should "know its attributes" do
+      assert_equal @context_hash[:server_data],   subject.server_data
+      assert_equal @context_hash[:request],       subject.request
+      assert_equal @context_hash[:response],      subject.response
+      assert_equal @context_hash[:handler_class], subject.handler_class
+      assert_equal @context_hash[:handler],       subject.handler
+      assert_equal @context_hash[:params],        subject.params
+    end
+
+    should "know if it equals another context" do
+      exp = Context.new(@context_hash)
+      assert_equal exp, subject
+
+      exp = Context.new({})
+      assert_not_equal exp, subject
+    end
+
+  end
+
+  class ErrorProcSpy
+    attr_reader :called, :exception, :context
+    attr_accessor :response, :raise_exception
+
+    def initialize
+      @called = false
+    end
+
+    def call(exception, context)
+      @called    = true
+      @exception = exception
+      @context   = context
+
+      raise self.raise_exception if self.raise_exception
+      @response
+    end
   end
 
 end

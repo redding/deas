@@ -13,7 +13,7 @@ module Deas
 
     def initialize(app)
       @app    = app
-      @logger = @app.settings.logger
+      @logger = @app.settings.deas_server_data.logger
     end
 
     # The Rack call interface. The receiver acts as a prototype and runs
@@ -101,7 +101,7 @@ module Deas
       line_attrs = {
         'method'  => request.request_method,
         'path'    => request.path,
-        'handler' => env['deas.handler_class_name'],
+        'handler' => env['deas.handler_class'].name,
         'params'  => env['deas.params'],
         'time'    => env['deas.time_taken'],
         'status'  => status

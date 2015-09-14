@@ -1,14 +1,12 @@
 require 'assert'
 require 'deas/logging'
 
-require 'test/support/fake_sinatra_call'
-
 module Deas::Logging
 
   class UnitTests < Assert::Context
     desc "Deas::Logging"
     setup do
-      @app = FakeSinatraCall.new
+      @app = Factory.sinatra_call
     end
     subject{ Deas::Logging }
 
