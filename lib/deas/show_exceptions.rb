@@ -27,24 +27,19 @@ module Deas
         error_body = Body.new(error)
 
         headers['Content-Length'] = error_body.size.to_s
-        headers['Content-Type'] = error_body.mime_type.to_s
+        headers['Content-Type']   = error_body.mime_type.to_s
         body = [error_body.content]
       end
-      [ status, headers, body ]
+      [status, headers, body]
     end
 
     class Body
-      attr_reader :content
+      attr_reader :content, :size, :mime_type
+
       def initialize(e)
-        @content ||= "#{e.class}: #{e.message}\n#{(e.backtrace || []).join("\n")}"
-      end
-
-      def size
-        @size ||= Rack::Utils.bytesize(self.content)
-      end
-
-      def mime_type
-        @mime_type ||= "text/plain"
+        @content   = "#{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
+        @size      = Rack::Utils.bytesize(@content)
+        @mime_type = "text/plain"
       end
     end
 
