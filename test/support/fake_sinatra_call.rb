@@ -10,7 +10,7 @@ class FakeSinatraCall
 
   def initialize(settings = nil)
     @request         = FakeRequest.new('GET','/something', {}, OpenStruct.new)
-    @response        = FakeResponse.new
+    @response        = FakeResponse.new(Factory.integer, {}, [Factory.text])
     @session         = @request.session
     @params          = @request.params
     @logger          = Deas::NullLogger.new
@@ -24,6 +24,10 @@ class FakeSinatraCall
     @settings = OpenStruct.new({
       :deas_server_data => Factory.server_data
     }.merge(settings || {}))
+  end
+
+  def call(env)
+    [@response.status, @response.headers, [@response.body]]
   end
 
   def halt(*args)

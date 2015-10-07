@@ -41,7 +41,7 @@ module Deas
       log_error(env['sinatra.error'])
       env['deas.time_taken'] = RoundedTime.new(benchmark.real)
 
-      [ status, headers, body ]
+      [status, headers, body]
     end
 
     def log(message)
@@ -81,11 +81,11 @@ module Deas
       status, headers, body = super(env)
       log "  Redir:   #{headers['Location']}" if headers.key?('Location')
       log "===== Completed in #{env['deas.time_taken']}ms (#{response_display(status)}) ====="
-      [ status, headers, body ]
+      [status, headers, body]
     end
 
     def response_display(status)
-      [ status, RESPONSE_STATUS_NAMES[status.to_i] ].compact.join(', ')
+      [status, RESPONSE_STATUS_NAMES[status.to_i]].compact.join(', ')
     end
 
   end
@@ -101,16 +101,18 @@ module Deas
       line_attrs = {
         'method'  => request.request_method,
         'path'    => request.path,
-        'handler' => env['deas.handler_class'].name,
         'params'  => env['deas.params'],
         'time'    => env['deas.time_taken'],
         'status'  => status
       }
+      if env['deas.handler_class']
+        line_attrs['handler'] = env['deas.handler_class'].name
+      end
       if headers.key?('Location')
         line_attrs['redir'] = headers['Location']
       end
       log SummaryLine.new(line_attrs)
-      [ status, headers, body ]
+      [status, headers, body]
     end
 
   end

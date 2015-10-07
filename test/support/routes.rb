@@ -6,7 +6,7 @@ class DeasTestServer
   root TEST_SUPPORT_ROOT
 
   logger TEST_LOGGER
-  verbose_logging true
+  verbose_logging Factory.boolean
 
   set :a_setting, 'something'
 
