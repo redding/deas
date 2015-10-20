@@ -83,14 +83,17 @@ module Deas
         handler_names[self.default_request_type_name] = default_handler_name
       end
 
+      from_url = self.urls[from_path]
+      if from_path.kind_of?(::Symbol) && from_url.nil?
+        raise ArgumentError, "no url named `#{from_path.inspect}`"
+      end
+      from_url_path = from_url.path if from_url
+
       require 'deas/route_proxy'
       proxies = handler_names.inject({}) do |proxies, (req_type_name, handler_name)|
         proxies[req_type_name] = Deas::RouteProxy.new(handler_name, self.view_handler_ns)
         proxies
       end
-
-      from_url = self.urls[from_path]
-      from_url_path = from_url.path if from_url
 
       add_route(http_method, prepend_base_url(from_url_path || from_path), proxies)
     end
@@ -100,13 +103,15 @@ module Deas
       if to_path.kind_of?(::Symbol) && to_url.nil?
         raise ArgumentError, "no url named `#{to_path.inspect}`"
       end
+      from_url = self.urls[from_path]
+      if from_path.kind_of?(::Symbol) && from_url.nil?
+        raise ArgumentError, "no url named `#{from_path.inspect}`"
+      end
+      from_url_path = from_url.path if from_url
 
       require 'deas/redirect_proxy'
       proxy = Deas::RedirectProxy.new(self, to_url || to_path, &block)
       proxies = { self.default_request_type_name => proxy }
-
-      from_url = self.urls[from_path]
-      from_url_path = from_url.path if from_url
 
       add_route(:get, prepend_base_url(from_url_path || from_path), proxies)
     end
