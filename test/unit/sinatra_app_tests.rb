@@ -16,8 +16,8 @@ module Deas::SinatraApp
     desc "Deas::SinatraApp"
     setup do
       @router = Deas::Router.new
-      @route = @router.get('/something', 'EmptyViewHandler')
-      @proxy = @route.handler_proxies[@router.default_request_type_name]
+      @router.get('/something', 'EmptyViewHandler')
+      @router.validate!
 
       @configuration = Deas::Server::Configuration.new.tap do |c|
         c.env              = 'staging'
@@ -74,10 +74,10 @@ module Deas::SinatraApp
     end
 
     should "define Sinatra routes for every route in the configuration" do
-      get_routes = subject.routes[@route.method.to_s.upcase] || []
-      sinatra_route = get_routes.detect{ |route| route[0].match(@route.path) }
+      router_route   = @router.routes.last
+      sinatra_routes = subject.routes[router_route.method.to_s.upcase] || []
 
-      assert_not_nil sinatra_route
+      assert_not_nil sinatra_routes.detect{ |r| r[0].match(router_route.path) }
     end
 
   end
