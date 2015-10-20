@@ -86,6 +86,11 @@ module Deas
       true
     end
 
+    def not_found(from_path, body = nil)
+      respond_with_args = [404, {}, body || 'Not Found']
+      self.definitions.push([:respond_with, [from_path, respond_with_args], nil])
+    end
+
     def apply_definitions!
       self.definitions.each do |(type, args, block)|
         self.send("apply_#{type}", *args, &block)
@@ -137,6 +142,20 @@ module Deas
 
       require 'deas/redirect_proxy'
       proxy = Deas::RedirectProxy.new(self, to_url || to_path, &block)
+      proxies = { self.default_request_type_name => proxy }
+
+      add_route(:get, prepend_base_url(from_url_path || from_path), proxies)
+    end
+
+    def apply_respond_with(from_path, respond_with_args)
+      from_url = self.urls[from_path]
+      if from_path.kind_of?(::Symbol) && from_url.nil?
+        raise ArgumentError, "no url named `#{from_path.inspect}`"
+      end
+      from_url_path = from_url.path if from_url
+
+      require 'deas/respond_with_proxy'
+      proxy = Deas::RespondWithProxy.new(respond_with_args)
       proxies = { self.default_request_type_name => proxy }
 
       add_route(:get, prepend_base_url(from_url_path || from_path), proxies)

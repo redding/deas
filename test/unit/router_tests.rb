@@ -40,7 +40,7 @@ class Deas::Router
     should have_imeths :default_request_type_name, :add_request_type
     should have_imeths :request_type_name
     should have_imeths :get, :post, :put, :patch, :delete
-    should have_imeths :route, :redirect
+    should have_imeths :route, :redirect, :not_found
     should have_imeths :apply_definitions!, :validate!
 
     should "default its settings" do
@@ -119,6 +119,19 @@ class Deas::Router
       assert_equal nil,              d.block
     end
 
+    should "add not found definitions" do
+      from_path = Factory.path
+      body      = Factory.string
+
+      subject.not_found(from_path, body)
+
+      args = [404, {}, body]
+      d = DefinitionSpy.new(*subject.definitions.last)
+      assert_equal :respond_with,     d.type
+      assert_equal [from_path, args], d.args
+      assert_equal nil,               d.block
+    end
+
     should "add a route for every definition when applying defintions" do
       subject.set_base_url(nil)
 
@@ -126,19 +139,23 @@ class Deas::Router
       path2 = Factory.path
       subject.get(path1)
       subject.redirect(path1, path2)
+      subject.not_found(path1)
 
       assert_not_empty subject.definitions
       assert_empty     subject.routes
 
       subject.apply_definitions!
-      assert_equal 2, subject.routes.size
+      assert_equal 3, subject.routes.size
       assert_empty subject.definitions
 
-      get = subject.routes.first
+      get = subject.routes[0]
       assert_equal path1, get.path
 
-      redir = subject.routes.last
+      redir = subject.routes[1]
       assert_equal path1, redir.path
+
+      nf = subject.routes[2]
+      assert_equal path1, nf.path
     end
 
     should "apply definitions and validate each route when validating" do
@@ -207,6 +224,17 @@ class Deas::Router
       handler = test_handler(proxy.handler_class)
       exp = subject.prepend_base_url(path2)
       assert_equal exp, handler.redirect_path
+    end
+
+    should "prepend the base url when adding not founds" do
+      url = Factory.url
+      subject.base_url url
+      path = Factory.path
+      subject.not_found(path); subject.apply_definitions!
+      route = subject.routes.last
+
+      exp_path = subject.prepend_base_url(path)
+      assert_equal exp_path, route.path
     end
 
     should "set a default request type name" do
@@ -318,6 +346,30 @@ class Deas::Router
       assert_equal exp, handler.redirect_path
     end
 
+    should "add not found routes" do
+      subject.not_found(@path1); subject.apply_definitions!
+
+      route = subject.routes.last
+      assert_instance_of Deas::Route, route
+      assert_equal :get, route.method
+      assert_equal subject.prepend_base_url(@path1), route.path
+
+      proxy = route.handler_proxies[subject.default_request_type_name]
+      assert_kind_of Deas::RespondWithProxy, proxy
+      assert_equal 'Deas::RespondWithHandler', proxy.handler_class_name
+
+      handler = test_handler(proxy.handler_class)
+      assert_equal [404, {}, 'Not Found'], handler.halt_args
+
+      body = Factory.string
+      subject.not_found(@path1, body); subject.apply_definitions!
+
+      route   = subject.routes.last
+      proxy   = route.handler_proxies[subject.default_request_type_name]
+      handler = test_handler(proxy.handler_class)
+      assert_equal [404, {}, body], handler.halt_args
+    end
+
   end
 
   class NamedUrlTests < InitTests
@@ -368,6 +420,23 @@ class Deas::Router
       end
     end
 
+    should "complain if routing a named url that hasn't been defined" do
+      assert_raises ArgumentError do
+        subject.route(:get, :not_defined_url, 'GetInfo')
+        subject.apply_definitions!
+      end
+    end
+
+    should "route using a url name instead of a path" do
+      subject.route(:get, :get_info, 'GetInfo'); subject.apply_definitions!
+
+      url   = subject.urls[:get_info]
+      route = subject.routes.last
+
+      exp = subject.prepend_base_url(url.path)
+      assert_equal exp, route.path
+    end
+
     should "complain if redirecting to/from a named url that hasn't been defined" do
       assert_raises ArgumentError do
         subject.redirect('/somewhere', :not_defined_url)
@@ -389,20 +458,21 @@ class Deas::Router
       assert_equal exp, route.path
     end
 
-    should "route using a url name instead of a path" do
-      subject.route(:get, :get_info, 'GetInfo'); subject.apply_definitions!
+    should "complain if adding a not found with a named url that hasn't been defined" do
+      assert_raises ArgumentError do
+        subject.not_found(:not_defined_url)
+        subject.apply_definitions!
+      end
+    end
+
+    should "add a not found using a url name instead of a path" do
+      subject.not_found(:get_info); subject.apply_definitions!
+
       url   = subject.urls[:get_info]
       route = subject.routes.last
 
       exp = subject.prepend_base_url(url.path)
       assert_equal exp, route.path
-    end
-
-    should "complain if routing a named url that hasn't been defined" do
-      assert_raises ArgumentError do
-        subject.route(:get, :not_defined_url, 'GetInfo')
-        subject.apply_definitions!
-      end
     end
 
     should "prepend the base url when building named urls" do
