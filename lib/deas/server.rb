@@ -224,8 +224,8 @@ module Deas
         self.init_procs.each{ |p| p.call }
         raise Deas::ServerRootError if self.root.nil?
 
-        # validate the routes
-        self.routes.each(&:validate!)
+        # validate the router
+        self.router.validate!
 
         # append the show exceptions and logging middlewares last.  This ensures
         # that the logging and exception showing happens just before the app gets

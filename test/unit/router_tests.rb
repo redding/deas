@@ -31,7 +31,7 @@ class Deas::Router
     end
     subject{ @router }
 
-    should have_readers :request_types, :urls, :routes
+    should have_readers :request_types, :urls, :routes, :definitions
     should have_readers :escape_query_value_proc
 
     should have_imeths :view_handler_ns, :escape_query_value
@@ -41,6 +41,7 @@ class Deas::Router
     should have_imeths :request_type_name
     should have_imeths :get, :post, :put, :patch, :delete
     should have_imeths :route, :redirect
+    should have_imeths :apply_definitions!, :validate!
 
     should "default its settings" do
       router = @router_class.new
@@ -49,6 +50,7 @@ class Deas::Router
       assert_empty router.request_types
       assert_empty router.urls
       assert_empty router.routes
+      assert_empty router.definitions
 
       exp = @router_class::DEFAULT_REQUEST_TYPE_NAME
       assert_equal exp, router.default_request_type_name
@@ -56,6 +58,15 @@ class Deas::Router
       value = "#%&?"
       exp = Rack::Utils.escape(value)
       assert_equal exp, router.escape_query_value_proc.call(value)
+    end
+
+    should "instance eval any given block" do
+      ns = Factory.string
+      router = Deas::Router.new do
+        view_handler_ns ns
+      end
+
+      assert_equal ns, router.view_handler_ns
     end
 
     should "set a view handler namespace" do
@@ -69,6 +80,83 @@ class Deas::Router
       assert_equal escape_proc, subject.escape_query_value_proc
 
       assert_raises(ArgumentError){ subject.escape_query_value }
+    end
+
+    should "add get, post, put, patch and delete route definitions" do
+      path = Factory.path
+      args = [Factory.string]
+
+      [:get, :post, :put, :patch, :delete].each do |meth|
+        subject.send(meth, path, *args)
+        d = DefinitionSpy.new(*subject.definitions.last)
+        assert_equal :route,              d.type
+        assert_equal [meth, path, *args], d.args
+        assert_equal nil,                 d.block
+      end
+    end
+
+    should "add redirect definitions" do
+      from_path = Factory.path
+      to_path   = Factory.path
+      block     = proc{}
+
+      subject.redirect(from_path, to_path, &block)
+      d = DefinitionSpy.new(*subject.definitions.last)
+      assert_equal :redirect,            d.type
+      assert_equal [from_path, to_path], d.args
+      assert_equal block,                d.block
+
+      subject.redirect(from_path, to_path)
+      d = DefinitionSpy.new(*subject.definitions.last)
+      assert_equal :redirect,            d.type
+      assert_equal [from_path, to_path], d.args
+      assert_equal nil,                  d.block
+
+      subject.redirect(from_path)
+      d = DefinitionSpy.new(*subject.definitions.last)
+      assert_equal :redirect,        d.type
+      assert_equal [from_path, nil], d.args
+      assert_equal nil,              d.block
+    end
+
+    should "add a route for every definition when applying defintions" do
+      subject.set_base_url(nil)
+
+      path1 = Factory.path
+      path2 = Factory.path
+      subject.get(path1)
+      subject.redirect(path1, path2)
+
+      assert_not_empty subject.definitions
+      assert_empty     subject.routes
+
+      subject.apply_definitions!
+      assert_equal 2, subject.routes.size
+      assert_empty subject.definitions
+
+      get = subject.routes.first
+      assert_equal path1, get.path
+
+      redir = subject.routes.last
+      assert_equal path1, redir.path
+    end
+
+    should "apply definitions and validate each route when validating" do
+      subject.get('/something', 'EmptyViewHandler')
+      subject.apply_definitions!
+      route = subject.routes.last
+      proxy = route.handler_proxies[subject.default_request_type_name]
+
+      apply_def_called = false
+      Assert.stub(subject, :apply_definitions!){ apply_def_called = true }
+
+      assert_false apply_def_called
+      assert_nil proxy.handler_class
+
+      subject.validate!
+
+      assert_true apply_def_called
+      assert_equal EmptyViewHandler, proxy.handler_class
     end
 
     should "set a base url" do
@@ -97,7 +185,8 @@ class Deas::Router
       url = Factory.url
       subject.base_url url
       path = Factory.path
-      route = subject.get(path, Object)
+      subject.get(path); subject.apply_definitions!
+      route = subject.routes.last
 
       exp_path = subject.prepend_base_url(path)
       assert_equal exp_path, route.path
@@ -108,7 +197,8 @@ class Deas::Router
       subject.base_url url
       path1 = Factory.path
       path2 = Factory.path
-      redirect = subject.redirect(path1, path2)
+      subject.redirect(path1, path2); subject.apply_definitions!
+      redirect = subject.routes.last
 
       exp = subject.prepend_base_url(path1)
       assert_equal exp, redirect.path
@@ -150,28 +240,6 @@ class Deas::Router
       assert_equal exp, subject.request_type_name(Factory.string)
     end
 
-    should "add get, post, put, patch and delete routes" do
-      Assert.stub(subject, :route){ |*args| RouteSpy.new(*args) }
-      path = Factory.path
-      args = [Factory.string]
-
-      [:get, :post, :put, :patch, :delete].each do |meth|
-        route = subject.send(meth, path, *args)
-        assert_equal meth, route.method
-        assert_equal path, route.path
-        assert_equal args, route.args
-      end
-    end
-
-    should "instance eval any given block" do
-      ns = Factory.string
-      router = Deas::Router.new do
-        view_handler_ns ns
-      end
-
-      assert_equal ns, router.view_handler_ns
-    end
-
   end
 
   class RouteTests < InitTests
@@ -186,7 +254,7 @@ class Deas::Router
     should "add a Route with the given method and path" do
       assert_empty subject.routes
 
-      subject.route(@method, @path1)
+      subject.route(@method, @path1); subject.apply_definitions!
       assert_not_empty subject.routes
 
       route = subject.routes.last
@@ -201,7 +269,7 @@ class Deas::Router
     end
 
     should "proxy any handler class given for the default request type" do
-      subject.route(@method, @path1, @handler_class_name1)
+      subject.route(@method, @path1, @handler_class_name1); subject.apply_definitions!
       route = subject.routes.last
       proxy = route.handler_proxies[subject.default_request_type_name]
       assert_kind_of Deas::RouteProxy, proxy
@@ -209,7 +277,7 @@ class Deas::Router
 
       subject.route(@method, @path1, @handler_class_name1, {
         subject.default_request_type_name => @handler_class_name2
-      })
+      }); subject.apply_definitions!
       route = subject.routes.last
       proxy = route.handler_proxies[subject.default_request_type_name]
       assert_kind_of Deas::RouteProxy, proxy
@@ -221,7 +289,7 @@ class Deas::Router
       subject.route(@method, @path1, {
         '1' => @handler_class_name1,
         '2' => @handler_class_name2,
-      })
+      }); subject.apply_definitions!
       route = subject.routes.last
 
       proxy = route.handler_proxies['1']
@@ -234,7 +302,7 @@ class Deas::Router
     end
 
     should "add redirect routes" do
-      subject.redirect(@path1, @path2)
+      subject.redirect(@path1, @path2); subject.apply_definitions!
 
       route = subject.routes.last
       assert_instance_of Deas::Route, route
@@ -303,14 +371,17 @@ class Deas::Router
     should "complain if redirecting to/from a named url that hasn't been defined" do
       assert_raises ArgumentError do
         subject.redirect('/somewhere', :not_defined_url)
+        subject.apply_definitions!
       end
       assert_raises ArgumentError do
         subject.redirect(:not_defined_url, '/somewhere')
+        subject.apply_definitions!
       end
     end
 
     should "redirect using a url name instead of a path" do
-      subject.redirect(:get_info, '/somewhere')
+      subject.redirect(:get_info, '/somewhere'); subject.apply_definitions!
+
       url   = subject.urls[:get_info]
       route = subject.routes.last
 
@@ -319,7 +390,7 @@ class Deas::Router
     end
 
     should "route using a url name instead of a path" do
-      subject.route(:get, :get_info, 'GetInfo')
+      subject.route(:get, :get_info, 'GetInfo'); subject.apply_definitions!
       url   = subject.urls[:get_info]
       route = subject.routes.last
 
@@ -330,6 +401,7 @@ class Deas::Router
     should "complain if routing a named url that hasn't been defined" do
       assert_raises ArgumentError do
         subject.route(:get, :not_defined_url, 'GetInfo')
+        subject.apply_definitions!
       end
     end
 
@@ -399,9 +471,5 @@ class Deas::Router
 
   end
 
-  class RouteSpy < Struct.new(:method, :path, :args)
-    def initialize(method, path, *args)
-      super(method, path, args)
-    end
-  end
+  DefinitionSpy = Struct.new(:type, :args, :block)
 end

@@ -8,12 +8,12 @@ module Deas
 
     DEFAULT_REQUEST_TYPE_NAME = 'default'
 
-    attr_reader :request_types, :urls, :routes
+    attr_reader :request_types, :urls, :routes, :definitions
     attr_reader :escape_query_value_proc
 
     def initialize(&block)
       @request_types = []
-      @urls, @routes = {}, []
+      @urls, @routes, @definitions = {}, [], []
       default_request_type_name(DEFAULT_REQUEST_TYPE_NAME)
       escape_query_value{ |v| Rack::Utils.escape(v) }
       self.instance_eval(&block) if !block.nil?
@@ -77,6 +77,32 @@ module Deas
     def delete(path, *args); self.route(:delete, path, *args); end
 
     def route(http_method, from_path, *args)
+      self.definitions.push([:route, [http_method, from_path, *args], nil])
+      true
+    end
+
+    def redirect(from_path, to_path = nil, &block)
+      self.definitions.push([:redirect, [from_path, to_path], block])
+      true
+    end
+
+    def apply_definitions!
+      self.definitions.each do |(type, args, block)|
+        self.send("apply_#{type}", *args, &block)
+      end
+      self.definitions.clear
+      true
+    end
+
+    def validate!
+      self.apply_definitions!
+      self.routes.each(&:validate!)
+      true
+    end
+
+    private
+
+    def apply_route(http_method, from_path, *args)
       handler_names        = args.last.kind_of?(::Hash) ? args.pop : {}
       default_handler_name = args.last
       if !handler_names.key?(self.default_request_type_name) && default_handler_name
@@ -98,7 +124,7 @@ module Deas
       add_route(http_method, prepend_base_url(from_url_path || from_path), proxies)
     end
 
-    def redirect(from_path, to_path = nil, &block)
+    def apply_redirect(from_path, to_path = nil, &block)
       to_url = self.urls[to_path]
       if to_path.kind_of?(::Symbol) && to_url.nil?
         raise ArgumentError, "no url named `#{to_path.inspect}`"
@@ -115,8 +141,6 @@ module Deas
 
       add_route(:get, prepend_base_url(from_url_path || from_path), proxies)
     end
-
-    private
 
     def add_url(name, path, options)
       options[:escape_query_value] ||= self.escape_query_value_proc

@@ -207,8 +207,9 @@ module Deas::Server
       @initialized = false
       @other_initialized = false
       @router = Deas::Router.new
-      @route = @router.get('/something', 'EmptyViewHandler')
-      @proxy = @route.handler_proxies[@router.default_request_type_name]
+
+      @router_validate_called = false
+      Assert.stub(@router, :validate!){ @router_validate_called = true }
 
       @configuration = Configuration.new.tap do |c|
         c.env              = 'staging'
@@ -236,11 +237,11 @@ module Deas::Server
       assert_equal true, @other_initialized
     end
 
-    should "call validate! on all routes" do
-      assert_nil @proxy.handler_class
+    should "call validate! on the router" do
+      assert_false @router_validate_called
 
       subject.validate!
-      assert_equal EmptyViewHandler, @proxy.handler_class
+      assert_true @router_validate_called
     end
 
     should "add the Logging and ShowExceptions middleware to the end" do
