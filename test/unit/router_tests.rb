@@ -300,9 +300,12 @@ class Deas::Router
       end
     end
 
-    should "complain if redirecting to a named url that hasn't been defined" do
+    should "complain if redirecting to/from a named url that hasn't been defined" do
       assert_raises ArgumentError do
         subject.redirect('/somewhere', :not_defined_url)
+      end
+      assert_raises ArgumentError do
+        subject.redirect(:not_defined_url, '/somewhere')
       end
     end
 
@@ -322,6 +325,12 @@ class Deas::Router
 
       exp = subject.prepend_base_url(url.path)
       assert_equal exp, route.path
+    end
+
+    should "complain if routing a named url that hasn't been defined" do
+      assert_raises ArgumentError do
+        subject.route(:get, :not_defined_url, 'GetInfo')
+      end
     end
 
     should "prepend the base url when building named urls" do
