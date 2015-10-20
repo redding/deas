@@ -1,5 +1,6 @@
 require 'sinatra/base'
 require 'deas/error_handler'
+require 'deas/exceptions'
 require 'deas/server_data'
 
 module Deas
@@ -55,28 +56,40 @@ module Deas
         end
 
         # error handling
+
         not_found do
           # `self` is the sinatra call in this context
-          env['sinatra.error'] ||= Sinatra::NotFound.new
-          ErrorHandler.run(env['sinatra.error'], {
-            :server_data   => server_data,
-            :request       => self.request,
-            :response      => self.response,
-            :handler_class => self.request.env['deas.handler_class'],
-            :handler       => self.request.env['deas.handler'],
-            :params        => self.request.env['deas.params'],
-          })
+          if env['sinatra.error']
+            env['deas.error'] = if env['sinatra.error'].instance_of?(::Sinatra::NotFound)
+              Deas::NotFound.new(env['PATH_INFO']).tap do |e|
+                e.set_backtrace(env['sinatra.error'].backtrace)
+              end
+            else
+              env['sinatra.error']
+            end
+            ErrorHandler.run(env['deas.error'], {
+              :server_data   => server_data,
+              :request       => self.request,
+              :response      => self.response,
+              :handler_class => self.request.env['deas.handler_class'],
+              :handler       => self.request.env['deas.handler'],
+              :params        => self.request.env['deas.params'],
+            })
+          end
         end
         error do
           # `self` is the sinatra call in this context
-          ErrorHandler.run(env['sinatra.error'], {
-            :server_data   => server_data,
-            :request       => self.request,
-            :response      => self.response,
-            :handler_class => self.request.env['deas.handler_class'],
-            :handler       => self.request.env['deas.handler'],
-            :params        => self.request.env['deas.params'],
-          })
+          if env['sinatra.error']
+            env['deas.error'] = env['sinatra.error']
+            ErrorHandler.run(env['deas.error'], {
+              :server_data   => server_data,
+              :request       => self.request,
+              :response      => self.response,
+              :handler_class => self.request.env['deas.handler_class'],
+              :handler       => self.request.env['deas.handler'],
+              :params        => self.request.env['deas.params'],
+            })
+          end
         end
 
       end

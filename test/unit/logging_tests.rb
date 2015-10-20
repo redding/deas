@@ -85,18 +85,15 @@ module Deas::Logging
       assert_equal exp, @env['deas.time_taken']
     end
 
-    should "log a sinatra.error env key if it exists" do
-      @env.delete('sinatra.error')
+    should "log a deas.error env key if it exists" do
+      @env.delete('deas.error')
       subject.call(@env)
       assert_empty @logger.info_logged
 
-      @env['sinatra.error'] = Factory.exception(Sinatra::NotFound)
+      @env['deas.error'] = error = Factory.exception
       subject.call(@env)
-      assert_empty @logger.info_logged
-
-      @env['sinatra.error'] = error = Factory.exception
-      subject.call(@env)
-      exp = "[Deas] #{error.class}: #{error.message}\n#{error.backtrace.join("\n")}"
+      exp = "[Deas] #{error.class}: #{error.message}\n" \
+            "#{(error.backtrace || []).join("\n")}"
       assert_includes exp, @logger.info_logged
     end
 
