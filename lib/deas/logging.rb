@@ -38,7 +38,7 @@ module Deas
       benchmark = Benchmark.measure do
         status, headers, body = @app.call(env)
       end
-      log_error(env['sinatra.error'])
+      log_error(env['deas.error'])
       env['deas.time_taken'] = RoundedTime.new(benchmark.real)
 
       [status, headers, body]
@@ -49,9 +49,9 @@ module Deas
     end
 
     def log_error(exception)
-      return if !exception || exception.kind_of?(Sinatra::NotFound)
+      return if !exception
       log "#{exception.class}: #{exception.message}\n" \
-          "#{exception.backtrace.join("\n")}"
+          "#{(exception.backtrace || []).join("\n")}"
     end
 
   end

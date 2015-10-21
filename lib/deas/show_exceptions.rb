@@ -23,7 +23,7 @@ module Deas
     # The real Rack call interface.
     def call!(env)
       status, headers, body = @app.call(env)
-      if error = env['sinatra.error']
+      if error = env['deas.error']
         error_body = Body.new(error)
 
         headers['Content-Length'] = error_body.size.to_s
@@ -37,7 +37,7 @@ module Deas
       attr_reader :content, :size, :mime_type
 
       def initialize(e)
-        @content   = "#{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
+        @content   = "#{e.class}: #{e.message}\n#{(e.backtrace || []).join("\n")}"
         @size      = Rack::Utils.bytesize(@content)
         @mime_type = "text/plain"
       end

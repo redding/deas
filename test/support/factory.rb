@@ -13,6 +13,7 @@ module Factory
     message ||= Factory.text
     exception = nil
     begin; raise(klass, message); rescue klass => exception; end
+    exception.set_backtrace(nil) if Factory.boolean
     exception
   end
 

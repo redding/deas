@@ -12,7 +12,7 @@ class DeasTestServer
 
   error do |exception, context|
     case exception
-    when Sinatra::NotFound
+    when Deas::NotFound
       [404, "Couldn't be found"]
     when Exception
       [500, "Oops, something went wrong"]

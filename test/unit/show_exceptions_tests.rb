@@ -18,7 +18,7 @@ class Deas::ShowExceptions
     desc "when init"
     setup do
       @app = Factory.sinatra_call
-      @env = { 'sinatra.error' => Factory.exception }
+      @env = { 'deas.error' => Factory.exception }
       @middleware = @middleware_class.new(@app)
     end
     subject{ @middleware }
@@ -27,7 +27,7 @@ class Deas::ShowExceptions
 
     should "return a response for the exception when called" do
       status, headers, body = subject.call(@env)
-      error_body = Body.new(@env['sinatra.error'])
+      error_body = Body.new(@env['deas.error'])
 
       assert_equal @app.response.status, status
       assert_equal error_body.size.to_s, headers['Content-Length']
@@ -36,7 +36,7 @@ class Deas::ShowExceptions
     end
 
     should "return the apps response if there isn't an exception" do
-      @env.delete('sinatra.error')
+      @env.delete('deas.error')
       status, headers, body = subject.call(@env)
 
       assert_equal @app.response.status,  status
@@ -58,7 +58,7 @@ class Deas::ShowExceptions
 
     should "know its attributes" do
       exp_content = "#{@exception.class}: #{@exception.message}\n" \
-                "#{@exception.backtrace.join("\n")}"
+                    "#{(@exception.backtrace || []).join("\n")}"
       assert_equal exp_content, subject.content
       assert_equal Rack::Utils.bytesize(exp_content), subject.size
       assert_equal "text/plain", subject.mime_type

@@ -41,6 +41,11 @@ module Deas
       assert_kind_of Deas::Error, Deas::HandlerProxyNotFound.new
     end
 
+    should "provide a generic not found exception" do
+      assert Deas::NotFound
+      assert_kind_of Deas::Error, Deas::NotFound.new
+    end
+
   end
 
 end
