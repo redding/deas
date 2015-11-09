@@ -3,7 +3,7 @@ require 'deas/router'
 
 require 'deas/exceptions'
 require 'deas/route'
-require 'deas/test_helpers'
+require 'deas/view_handler'
 require 'test/support/view_handlers'
 
 class Deas::Router
@@ -22,7 +22,7 @@ class Deas::Router
   end
 
   class InitTests < UnitTests
-    include Deas::TestHelpers
+    include Deas::ViewHandler::TestHelpers
 
     desc "when init"
     setup do
