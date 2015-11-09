@@ -1,14 +1,15 @@
 require 'assert'
 require 'deas/view_handler'
 
-require 'deas/test_helpers'
 require 'deas/template_source'
+require 'rack/request'
+require 'rack/response'
 require 'test/support/view_handlers'
 
 module Deas::ViewHandler
 
   class UnitTests < Assert::Context
-    include Deas::TestHelpers
+    include Deas::ViewHandler::TestHelpers
 
     desc "Deas::ViewHandler"
     setup do
@@ -269,6 +270,35 @@ module Deas::ViewHandler
       }
 
       assert_equal exp_headers, headers_args.value
+    end
+
+  end
+
+  class TestHelpersTests < UnitTests
+    desc "TestHelpers"
+    setup do
+      context_class = Class.new{ include Deas::ViewHandler::TestHelpers }
+      @context = context_class.new
+    end
+    subject{ @context }
+
+    should have_imeths :test_runner, :test_handler
+
+    should "build a test runner for a given handler class" do
+      runner  = subject.test_runner(@handler_class)
+
+      assert_kind_of ::Deas::TestRunner, runner
+      assert_kind_of Rack::Request,  runner.request
+      assert_kind_of Rack::Response, runner.response
+      assert_equal runner.request.session, runner.session
+    end
+
+    should "return an initialized handler instance" do
+      handler = subject.test_handler(@handler_class)
+      assert_kind_of @handler_class, handler
+
+      exp = subject.test_runner(@handler_class).handler
+      assert_equal exp, handler
     end
 
   end

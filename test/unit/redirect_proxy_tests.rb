@@ -2,7 +2,6 @@ require 'assert'
 require 'deas/redirect_proxy'
 
 require 'deas/handler_proxy'
-require 'deas/test_helpers'
 require 'deas/url'
 require 'deas/view_handler'
 
@@ -24,7 +23,7 @@ class Deas::RedirectProxy
   end
 
   class HandlerClassTests < UnitTests
-    include Deas::TestHelpers
+    include Deas::ViewHandler::TestHelpers
 
     desc "handler class"
     setup do
