@@ -14,7 +14,7 @@ module Deas
     def initialize(handler_class, args = nil)
       if !handler_class.include?(Deas::ViewHandler)
         raise InvalidServiceHandlerError, "#{handler_class.inspect} is not a"\
-                                          " Deas::ServiceHandler"
+                                          " Deas::ViewHandler"
       end
 
       args = (args || {}).dup

@@ -66,13 +66,12 @@ module Deas
       def source_partial(*args, &block); @deas_runner.source_partial(*args, &block); end
       def send_file(*args, &block);      @deas_runner.send_file(*args, &block);      end
 
-      # TODO: make these public when built using the test helpers
-      def logger;   @deas_runner.logger;   end
-      def router;   @deas_runner.router;   end
       def request;  @deas_runner.request;  end
       def response; @deas_runner.response; end
-      def params;   @deas_runner.params;   end
       def session;  @deas_runner.session;  end
+      def params;   @deas_runner.params;   end
+      def logger;   @deas_runner.logger;   end
+      def router;   @deas_runner.router;   end
 
       def run_callback(callback)
         (self.class.send("#{callback}_callbacks") || []).each do |callback|
