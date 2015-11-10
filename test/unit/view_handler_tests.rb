@@ -59,6 +59,14 @@ module Deas::ViewHandler
       assert_nil subject.after_run_called
     end
 
+    should "know if it is equal to another view handler" do
+      handler = test_handler(@handler_class)
+      assert_equal handler, subject
+
+      handler = test_handler(Class.new{ include Deas::ViewHandler })
+      assert_not_equal handler, subject
+    end
+
   end
 
   class LayoutsTests < InitTests
