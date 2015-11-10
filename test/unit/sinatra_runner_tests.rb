@@ -22,14 +22,28 @@ class Deas::SinatraRunner
   class InitTests < UnitTests
     desc "when init"
     setup do
+      @params = {
+        :splat  => Factory.string,
+        'splat' => Factory.string,
+        :captures  => [Factory.string],
+        'captures' => [Factory.string]
+      }
+
       @fake_sinatra_call = Factory.sinatra_call
       @runner = @runner_class.new(DeasRunnerViewHandler, {
-        :sinatra_call => @fake_sinatra_call
+        :sinatra_call => @fake_sinatra_call,
+        :params       => @params
       })
     end
     subject{ @runner }
 
     should have_imeths :run
+
+    should "remove any 'splat' or 'captures' params added by Sinatra's router" do
+      [:splat, 'splat', :captures, 'captures'].each do |param_name|
+        assert_nil subject.params[param_name]
+      end
+    end
 
     should "call the sinatra_call's halt with" do
       response_value = catch(:halt){ subject.halt('test') }
