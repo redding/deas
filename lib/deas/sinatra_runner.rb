@@ -5,7 +5,18 @@ module Deas
   class SinatraRunner < DeasRunner
 
     def initialize(handler_class, args = nil)
-      @sinatra_call = (args || {})[:sinatra_call]
+      args ||= {}
+      @sinatra_call = args[:sinatra_call]
+
+      # these are not part of Deas' intended behavior and route matching
+      # they are side-effects of using Sinatra.  remove them so they won't
+      # be relied upon in Deas apps.
+      args[:params] ||= {}
+      args[:params].delete(:splat)
+      args[:params].delete('splat')
+      args[:params].delete(:captures)
+      args[:params].delete('captures')
+
       super(handler_class, args)
     end
 
