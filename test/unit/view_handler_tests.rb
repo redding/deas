@@ -297,7 +297,6 @@ module Deas::ViewHandler
 
       assert_kind_of ::Deas::TestRunner, runner
       assert_kind_of Rack::Request,  runner.request
-      assert_kind_of Rack::Response, runner.response
       assert_equal runner.request.session, runner.session
     end
 

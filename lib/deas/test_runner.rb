@@ -19,12 +19,11 @@ module Deas
 
       args = (args || {}).dup
       super(handler_class, {
-        :request  => args.delete(:request),
-        :response => args.delete(:response),
-        :session  => args.delete(:session),
-        :params   => NormalizedParams.new(args.delete(:params) || {}).value,
-        :logger   => args.delete(:logger),
-        :router   => args.delete(:router),
+        :request         => args.delete(:request),
+        :session         => args.delete(:session),
+        :params          => NormalizedParams.new(args.delete(:params) || {}).value,
+        :logger          => args.delete(:logger),
+        :router          => args.delete(:router),
         :template_source => args.delete(:template_source)
       })
       args.each{|key, value| self.handler.send("#{key}=", value) }
