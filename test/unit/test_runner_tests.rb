@@ -28,12 +28,11 @@ class Deas::TestRunner
     setup do
       @params = { 'value' => '1' }
       @args = {
-        :request  => 'a-request',
-        :response => 'a-response',
-        :session  => 'a-session',
-        :params   => @params,
-        :logger   => 'a-logger',
-        :router   => 'a-router',
+        :request         => 'a-request',
+        :session         => 'a-session',
+        :params          => @params,
+        :logger          => 'a-logger',
+        :router          => 'a-router',
         :template_source => 'a-source'
       }
 
@@ -54,13 +53,12 @@ class Deas::TestRunner
     end
 
     should "super its standard args" do
-      assert_equal 'a-request',  subject.request
-      assert_equal 'a-response', subject.response
-      assert_equal 'a-session',  subject.session
-      assert_equal @params,      subject.params
-      assert_equal 'a-logger',   subject.logger
-      assert_equal 'a-router',   subject.router
-      assert_equal 'a-source',   subject.template_source
+      assert_equal 'a-request', subject.request
+      assert_equal 'a-session', subject.session
+      assert_equal @params,     subject.params
+      assert_equal 'a-logger',  subject.logger
+      assert_equal 'a-router',  subject.router
+      assert_equal 'a-source',  subject.template_source
     end
 
     should "call to normalize its params" do

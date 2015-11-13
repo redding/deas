@@ -49,7 +49,6 @@ class Deas::HandlerProxy
       exp_args = {
         :sinatra_call    => @fake_sinatra_call,
         :request         => @fake_sinatra_call.request,
-        :response        => @fake_sinatra_call.response,
         :session         => @fake_sinatra_call.session,
         :params          => @fake_sinatra_call.params,
         :logger          => @server_data.logger,

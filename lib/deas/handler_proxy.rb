@@ -19,7 +19,6 @@ module Deas
       runner = SinatraRunner.new(self.handler_class, {
         :sinatra_call    => sinatra_call,
         :request         => sinatra_call.request,
-        :response        => sinatra_call.response,
         :session         => sinatra_call.session,
         :params          => sinatra_call.params,
         :logger          => server_data.logger,

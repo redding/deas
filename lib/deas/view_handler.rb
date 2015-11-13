@@ -66,12 +66,11 @@ module Deas
       def source_partial(*args, &block); @deas_runner.source_partial(*args, &block); end
       def send_file(*args, &block);      @deas_runner.send_file(*args, &block);      end
 
-      def request;  @deas_runner.request;  end
-      def response; @deas_runner.response; end
-      def session;  @deas_runner.session;  end
-      def params;   @deas_runner.params;   end
-      def logger;   @deas_runner.logger;   end
-      def router;   @deas_runner.router;   end
+      def request; @deas_runner.request; end
+      def session; @deas_runner.session; end
+      def params;  @deas_runner.params;  end
+      def logger;  @deas_runner.logger;  end
+      def router;  @deas_runner.router;  end
 
       def run_callback(callback)
         (self.class.send("#{callback}_callbacks") || []).each do |callback|
@@ -124,9 +123,8 @@ module Deas
 
       def test_runner(handler_class, args = nil)
         args ||= {}
-        args[:request]  ||= Rack::Request.new({})
-        args[:response] ||= Rack::Response.new
-        args[:session]  ||= args[:request].session
+        args[:request] ||= Rack::Request.new({})
+        args[:session] ||= args[:request].session
         TestRunner.new(handler_class, args)
       end
 

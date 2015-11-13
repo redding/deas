@@ -133,11 +133,10 @@ module Deas
 
     should "be able to access sinatra call data" do
       exp = {
-        'logger_class_name'       => 'Logger',
-        'request_method'          => 'GET',
-        'response_firstheaderval' => 'Content-Type',
-        'params_a_param'          => 'something',
-        'session_inspect'         => '{}'
+        'logger_class_name' => 'Logger',
+        'request_method'    => 'GET',
+        'params_a_param'    => 'something',
+        'session_inspect'   => '{}'
       }
       assert_equal exp.inspect, @data_inspect
     end

@@ -8,8 +8,8 @@ module Deas
   class Runner
 
     attr_reader :handler_class, :handler
-    attr_reader :request, :response, :session
-    attr_reader :params, :logger, :router, :template_source
+    attr_reader :request, :session, :params
+    attr_reader :logger, :router, :template_source
 
     def initialize(handler_class, args = nil)
       @handler_class = handler_class
@@ -17,7 +17,6 @@ module Deas
 
       a = args || {}
       @request         = a[:request]
-      @response        = a[:response]
       @session         = a[:session]
       @params          = a[:params] || {}
       @logger          = a[:logger] || Deas::NullLogger.new
