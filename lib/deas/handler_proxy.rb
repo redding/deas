@@ -1,5 +1,5 @@
 require 'deas/exceptions'
-require 'deas/sinatra_runner'
+require 'deas/deas_runner'
 
 module Deas
 
@@ -24,8 +24,7 @@ module Deas
       sinatra_call.params.delete(:captures)
       sinatra_call.params.delete('captures')
 
-      runner = SinatraRunner.new(self.handler_class, {
-        :sinatra_call    => sinatra_call,
+      runner = DeasRunner.new(self.handler_class, {
         :logger          => server_data.logger,
         :router          => server_data.router,
         :template_source => server_data.template_source,

@@ -1,3 +1,4 @@
+require 'rack/utils'
 require 'deas/runner'
 
 module Deas
@@ -11,11 +12,17 @@ module Deas
     end
 
     def run
-      run_callbacks self.handler_class.before_callbacks
-      self.handler.init
-      response_data = self.handler.run
-      run_callbacks self.handler_class.after_callbacks
-      response_data
+      catch(:halt) do
+        run_callbacks self.handler_class.before_callbacks
+        catch(:halt){ self.handler.init; self.handler.run }
+        run_callbacks self.handler_class.after_callbacks
+      end
+
+      self.to_rack.tap do |(status, headers, body)|
+        headers['Content-Length'] ||= body.inject(0) do |length, part|
+          length + Rack::Utils.bytesize(part)
+        end.to_s
+      end
     end
 
     private

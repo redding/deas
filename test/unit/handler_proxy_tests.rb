@@ -2,7 +2,7 @@ require 'assert'
 require 'deas/handler_proxy'
 
 require 'deas/exceptions'
-require 'deas/sinatra_runner'
+require 'deas/deas_runner'
 require 'test/support/view_handlers'
 
 class Deas::HandlerProxy
@@ -30,8 +30,8 @@ class Deas::HandlerProxy
   class RunTests < UnitTests
     desc "when run"
     setup do
-      @runner_spy = SinatraRunnerSpy.new
-      Assert.stub(Deas::SinatraRunner, :new) do |*args|
+      @runner_spy = RunnerSpy.new
+      Assert.stub(Deas::DeasRunner, :new) do |*args|
         @runner_spy.build(*args)
         @runner_spy
       end
@@ -56,11 +56,10 @@ class Deas::HandlerProxy
       end
     end
 
-    should "build and run a sinatra runner" do
+    should "build and run a deas runner" do
       assert_equal subject.handler_class, @runner_spy.handler_class
 
       exp_args = {
-        :sinatra_call    => @fake_sinatra_call,
         :logger          => @server_data.logger,
         :router          => @server_data.router,
         :template_source => @server_data.template_source,
@@ -94,13 +93,12 @@ class Deas::HandlerProxy
 
   end
 
-  class SinatraRunnerSpy
+  class RunnerSpy
 
     attr_reader :run_called
     attr_reader :handler_class, :handler, :args
-    attr_reader :sinatra_call
     attr_reader :logger, :router, :template_source
-    attr_reader :request, :response, :session, :params
+    attr_reader :request, :session, :params
 
     def initialize
       @run_called = false
@@ -111,12 +109,10 @@ class Deas::HandlerProxy
       @handler       = handler_class.new(self)
       @args          = args
 
-      @sinatra_call    = args[:sinatra_call]
       @logger          = args[:logger]
       @router          = args[:router]
       @template_source = args[:template_source]
       @request         = args[:request]
-      @response        = args[:response]
       @session         = args[:session]
       @params          = args[:params]
     end
