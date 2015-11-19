@@ -59,7 +59,7 @@ class DeasDevServer
 
   show_exceptions true
 
-  get  '/error', 'ErrorHandler'
+  get '/error', 'ErrorHandler'
 
 end
 

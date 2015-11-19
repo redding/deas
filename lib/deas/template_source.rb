@@ -75,8 +75,8 @@ module Deas
 
   class NullTemplateSource < TemplateSource
 
-    def initialize
-      super('')
+    def initialize(root = nil)
+      super(root || '')
     end
 
   end

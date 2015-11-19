@@ -174,8 +174,8 @@ module Deas
       # server handling options
 
       option :verbose_logging, NsOptions::Boolean, :default => true
-      option :logger,                              :default => proc{ Deas::NullLogger.new }
-      option :template_source,                     :default => proc{ Deas::NullTemplateSource.new }
+      option :logger
+      option :template_source
 
       attr_accessor :settings, :init_procs, :error_procs, :template_helpers
       attr_accessor :middlewares, :router
@@ -186,8 +186,10 @@ module Deas
         # Configuration class `root`, which will not update these options as
         # expected.
         super((values || {}).merge({
-          :public_root => proc{ self.root.join('public') },
-          :views_root  => proc{ self.root.join('views') }
+          :public_root     => proc{ self.root.join('public') },
+          :views_root      => proc{ self.root.join('views') },
+          :logger          => proc{ Deas::NullLogger.new },
+          :template_source => proc{ Deas::NullTemplateSource.new(self.root) }
         }))
         @settings = {}
         @init_procs, @error_procs, @template_helpers, @middlewares = [], [], [], []

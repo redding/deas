@@ -1,4 +1,4 @@
-require 'ostruct'
+require 'test/support/fake_request'
 
 class FakeSinatraCall
 
@@ -9,8 +9,8 @@ class FakeSinatraCall
   attr_accessor :settings
 
   def initialize(settings = nil)
-    @request         = FakeRequest.new('GET','/something', {}, OpenStruct.new)
-    @response        = FakeResponse.new(Factory.integer, {}, [Factory.text])
+    @request         = FakeRequest.new
+    @response        = FakeResponse.new
     @session         = @request.session
     @params          = @request.params
     @logger          = Deas::NullLogger.new
@@ -69,18 +69,13 @@ class FakeSinatraCall
 
 end
 
-class FakeRequest < Struct.new(:http_method, :path, :params, :session)
-  alias :request_method :http_method
-
-  attr_reader :logging_msgs
-
-  def env
-    @env ||= {
-      'deas.logging' => Proc.new do |msg|
-        @logging_msgs ||= []
-        @logging_msgs.push(msg)
-      end
-    }
+class FakeResponse < Struct.new(:status, :headers, :body)
+  def initialize(args = nil)
+    args ||= {}
+    super(*[
+      args[:status]  || Factory.integer,
+      args[:headers] || {},
+      args[:body]    || [Factory.text]
+    ])
   end
 end
-FakeResponse = Struct.new(:status, :headers, :body)
