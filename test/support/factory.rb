@@ -3,6 +3,7 @@ require 'deas/logger'
 require 'deas/router'
 require 'deas/server_data'
 require 'deas/template_source'
+require 'test/support/fake_request'
 require 'test/support/fake_sinatra_call'
 
 module Factory
@@ -23,6 +24,10 @@ module Factory
       :router          => Deas::Router.new,
       :template_source => Deas::NullTemplateSource.new
     }.merge(opts || {}))
+  end
+
+  def self.request(args = nil)
+    FakeRequest.new(args)
   end
 
   def self.sinatra_call(settings = nil)

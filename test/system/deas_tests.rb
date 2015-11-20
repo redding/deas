@@ -26,21 +26,27 @@ module Deas
 
     should "set the content type appropriately" do
       get '/show'
+      assert_equal 200, last_response.status
       assert_equal 'text/html;charset=utf-8', last_response.headers['Content-Type']
 
       get '/show.html'
+      assert_equal 200, last_response.status
       assert_equal 'text/html;charset=utf-8', last_response.headers['Content-Type']
 
       get '/show.json'
+      assert_equal 200, last_response.status
       assert_equal 'application/json;charset=utf-8', last_response.headers['Content-Type']
 
       get '/show-latin1-json'
+      assert_equal 200, last_response.status
       assert_equal 'application/json;charset=latin1', last_response.headers['Content-Type']
 
       get '/show-text'
+      assert_equal 200, last_response.status
       assert_equal 'text/plain', last_response.headers['Content-Type']
 
       get '/show-headers-text'
+      assert_equal 200, last_response.status
       assert_equal 'text/plain', last_response.headers['Content-Type']
     end
 
@@ -81,25 +87,25 @@ module Deas
 
     should "return a 302 redirecting to the expected locations" do
       get '/redirect'
-      expected_location = 'http://google.com'
+      exp_location = 'http://google.com'
 
-      assert_equal 302,               last_response.status
-      assert_equal expected_location, last_response.headers['Location']
+      assert_equal 302, last_response.status
+      assert_equal exp_location, last_response.headers['Location']
     end
 
     should "return a 302 redirect to the expected location " \
            "when using a route redirect" do
       get '/route_redirect'
-      expected_location = 'http://example.org/somewhere'
+      exp_location = 'http://example.org/somewhere'
 
-      assert_equal 302,               last_response.status
-      assert_equal expected_location, last_response.headers['Location']
+      assert_equal 302, last_response.status
+      assert_equal exp_location, last_response.headers['Location']
 
       get '/my_prefix/redirect'
-      expected_location = 'http://example.org/my_prefix/somewhere'
+      exp_location = 'http://example.org/my_prefix/somewhere'
 
-      assert_equal 302,               last_response.status
-      assert_equal expected_location, last_response.headers['Location']
+      assert_equal 302, last_response.status
+      assert_equal exp_location, last_response.headers['Location']
     end
 
   end
