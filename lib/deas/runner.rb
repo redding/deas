@@ -8,20 +8,20 @@ module Deas
   class Runner
 
     attr_reader :handler_class, :handler
-    attr_reader :request, :session, :params
     attr_reader :logger, :router, :template_source
+    attr_reader :request, :session, :params
 
     def initialize(handler_class, args = nil)
       @handler_class = handler_class
       @handler = @handler_class.new(self)
 
-      a = args || {}
-      @request         = a[:request]
-      @session         = a[:session]
-      @params          = a[:params] || {}
-      @logger          = a[:logger] || Deas::NullLogger.new
-      @router          = a[:router] || Deas::Router.new
-      @template_source = a[:template_source] || Deas::NullTemplateSource.new
+      args ||= {}
+      @logger          = args[:logger] || Deas::NullLogger.new
+      @router          = args[:router] || Deas::Router.new
+      @template_source = args[:template_source] || Deas::NullTemplateSource.new
+      @request         = args[:request]
+      @session         = args[:session]
+      @params          = args[:params] || {}
     end
 
     def halt(*args);           raise NotImplementedError; end

@@ -16,14 +16,22 @@ module Deas
     end
 
     def run(server_data, sinatra_call)
+      # these are not part of Deas' intended behavior and route matching
+      # they are side-effects of using Sinatra.  remove them so they won't
+      # be relied upon in Deas apps.
+      sinatra_call.params.delete(:splat)
+      sinatra_call.params.delete('splat')
+      sinatra_call.params.delete(:captures)
+      sinatra_call.params.delete('captures')
+
       runner = SinatraRunner.new(self.handler_class, {
         :sinatra_call    => sinatra_call,
-        :request         => sinatra_call.request,
-        :session         => sinatra_call.session,
-        :params          => sinatra_call.params,
         :logger          => server_data.logger,
         :router          => server_data.router,
-        :template_source => server_data.template_source
+        :template_source => server_data.template_source,
+        :request         => sinatra_call.request,
+        :session         => sinatra_call.session,
+        :params          => sinatra_call.params
       })
 
       runner.request.env.tap do |env|

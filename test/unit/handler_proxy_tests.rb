@@ -40,7 +40,20 @@ class Deas::HandlerProxy
 
       @server_data       = Factory.server_data
       @fake_sinatra_call = Factory.sinatra_call
+      @fake_sinatra_call.params = {
+        :splat     => Factory.string,
+        'splat'    => Factory.string,
+        :captures  => [Factory.string],
+        'captures' => [Factory.string]
+      }
+
       @proxy.run(@server_data, @fake_sinatra_call)
+    end
+
+    should "remove any 'splat' or 'captures' params added by Sinatra's router" do
+      [:splat, 'splat', :captures, 'captures'].each do |param_name|
+        assert_nil @fake_sinatra_call.params[param_name]
+      end
     end
 
     should "build and run a sinatra runner" do
@@ -48,12 +61,12 @@ class Deas::HandlerProxy
 
       exp_args = {
         :sinatra_call    => @fake_sinatra_call,
-        :request         => @fake_sinatra_call.request,
-        :session         => @fake_sinatra_call.session,
-        :params          => @fake_sinatra_call.params,
         :logger          => @server_data.logger,
         :router          => @server_data.router,
-        :template_source => @server_data.template_source
+        :template_source => @server_data.template_source,
+        :request         => @fake_sinatra_call.request,
+        :session         => @fake_sinatra_call.session,
+        :params          => @fake_sinatra_call.params
       }
       assert_equal exp_args, @runner_spy.args
 
@@ -86,8 +99,8 @@ class Deas::HandlerProxy
     attr_reader :run_called
     attr_reader :handler_class, :handler, :args
     attr_reader :sinatra_call
-    attr_reader :request, :response, :session, :params
     attr_reader :logger, :router, :template_source
+    attr_reader :request, :response, :session, :params
 
     def initialize
       @run_called = false
@@ -99,13 +112,13 @@ class Deas::HandlerProxy
       @args          = args
 
       @sinatra_call    = args[:sinatra_call]
+      @logger          = args[:logger]
+      @router          = args[:router]
+      @template_source = args[:template_source]
       @request         = args[:request]
       @response        = args[:response]
       @session         = args[:session]
       @params          = args[:params]
-      @logger          = args[:logger]
-      @router          = args[:router]
-      @template_source = args[:template_source]
     end
 
     def run
