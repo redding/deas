@@ -31,7 +31,7 @@ class Deas::RedirectProxy
     end
     subject{ @handler_class }
 
-    should have_accessor :router, :redirect_path
+    should have_accessor :router, :redirect_location
     should have_imeth :name
 
     should "be a view handler" do
@@ -44,16 +44,16 @@ class Deas::RedirectProxy
       assert_equal @router, subject.router
     end
 
-    should "store its redirect path as a proc" do
-      assert_kind_of Proc, subject.redirect_path
+    should "store its redirect location as a proc" do
+      assert_kind_of Proc, subject.redirect_location
 
       url = Deas::Url.new(:some_thing, '/:some/:thing')
       handler_class = Deas::RedirectProxy.new(@router, url).handler_class
-      assert_kind_of Proc, handler_class.redirect_path
+      assert_kind_of Proc, handler_class.redirect_location
 
-      path_proc = proc{ '/somewhere' }
-      handler_class = Deas::RedirectProxy.new(@router, &path_proc).handler_class
-      assert_kind_of Proc, handler_class.redirect_path
+      location_proc = proc{ '/somewhere' }
+      handler_class = Deas::RedirectProxy.new(@router, &location_proc).handler_class
+      assert_kind_of Proc, handler_class.redirect_location
     end
 
     should "know its name" do
@@ -69,48 +69,48 @@ class Deas::RedirectProxy
     end
     subject{ @handler }
 
-    should have_reader :redirect_path
+    should have_reader :redirect_location
 
-    should "know its redir path if from a path string" do
-      exp_path = '/somewhere'
-      assert_equal exp_path, subject.redirect_path
+    should "know its redir location if from a location string" do
+      exp_location = '/somewhere'
+      assert_equal exp_location, subject.redirect_location
 
       @router.base_url(@base_url)
       handler = test_handler(@handler_class)
-      exp = @router.prepend_base_url(exp_path)
-      assert_equal exp, handler.redirect_path
+      exp = @router.prepend_base_url(exp_location)
+      assert_equal exp, handler.redirect_location
     end
 
-    should "know its redir path if from Url" do
+    should "know its redir location if from Url" do
       url = Deas::Url.new(:some_thing, '/:some/:thing')
       handler_class = Deas::RedirectProxy.new(@router, url).handler_class
       handler = test_handler(handler_class, {
         :params => { 'some' => 'a', 'thing' => 'goose' }
       })
 
-      exp_path = '/a/goose'
-      assert_equal exp_path, handler.redirect_path
+      exp_location = '/a/goose'
+      assert_equal exp_location, handler.redirect_location
 
       @router.base_url(@base_url)
       handler = test_handler(handler_class, {
         :params => { 'some' => 'a', 'thing' => 'goose' }
       })
-      exp = @router.prepend_base_url(exp_path)
-      assert_equal exp, handler.redirect_path
+      exp = @router.prepend_base_url(exp_location)
+      assert_equal exp, handler.redirect_location
     end
 
-    should "know its redir path if from a block" do
-      path_proc = proc{ '/from-block-arg' }
-      handler_class = Deas::RedirectProxy.new(@router, &path_proc).handler_class
+    should "know its redir location if from a block" do
+      location_proc = proc{ '/from-block-arg' }
+      handler_class = Deas::RedirectProxy.new(@router, &location_proc).handler_class
       handler = test_handler(handler_class)
 
-      exp_path = '/from-block-arg'
-      assert_equal exp_path , handler.redirect_path
+      exp_location = '/from-block-arg'
+      assert_equal exp_location , handler.redirect_location
 
       @router.base_url(@base_url)
       handler = test_handler(handler_class)
-      exp = @router.prepend_base_url(exp_path)
-      assert_equal exp, handler.redirect_path
+      exp = @router.prepend_base_url(exp_location)
+      assert_equal exp, handler.redirect_location
     end
 
   end
@@ -118,14 +118,14 @@ class Deas::RedirectProxy
   class RunTests < HandlerClassTests
     desc "when run"
     setup do
-      @runner = test_runner(@handler_class)
-      @handler = @runner.handler
-      @render_args = @runner.run
+      @runner   = test_runner(@handler_class)
+      @handler  = @runner.handler
+      @response = @runner.run
     end
 
-    should "redirect to the handler's redirect path" do
-      assert @render_args.redirect?
-      assert_equal @handler.redirect_path, @render_args.path
+    should "redirect to the handler's redirect location" do
+      assert_true @response.redirect?
+      assert_equal @handler.redirect_location, @response.path
     end
 
   end
