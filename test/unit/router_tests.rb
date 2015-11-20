@@ -223,7 +223,7 @@ class Deas::Router
       proxy = redirect.handler_proxies[subject.default_request_type_name]
       handler = test_handler(proxy.handler_class)
       exp = subject.prepend_base_url(path2)
-      assert_equal exp, handler.redirect_path
+      assert_equal exp, handler.redirect_location
     end
 
     should "prepend the base url when adding not founds" do
@@ -343,7 +343,7 @@ class Deas::Router
 
       handler = test_handler(proxy.handler_class)
       exp = subject.prepend_base_url(@path2)
-      assert_equal exp, handler.redirect_path
+      assert_equal exp, handler.redirect_location
     end
 
     should "add not found routes" do
