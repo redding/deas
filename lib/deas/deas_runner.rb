@@ -21,7 +21,7 @@ module Deas
     private
 
     def run_callbacks(callbacks)
-      callbacks.each{|proc| self.handler.instance_eval(&proc) }
+      callbacks.each{ |proc| self.handler.instance_eval(&proc) }
     end
 
     class NormalizedParams < Deas::Runner::NormalizedParams

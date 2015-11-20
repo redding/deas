@@ -24,8 +24,8 @@ class Deas::Runner
     subject{ @runner }
 
     should have_readers :handler_class, :handler
-    should have_readers :request, :session, :params
     should have_readers :logger, :router, :template_source
+    should have_readers :request, :session, :params
     should have_imeths :halt, :redirect, :content_type, :status, :headers
     should have_imeths :render, :source_render, :partial, :source_partial
     should have_imeths :send_file
@@ -36,12 +36,12 @@ class Deas::Runner
     end
 
     should "default its settings" do
-      assert_nil subject.request
-      assert_nil subject.session
-      assert_equal ::Hash.new, subject.params
       assert_kind_of Deas::NullLogger, subject.logger
       assert_kind_of Deas::Router, subject.router
       assert_kind_of Deas::NullTemplateSource, subject.template_source
+      assert_nil subject.request
+      assert_nil subject.session
+      assert_equal ::Hash.new, subject.params
     end
 
     should "not implement its non-rendering actions" do

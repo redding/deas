@@ -11,7 +11,8 @@ class Deas::DeasRunner
   class UnitTests < Assert::Context
     desc "Deas::DeasRunner"
     setup do
-      @runner_class = Deas::DeasRunner
+      @handler_class = DeasRunnerViewHandler
+      @runner_class  = Deas::DeasRunner
     end
     subject{ @runner_class }
 
@@ -28,24 +29,31 @@ class Deas::DeasRunner
       @norm_params_spy = Deas::Runner::NormalizedParamsSpy.new
       Assert.stub(NormalizedParams, :new){ |p| @norm_params_spy.new(p) }
 
-      @runner = @runner_class.new(DeasRunnerViewHandler, :params => @params)
+      @runner = @runner_class.new(@handler_class, :params => @params)
     end
     subject{ @runner }
 
     should have_imeths :run
-
-    should "super its params arg" do
-      assert_equal @params, subject.params
-    end
 
     should "call to normalize its params" do
       assert_equal @params, @norm_params_spy.params
       assert_true @norm_params_spy.value_called
     end
 
+    should "super its params arg" do
+      assert_equal @params, subject.params
+    end
+
   end
 
-  class RunTests < InitTests
+  class InitHandlerTests < InitTests
+    setup do
+      @handler = @runner.instance_variable_get("@handler")
+    end
+
+  end
+
+  class RunTests < InitHandlerTests
     desc "and run"
     setup do
       @response_value = @runner.run

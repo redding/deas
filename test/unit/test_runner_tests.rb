@@ -13,7 +13,7 @@ class Deas::TestRunner
     desc "Deas::TestRunner"
     setup do
       @handler_class = TestRunnerViewHandler
-      @runner_class = Deas::TestRunner
+      @runner_class  = Deas::TestRunner
     end
     subject{ @runner_class }
 
@@ -26,14 +26,16 @@ class Deas::TestRunner
   class InitTests < UnitTests
     desc "when init"
     setup do
-      @params = { 'value' => '1' }
+      @request = Factory.request
+      @params  = { Factory.string => Factory.string }
+
       @args = {
-        :request         => 'a-request',
-        :session         => 'a-session',
-        :params          => @params,
-        :logger          => 'a-logger',
-        :router          => 'a-router',
-        :template_source => 'a-source'
+        :logger          => Factory.string,
+        :router          => Factory.string,
+        :template_source => Factory.string,
+        :request         => @request,
+        :session         => Factory.string,
+        :params          => @params
       }
 
       @norm_params_spy = Deas::Runner::NormalizedParamsSpy.new
@@ -53,12 +55,12 @@ class Deas::TestRunner
     end
 
     should "super its standard args" do
-      assert_equal 'a-request', subject.request
-      assert_equal 'a-session', subject.session
-      assert_equal @params,     subject.params
-      assert_equal 'a-logger',  subject.logger
-      assert_equal 'a-router',  subject.router
-      assert_equal 'a-source',  subject.template_source
+      assert_equal @args[:logger],          subject.logger
+      assert_equal @args[:router],          subject.router
+      assert_equal @args[:template_source], subject.template_source
+      assert_equal @args[:request],         subject.request
+      assert_equal @args[:session],         subject.session
+      assert_equal @args[:params],          subject.params
     end
 
     should "call to normalize its params" do
