@@ -69,21 +69,6 @@ module Deas::ViewHandler
 
   end
 
-  class LayoutsTests < InitTests
-    desc "with layouts"
-    setup do
-      @params = { 'n' => Factory.integer }
-      @runner  = test_runner(LayoutsViewHandler, :params => @params)
-      @handler = @runner.handler
-    end
-
-    should "build its layouts by instance eval'ing its class layout procs" do
-      exp = subject.class.layouts.map{ |proc| @handler.instance_eval(&proc) }
-      assert_equal exp, subject.layouts
-    end
-
-  end
-
   class RunTests < InitTests
     desc "and run"
 
@@ -98,46 +83,157 @@ module Deas::ViewHandler
       assert_raises(NotImplementedError){ test_runner(EmptyViewHandler).run }
     end
 
-    should "send files" do
-      send_file_args = test_runner(SendFileViewHandler).run
-      assert_equal "my_file.txt",      send_file_args.file_path
-      assert_equal({:some => :option}, send_file_args.options)
+  end
+
+  class PrivateHelpersTests < InitTests
+    setup do
+      @something = Factory.string
+      @args      = (Factory.integer(3)+1).times.map{ Factory.string }
+      @block     = proc{}
+    end
+
+    should "call to the runner for its logger" do
+      stub_runner_with_something_for(:logger)
+      assert_equal @runner.logger, subject.instance_eval{ logger }
+    end
+
+    should "call to the runner for its router" do
+      stub_runner_with_something_for(:router)
+      assert_equal @runner.router, subject.instance_eval{ router }
+    end
+
+    should "call to the runner for its request" do
+      stub_runner_with_something_for(:request)
+      assert_equal @runner.request, subject.instance_eval{ request }
+    end
+
+    should "call to the runner for its session" do
+      stub_runner_with_something_for(:session)
+      assert_equal @runner.session, subject.instance_eval{ session }
+    end
+
+    should "call to the runner for its params" do
+      stub_runner_with_something_for(:params)
+      assert_equal @runner.params, subject.instance_eval{ params }
+    end
+
+    should "call to the runner for its status helper" do
+      capture_runner_meth_args_for(:status)
+      exp_args = @args
+      subject.instance_eval{ status(*exp_args) }
+
+      assert_equal exp_args, @meth_args
+      assert_nil @meth_block
+    end
+
+    should "call to the runner for its headers helper" do
+      capture_runner_meth_args_for(:headers)
+      exp_args = @args
+      subject.instance_eval{ headers(*exp_args) }
+
+      assert_equal exp_args, @meth_args
+      assert_nil @meth_block
+    end
+
+    should "call to the runner for its content type helper" do
+      capture_runner_meth_args_for(:content_type)
+      exp_args = @args
+      subject.instance_eval{ content_type(*exp_args) }
+
+      assert_equal exp_args, @meth_args
+      assert_nil @meth_block
+    end
+
+    should "call to the runner for its halt helper" do
+      capture_runner_meth_args_for(:halt)
+      exp_args = @args
+      subject.instance_eval{ halt(*exp_args) }
+
+      assert_equal exp_args, @meth_args
+      assert_nil @meth_block
+    end
+
+    should "call to the runner for its redirect helper" do
+      capture_runner_meth_args_for(:redirect)
+      exp_args = @args
+      subject.instance_eval{ redirect(*exp_args) }
+
+      assert_equal exp_args, @meth_args
+      assert_nil @meth_block
+    end
+
+    should "call to the runner for its send file helper" do
+      capture_runner_meth_args_for(:send_file)
+      exp_args = @args
+      subject.instance_eval{ send_file(*exp_args) }
+
+      assert_equal exp_args, @meth_args
+      assert_nil @meth_block
+    end
+
+    should "call to the runner for its render helper" do
+      capture_runner_meth_args_for(:render)
+      exp_args, exp_block = @args, @block
+      subject.instance_eval{ render(*exp_args, &exp_block) }
+
+      assert_equal exp_args,  @meth_args
+      assert_equal exp_block, @meth_block
+    end
+
+    should "call to the runner for its source render helper" do
+      capture_runner_meth_args_for(:source_render)
+      exp_args, exp_block = @args, @block
+      subject.instance_eval{ source_render(*exp_args, &exp_block) }
+
+      assert_equal exp_args,  @meth_args
+      assert_equal exp_block, @meth_block
+    end
+
+    should "call to the runner for its partial helper" do
+      capture_runner_meth_args_for(:partial)
+      exp_args, exp_block = @args, @block
+      subject.instance_eval{ partial(*exp_args, &exp_block) }
+
+      assert_equal exp_args,  @meth_args
+      assert_equal exp_block, @meth_block
+    end
+
+    should "call to the runner for its source partial helper" do
+      capture_runner_meth_args_for(:source_partial)
+      exp_args, exp_block = @args, @block
+      subject.instance_eval{ source_partial(*exp_args, &exp_block) }
+
+      assert_equal exp_args,  @meth_args
+      assert_equal exp_block, @meth_block
+    end
+
+    private
+
+    def stub_runner_with_something_for(meth)
+      Assert.stub(@runner, meth){ @something }
+    end
+
+    def capture_runner_meth_args_for(meth)
+      Assert.stub(@runner, meth) do |*args, &block|
+        @meth_args  = args
+        @meth_block = block
+      end
     end
 
   end
 
-  class RenderTests < RunTests
+  class InitLayoutsTests < UnitTests
+    desc "when init with layouts"
     setup do
-      @template_name = Factory.path
-      @locals = { Factory.string => Factory.string }
-      @source = Deas::TemplateSource.new(Factory.path)
-
-      @render_args = nil
-      Assert.stub(@runner.template_source, :render){ |*args| @render_args = args }
-      @source_render_args = nil
-      Assert.stub(@source, :render){ |*args| @source_render_args = args }
-      @partial_args = nil
-      Assert.stub(@runner.template_source, :partial){ |*args| @partial_args = args }
-      @source_partial_args = nil
-      Assert.stub(@source, :partial){ |*args| @source_partial_args = args }
+      @params = { 'n' => Factory.integer }
+      @runner  = test_runner(LayoutsViewHandler, :params => @params)
+      @handler = @runner.handler
     end
+    subject{ @handler }
 
-    should "render templates" do
-      subject.send(:render, @template_name, @locals)
-      exp = [@template_name, subject, @locals]
-      assert_equal exp, @render_args
-
-      subject.send(:source_render, @source, @template_name, @locals)
-      exp = [@template_name, subject, @locals]
-      assert_equal exp, @source_render_args
-
-      subject.send(:partial, @template_name, @locals)
-      exp = [@template_name, @locals]
-      assert_equal exp, @partial_args
-
-      subject.send(:source_partial, @source, @template_name, @locals)
-      exp = [@template_name, @locals]
-      assert_equal exp, @source_partial_args
+    should "build its layouts by instance eval'ing its class layout procs" do
+      exp = subject.class.layouts.map{ |proc| subject.instance_eval(&proc) }
+      assert_equal exp, subject.layouts
     end
 
   end
@@ -149,135 +245,76 @@ module Deas::ViewHandler
       @handler = Class.new{ include Deas::ViewHandler }
     end
 
-    should "append procs in #before_callbacks with #before" do
+    should "append before procs" do
       @handler.before(&@proc1); @handler.before(&@proc2)
       assert_equal @proc1, @handler.before_callbacks.first
       assert_equal @proc2, @handler.before_callbacks.last
     end
 
-    should "prepend procs in #before_callbacks with #before" do
+    should "prepend before procs" do
       @handler.prepend_before(&@proc1); @handler.prepend_before(&@proc2)
       assert_equal @proc2, @handler.before_callbacks.first
       assert_equal @proc1, @handler.before_callbacks.last
     end
 
-    should "append procs in #after_callbacks with #after" do
+    should "append after procs" do
       @handler.after(&@proc1); @handler.after(&@proc2)
       assert_equal @proc1, @handler.after_callbacks.first
       assert_equal @proc2, @handler.after_callbacks.last
     end
 
-    should "prepend procs in #after_callbacks with #before" do
+    should "prepend after procs" do
       @handler.prepend_after(&@proc1); @handler.prepend_after(&@proc2)
       assert_equal @proc2, @handler.after_callbacks.first
       assert_equal @proc1, @handler.after_callbacks.last
     end
 
-    should "append procs in #before_init_callbacks with #before_init" do
+    should "append before init procs" do
       @handler.before_init(&@proc1); @handler.before_init(&@proc2)
       assert_equal @proc1, @handler.before_init_callbacks.first
       assert_equal @proc2, @handler.before_init_callbacks.last
     end
 
-    should "prepend procs in #before_init_callbacks with #before" do
+    should "prepend before init procs" do
       @handler.prepend_before_init(&@proc1); @handler.prepend_before_init(&@proc2)
       assert_equal @proc2, @handler.before_init_callbacks.first
       assert_equal @proc1, @handler.before_init_callbacks.last
     end
 
-    should "append procs in #after_init_callbacks with #after_init" do
+    should "append after init procs" do
       @handler.after_init(&@proc1); @handler.after_init(&@proc2)
       assert_equal @proc1, @handler.after_init_callbacks.first
       assert_equal @proc2, @handler.after_init_callbacks.last
     end
 
-    should "prepend procs in #after_init_callbacks with #before" do
+    should "prepend after init procs" do
       @handler.prepend_after_init(&@proc1); @handler.prepend_after_init(&@proc2)
       assert_equal @proc2, @handler.after_init_callbacks.first
       assert_equal @proc1, @handler.after_init_callbacks.last
     end
 
-    should "append procs in #before_run_callbacks with #before_run" do
+    should "append before run procs" do
       @handler.before_run(&@proc1); @handler.before_run(&@proc2)
       assert_equal @proc1, @handler.before_run_callbacks.first
       assert_equal @proc2, @handler.before_run_callbacks.last
     end
 
-    should "prepend procs in #before_run_callbacks with #before" do
+    should "prepend before run procs" do
       @handler.prepend_before_run(&@proc1); @handler.prepend_before_run(&@proc2)
       assert_equal @proc2, @handler.before_run_callbacks.first
       assert_equal @proc1, @handler.before_run_callbacks.last
     end
 
-    should "append procs in #after_run_callbacks with #after_run" do
+    should "append after run procs" do
       @handler.after_run(&@proc1); @handler.after_run(&@proc2)
       assert_equal @proc1, @handler.after_run_callbacks.first
       assert_equal @proc2, @handler.after_run_callbacks.last
     end
 
-    should "prepend procs in #after_run_callbacks with #before" do
+    should "prepend after run procs" do
       @handler.prepend_after_run(&@proc1); @handler.prepend_after_run(&@proc2)
       assert_equal @proc2, @handler.after_run_callbacks.first
       assert_equal @proc1, @handler.after_run_callbacks.last
-    end
-
-  end
-
-  class HaltTests < UnitTests
-    desc "halt"
-
-    should "return a response with the status code and the passed data" do
-      runner = test_runner(HaltViewHandler, :params => {
-        'code'    => 200,
-        'headers' => { 'Content-Type' => 'text/plain' },
-        'body'    => 'test halting'
-      })
-      runner.run
-
-      assert_equal 200,                                runner.response_value.status
-      assert_equal({ 'Content-Type' => 'text/plain' }, runner.response_value.headers)
-      assert_equal 'test halting',                     runner.response_value.body
-    end
-
-  end
-
-  class ContentTypeTests < UnitTests
-    desc "content_type"
-
-    should "should set the response content_type/charset" do
-      runner = test_runner(ContentTypeViewHandler)
-      content_type_args = runner.run
-
-      assert_equal 'text/plain', content_type_args.value
-      assert_equal({:charset => 'latin1'}, content_type_args.opts)
-    end
-
-  end
-
-  class StatusTests < UnitTests
-    desc "status"
-
-    should "should set the response status" do
-      runner = test_runner(StatusViewHandler)
-      status_args = runner.run
-
-      assert_equal 422, status_args.value
-    end
-
-  end
-
-  class HeadersTests < UnitTests
-    desc "headers"
-
-    should "should set the response status" do
-      runner = test_runner(HeadersViewHandler)
-      headers_args = runner.run
-      exp_headers = {
-        'a-header' => 'some value',
-        'other'    => 'other'
-      }
-
-      assert_equal exp_headers, headers_args.value
     end
 
   end

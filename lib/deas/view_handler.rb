@@ -52,31 +52,36 @@ module Deas
 
       private
 
-      # Helpers
-
-      def halt(*args);         @deas_runner.halt(*args);         end
-      def redirect(*args);     @deas_runner.redirect(*args);     end
-      def content_type(*args); @deas_runner.content_type(*args); end
-      def status(*args);       @deas_runner.status(*args);       end
-      def headers(*args);      @deas_runner.headers(*args);      end
-
-      def render(*args, &block);         @deas_runner.render(*args, &block);         end
-      def source_render(*args, &block);  @deas_runner.source_render(*args, &block);  end
-      def partial(*args, &block);        @deas_runner.partial(*args, &block);        end
-      def source_partial(*args, &block); @deas_runner.source_partial(*args, &block); end
-      def send_file(*args, &block);      @deas_runner.send_file(*args, &block);      end
-
-      def request; @deas_runner.request; end
-      def session; @deas_runner.session; end
-      def params;  @deas_runner.params;  end
-      def logger;  @deas_runner.logger;  end
-      def router;  @deas_runner.router;  end
-
       def run_callback(callback)
         (self.class.send("#{callback}_callbacks") || []).each do |callback|
           self.instance_eval(&callback)
         end
       end
+
+      # Helpers
+
+      # utils
+      def logger; @deas_runner.logger; end
+      def router; @deas_runner.router; end
+
+      # request
+      def request; @deas_runner.request; end
+      def session; @deas_runner.session; end
+      def params;  @deas_runner.params;  end
+
+      # response
+      def status(*args);       @deas_runner.status(*args);       end
+      def headers(*args);      @deas_runner.headers(*args);      end
+      def content_type(*args); @deas_runner.content_type(*args); end
+      def halt(*args);         @deas_runner.halt(*args);         end
+      def redirect(*args);     @deas_runner.redirect(*args);     end
+      def send_file(*args);    @deas_runner.send_file(*args);    end
+
+      # rendering
+      def render(*args, &block);         @deas_runner.render(*args, &block);         end
+      def source_render(*args, &block);  @deas_runner.source_render(*args, &block);  end
+      def partial(*args, &block);        @deas_runner.partial(*args, &block);        end
+      def source_partial(*args, &block); @deas_runner.source_partial(*args, &block); end
 
     end
 
