@@ -17,19 +17,19 @@ module Deas
         @deas_runner = runner
       end
 
-      def init
-        run_callback 'before_init'
+      def deas_init
+        self.deas_run_callback 'before_init'
         self.init!
-        run_callback 'after_init'
+        self.deas_run_callback 'after_init'
       end
 
       def init!
       end
 
-      def run
-        run_callback 'before_run'
+      def deas_run
+        self.deas_run_callback 'before_run'
         data = self.run!
-        run_callback 'after_run'
+        self.deas_run_callback 'after_run'
         data
       end
 
@@ -38,6 +38,12 @@ module Deas
 
       def layouts
         self.class.layouts.map{ |proc| self.instance_eval(&proc) }
+      end
+
+      def deas_run_callback(callback)
+        (self.class.send("#{callback}_callbacks") || []).each do |callback|
+          self.instance_eval(&callback)
+        end
       end
 
       def inspect
@@ -50,12 +56,6 @@ module Deas
       end
 
       private
-
-      def run_callback(callback)
-        (self.class.send("#{callback}_callbacks") || []).each do |callback|
-          self.instance_eval(&callback)
-        end
-      end
 
       # Helpers
 
