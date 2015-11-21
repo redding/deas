@@ -79,10 +79,6 @@ module Deas::ViewHandler
       assert_equal true, subject.after_run_called
     end
 
-    should "complain if run! is not overwritten" do
-      assert_raises(NotImplementedError){ test_runner(EmptyViewHandler).run }
-    end
-
   end
 
   class PrivateHelpersTests < InitTests
