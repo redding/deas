@@ -5,14 +5,15 @@ require 'rack/utils'
 require 'deas/logger'
 require 'deas/router'
 require 'deas/template_source'
-require 'test/support/view_handlers'
+require 'test/support/empty_view_handler'
 
 class Deas::Runner
 
   class UnitTests < Assert::Context
     desc "Deas::Runner"
     setup do
-      @runner_class = Deas::Runner
+      @handler_class = EmptyViewHandler
+      @runner_class  = Deas::Runner
     end
     subject{ @runner_class }
 
@@ -38,7 +39,7 @@ class Deas::Runner
     desc "when init"
     setup do
       @request = Factory.request
-      @runner  = @runner_class.new(EmptyViewHandler, :request => @request)
+      @runner  = @runner_class.new(@handler_class, :request => @request)
     end
     subject{ @runner }
 
@@ -51,12 +52,12 @@ class Deas::Runner
     should have_imeths :render, :source_render, :partial, :source_partial
 
     should "know its handler and handler class" do
-      assert_equal EmptyViewHandler, subject.handler_class
+      assert_equal @handler_class, subject.handler_class
       assert_instance_of subject.handler_class, subject.handler
     end
 
     should "default its attrs" do
-      runner = @runner_class.new(EmptyViewHandler)
+      runner = @runner_class.new(@handler_class)
       assert_kind_of Deas::NullLogger,         runner.logger
       assert_kind_of Deas::Router,             runner.router
       assert_kind_of Deas::NullTemplateSource, runner.template_source
@@ -77,7 +78,7 @@ class Deas::Runner
         :params          => {}
       }
 
-      runner = @runner_class.new(EmptyViewHandler, args)
+      runner = @runner_class.new(@handler_class, args)
 
       assert_equal args[:logger],          runner.logger
       assert_equal args[:router],          runner.router
@@ -226,7 +227,7 @@ class Deas::Runner
     private
 
     def runner_halted_with(*halt_args)
-      @runner_class.new(EmptyViewHandler).tap do |runner|
+      @runner_class.new(@handler_class).tap do |runner|
         catch(:halt){ runner.halt(*halt_args) }
       end
     end

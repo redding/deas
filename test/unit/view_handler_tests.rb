@@ -4,7 +4,7 @@ require 'deas/view_handler'
 require 'deas/template_source'
 require 'rack/request'
 require 'rack/response'
-require 'test/support/view_handlers'
+require 'test/support/empty_view_handler'
 
 module Deas::ViewHandler
 
@@ -13,17 +13,20 @@ module Deas::ViewHandler
 
     desc "Deas::ViewHandler"
     setup do
-      @handler_class = TestViewHandler
+      @handler_class = Class.new{ include Deas::ViewHandler }
     end
     subject{ @handler_class }
 
     should have_imeths :layout, :layouts
-    should have_imeths :before, :prepend_before, :before_callbacks
-    should have_imeths :after,  :prepend_after,  :after_callbacks
-    should have_imeths :before_init, :prepend_before_init, :before_init_callbacks
-    should have_imeths :after_init,  :prepend_after_init,  :after_init_callbacks
-    should have_imeths :before_run,  :prepend_before_run,  :before_run_callbacks
-    should have_imeths :after_run,   :prepend_after_run,   :after_run_callbacks
+    should have_imeths :before_callbacks, :after_callbacks
+    should have_imeths :before_init_callbacks, :after_init_callbacks
+    should have_imeths :before_run_callbacks,  :after_run_callbacks
+    should have_imeths :before, :after
+    should have_imeths :before_init, :after_init
+    should have_imeths :before_run,  :after_run
+    should have_imeths :prepend_before, :prepend_after
+    should have_imeths :prepend_before_init, :prepend_after_init
+    should have_imeths :prepend_before_run,  :prepend_after_run
 
     should "specify layouts" do
       subject.layout 'layouts/app'
@@ -33,12 +36,120 @@ module Deas::ViewHandler
       assert_equal ['layouts/app', 'layouts/web'], subject.layouts.map(&:call)
     end
 
+    should "return an empty array by default using `before_callbacks`" do
+      assert_equal [], subject.before_callbacks
+    end
+
+    should "return an empty array by default using `after_callbacks`" do
+      assert_equal [], subject.after_callbacks
+    end
+
+    should "return an empty array by default using `before_init_callbacks`" do
+      assert_equal [], subject.before_init_callbacks
+    end
+
+    should "return an empty array by default using `after_init_callbacks`" do
+      assert_equal [], subject.after_init_callbacks
+    end
+
+    should "return an empty array by default using `before_run_callbacks`" do
+      assert_equal [], subject.before_run_callbacks
+    end
+
+    should "return an empty array by default using `after_run_callbacks`" do
+      assert_equal [], subject.after_run_callbacks
+    end
+
+  should "append a block to the before callbacks using `before`" do
+    subject.before_callbacks << proc{ Factory.string }
+    block = Proc.new{ Factory.string }
+    subject.before(&block)
+    assert_equal block, subject.before_callbacks.last
+  end
+
+  should "append a block to the after callbacks using `after`" do
+    subject.after_callbacks << proc{ Factory.string }
+    block = Proc.new{ Factory.string }
+    subject.after(&block)
+    assert_equal block, subject.after_callbacks.last
+  end
+
+  should "append a block to the before init callbacks using `before_init`" do
+    subject.before_init_callbacks << proc{ Factory.string }
+    block = Proc.new{ Factory.string }
+    subject.before_init(&block)
+    assert_equal block, subject.before_init_callbacks.last
+  end
+
+  should "append a block to the after init callbacks using `after_init`" do
+    subject.after_init_callbacks << proc{ Factory.string }
+    block = Proc.new{ Factory.string }
+    subject.after_init(&block)
+    assert_equal block, subject.after_init_callbacks.last
+  end
+
+  should "append a block to the before run callbacks using `before_run`" do
+    subject.before_run_callbacks << proc{ Factory.string }
+    block = Proc.new{ Factory.string }
+    subject.before_run(&block)
+    assert_equal block, subject.before_run_callbacks.last
+  end
+
+  should "append a block to the after run callbacks using `after_run`" do
+    subject.after_run_callbacks << proc{ Factory.string }
+    block = Proc.new{ Factory.string }
+    subject.after_run(&block)
+    assert_equal block, subject.after_run_callbacks.last
+  end
+
+  should "prepend a block to the before callbacks using `prepend_before`" do
+    subject.before_callbacks << proc{ Factory.string }
+    block = Proc.new{ Factory.string }
+    subject.prepend_before(&block)
+    assert_equal block, subject.before_callbacks.first
+  end
+
+  should "prepend a block to the after callbacks using `prepend_after`" do
+    subject.after_callbacks << proc{ Factory.string }
+    block = Proc.new{ Factory.string }
+    subject.prepend_after(&block)
+    assert_equal block, subject.after_callbacks.first
+  end
+
+  should "prepend a block to the before init callbacks using `prepend_before_init`" do
+    subject.before_init_callbacks << proc{ Factory.string }
+    block = Proc.new{ Factory.string }
+    subject.prepend_before_init(&block)
+    assert_equal block, subject.before_init_callbacks.first
+  end
+
+  should "prepend a block to the after init callbacks using `prepend_after_init`" do
+    subject.after_init_callbacks << proc{ Factory.string }
+    block = Proc.new{ Factory.string }
+    subject.prepend_after_init(&block)
+    assert_equal block, subject.after_init_callbacks.first
+  end
+
+  should "prepend a block to the before run callbacks using `prepend_before_run`" do
+    subject.before_run_callbacks << proc{ Factory.string }
+    block = Proc.new{ Factory.string }
+    subject.prepend_before_run(&block)
+    assert_equal block, subject.before_run_callbacks.first
+  end
+
+  should "prepend a block to the after run callbacks using `prepend_after_run`" do
+    subject.after_run_callbacks << proc{ Factory.string }
+    block = Proc.new{ Factory.string }
+    subject.prepend_after_run(&block)
+    assert_equal block, subject.after_run_callbacks.first
+  end
+
   end
 
   class InitTests < UnitTests
     desc "when init"
     setup do
-      @runner  = test_runner(@handler_class)
+      @runner  = test_runner(TestViewHandler)
       @handler = @runner.handler
     end
     subject{ @handler }
@@ -46,26 +157,30 @@ module Deas::ViewHandler
     should have_imeths :deas_init, :init!, :deas_run, :run!
     should have_imeths :layouts, :deas_run_callback
 
-    should "have called `init!` and it's callbacks" do
-      assert_equal true, subject.before_init_called
-      assert_equal true, subject.second_before_init_called
-      assert_equal true, subject.init_bang_called
-      assert_equal true, subject.after_init_called
+    should "have called `init!` and its before/after init callbacks" do
+      assert_equal 1, subject.first_before_init_call_order
+      assert_equal 2, subject.second_before_init_call_order
+      assert_equal 3, subject.init_call_order
+      assert_equal 4, subject.first_after_init_call_order
+      assert_equal 5, subject.second_after_init_call_order
     end
 
-    should "not have called `run!` or it's callbacks when initialized" do
-      assert_nil subject.before_run_called
-      assert_nil subject.run_bang_called
-      assert_nil subject.after_run_called
+    should "not have called `run!` and its before/after run callbacks" do
+      assert_nil subject.first_before_run_call_order
+      assert_nil subject.second_before_run_call_order
+      assert_nil subject.run_call_order
+      assert_nil subject.first_after_run_call_order
+      assert_nil subject.second_after_run_call_order
     end
 
     should "run its callbacks with `deas_run_callback`" do
       subject.deas_run_callback 'before_run'
-      assert_equal true, subject.before_run_called
+      assert_equal 6, subject.first_before_run_call_order
+      assert_equal 7, subject.second_before_run_call_order
     end
 
     should "know if it is equal to another view handler" do
-      handler = test_handler(@handler_class)
+      handler = test_handler(TestViewHandler)
       assert_equal handler, subject
 
       handler = test_handler(Class.new{ include Deas::ViewHandler })
@@ -76,12 +191,16 @@ module Deas::ViewHandler
 
   class RunTests < InitTests
     desc "and run"
+    setup do
+      @handler.deas_run
+    end
 
     should "call `run!` and it's callbacks" do
-      subject.deas_run
-      assert_equal true, subject.before_run_called
-      assert_equal true, subject.run_bang_called
-      assert_equal true, subject.after_run_called
+      assert_equal 6,  subject.first_before_run_call_order
+      assert_equal 7,  subject.second_before_run_call_order
+      assert_equal 8,  subject.run_call_order
+      assert_equal 9,  subject.first_after_run_call_order
+      assert_equal 10, subject.second_after_run_call_order
     end
 
   end
@@ -248,87 +367,6 @@ module Deas::ViewHandler
 
   end
 
-  class CallbackTests < UnitTests
-    setup do
-      @proc1 = proc{ '1' }
-      @proc2 = proc{ '2' }
-      @handler = Class.new{ include Deas::ViewHandler }
-    end
-
-    should "append before procs" do
-      @handler.before(&@proc1); @handler.before(&@proc2)
-      assert_equal @proc1, @handler.before_callbacks.first
-      assert_equal @proc2, @handler.before_callbacks.last
-    end
-
-    should "prepend before procs" do
-      @handler.prepend_before(&@proc1); @handler.prepend_before(&@proc2)
-      assert_equal @proc2, @handler.before_callbacks.first
-      assert_equal @proc1, @handler.before_callbacks.last
-    end
-
-    should "append after procs" do
-      @handler.after(&@proc1); @handler.after(&@proc2)
-      assert_equal @proc1, @handler.after_callbacks.first
-      assert_equal @proc2, @handler.after_callbacks.last
-    end
-
-    should "prepend after procs" do
-      @handler.prepend_after(&@proc1); @handler.prepend_after(&@proc2)
-      assert_equal @proc2, @handler.after_callbacks.first
-      assert_equal @proc1, @handler.after_callbacks.last
-    end
-
-    should "append before init procs" do
-      @handler.before_init(&@proc1); @handler.before_init(&@proc2)
-      assert_equal @proc1, @handler.before_init_callbacks.first
-      assert_equal @proc2, @handler.before_init_callbacks.last
-    end
-
-    should "prepend before init procs" do
-      @handler.prepend_before_init(&@proc1); @handler.prepend_before_init(&@proc2)
-      assert_equal @proc2, @handler.before_init_callbacks.first
-      assert_equal @proc1, @handler.before_init_callbacks.last
-    end
-
-    should "append after init procs" do
-      @handler.after_init(&@proc1); @handler.after_init(&@proc2)
-      assert_equal @proc1, @handler.after_init_callbacks.first
-      assert_equal @proc2, @handler.after_init_callbacks.last
-    end
-
-    should "prepend after init procs" do
-      @handler.prepend_after_init(&@proc1); @handler.prepend_after_init(&@proc2)
-      assert_equal @proc2, @handler.after_init_callbacks.first
-      assert_equal @proc1, @handler.after_init_callbacks.last
-    end
-
-    should "append before run procs" do
-      @handler.before_run(&@proc1); @handler.before_run(&@proc2)
-      assert_equal @proc1, @handler.before_run_callbacks.first
-      assert_equal @proc2, @handler.before_run_callbacks.last
-    end
-
-    should "prepend before run procs" do
-      @handler.prepend_before_run(&@proc1); @handler.prepend_before_run(&@proc2)
-      assert_equal @proc2, @handler.before_run_callbacks.first
-      assert_equal @proc1, @handler.before_run_callbacks.last
-    end
-
-    should "append after run procs" do
-      @handler.after_run(&@proc1); @handler.after_run(&@proc2)
-      assert_equal @proc1, @handler.after_run_callbacks.first
-      assert_equal @proc2, @handler.after_run_callbacks.last
-    end
-
-    should "prepend after run procs" do
-      @handler.prepend_after_run(&@proc1); @handler.prepend_after_run(&@proc2)
-      assert_equal @proc2, @handler.after_run_callbacks.first
-      assert_equal @proc1, @handler.after_run_callbacks.last
-    end
-
-  end
-
   class TestHelpersTests < UnitTests
     desc "TestHelpers"
     setup do
@@ -360,22 +398,38 @@ module Deas::ViewHandler
   class TestViewHandler
     include Deas::ViewHandler
 
-    attr_reader :before_called, :after_called
-    attr_reader :before_init_called, :second_before_init_called
-    attr_reader :init_bang_called, :after_init_called
-    attr_reader :before_run_called, :run_bang_called, :after_run_called
+    attr_reader :first_before_init_call_order, :second_before_init_call_order
+    attr_reader :first_after_init_call_order, :second_after_init_call_order
+    attr_reader :first_before_run_call_order, :second_before_run_call_order
+    attr_reader :first_after_run_call_order, :second_after_run_call_order
+    attr_reader :init_call_order, :run_call_order
 
-    before{ @before_called = true }
-    after{  @after_called  = true }
+    before_init{ @first_before_init_call_order = next_call_order }
+    before_init{ @second_before_init_call_order = next_call_order }
 
-    before_init{ @before_init_called        = true }
-    before_init{ @second_before_init_called = true }
-    after_init{  @after_init_called         = true }
-    before_run{  @before_run_called         = true }
-    after_run{   @after_run_called          = true }
+    after_init{ @first_after_init_call_order = next_call_order }
+    after_init{ @second_after_init_call_order = next_call_order }
 
-    def init!; @init_bang_called = true; end
-    def run!;  @run_bang_called = true;  end
+    before_run{ @first_before_run_call_order = next_call_order }
+    before_run{ @second_before_run_call_order = next_call_order }
+
+    after_run{ @first_after_run_call_order = next_call_order }
+    after_run{ @second_after_run_call_order = next_call_order }
+
+    def init!
+      @init_call_order = next_call_order
+    end
+
+    def run!
+      @run_call_order = next_call_order
+    end
+
+    private
+
+    def next_call_order
+      @order ||= 0
+      @order += 1
+    end
 
   end
 

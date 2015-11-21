@@ -6,7 +6,7 @@ require 'deas/exceptions'
 require 'deas/logger'
 require 'deas/router'
 require 'deas/template_source'
-require 'test/support/view_handlers'
+require 'test/support/empty_view_handler'
 
 module Deas::Server
 

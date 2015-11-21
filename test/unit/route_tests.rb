@@ -3,7 +3,7 @@ require 'deas/route'
 
 require 'deas/exceptions'
 require 'deas/route_proxy'
-require 'test/support/view_handlers'
+require 'test/support/empty_view_handler'
 
 class Deas::Route
 

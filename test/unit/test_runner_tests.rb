@@ -5,19 +5,18 @@ require 'rack/test'
 require 'deas/runner'
 require 'deas/template_source'
 require 'test/support/normalized_params_spy'
-require 'test/support/view_handlers'
 
 class Deas::TestRunner
 
   class UnitTests < Assert::Context
     desc "Deas::TestRunner"
     setup do
-      @handler_class = TestRunnerViewHandler
+      @handler_class = TestViewHandler
       @runner_class  = Deas::TestRunner
     end
     subject{ @runner_class }
 
-    should "be a `Runner`" do
+    should "be a runner" do
       assert subject < Deas::Runner
     end
 
@@ -35,20 +34,23 @@ class Deas::TestRunner
         :template_source => Factory.string,
         :request         => @request,
         :session         => Factory.string,
-        :params          => @params
+        :params          => @params,
+        :custom_value    => Factory.integer
       }
 
       @norm_params_spy = Deas::Runner::NormalizedParamsSpy.new
       Assert.stub(NormalizedParams, :new){ |p| @norm_params_spy.new(p) }
 
+      @original_args = @args.dup
       @runner = @runner_class.new(@handler_class, @args)
+      @handler = @runner.handler
     end
     subject{ @runner }
 
     should have_imeths :halted?, :run
 
-    should "raise an invalid error when not passed a view handler" do
-      assert_raises(Deas::InvalidServiceHandlerError) do
+    should "raise an invalid error when passed a non view handler" do
+      assert_raises(Deas::InvalidViewHandlerError) do
         @runner_class.new(Class.new)
       end
     end
@@ -67,18 +69,28 @@ class Deas::TestRunner
       assert_true @norm_params_spy.value_called
     end
 
-    should "write any non-standard args on the handler" do
-      runner = @runner_class.new(@handler_class, :custom_value => 42)
-      assert_equal 42, runner.handler.custom_value
+    should "write any non-standard args to its handler" do
+      assert_equal @args[:custom_value], @handler.custom_value
     end
 
-    should "not have called its service handlers before callbacks" do
-      assert_not_true subject.handler.before_called
+    should "not alter the args passed to it" do
+      assert_equal @original_args, @args
     end
 
-    should "have called init (but not run) on its handler" do
-      assert_true     subject.handler.init_called
-      assert_not_true subject.handler.run_called
+    should "not call its handler's before callbacks" do
+      assert_nil @handler.before_called
+    end
+
+    should "call its handler's init" do
+      assert_true @handler.init_called
+    end
+
+    should "not call its handler's run" do
+      assert_nil @handler.run_called
+    end
+
+    should "not call its handler's after callbacks" do
+      assert_nil @handler.after_called
     end
 
     should "not have set a run return value" do
@@ -89,11 +101,11 @@ class Deas::TestRunner
       assert_false subject.halted?
     end
 
-    should "not call `run` on the handler if halted when run" do
+    should "not call `run` on its handler if halted when run" do
       catch(:halt){ subject.halt }
       assert_true subject.halted?
       subject.run
-      assert_not_true subject.handler.run_called
+      assert_nil @handler.run_called
     end
 
     should "return its run return value when run" do
@@ -243,7 +255,7 @@ class Deas::TestRunner
     end
 
     should "super to the base runner" do
-      exp = [@template_name, subject.handler, @locals]
+      exp = [@template_name, @handler, @locals]
       assert_equal exp, @source_render_called_with
     end
 
@@ -446,6 +458,26 @@ class Deas::TestRunner
 
     def normalized(params)
       @norm_params_class.new(params).value
+    end
+
+  end
+
+  class TestViewHandler
+    include Deas::ViewHandler
+
+    attr_reader :before_called, :after_called
+    attr_reader :init_called, :run_called
+    attr_accessor :custom_value
+
+    before{ @before_called = true }
+    after{ @after_called = true }
+
+    def init!
+      @init_called = true
+    end
+
+    def run!
+      @run_called = true
     end
 
   end
