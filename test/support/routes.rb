@@ -73,7 +73,7 @@ class ShowHandler
   end
 
   def run!
-    @message
+    body @message
   end
 
 end
@@ -88,7 +88,7 @@ class ShowMobileHandler
   end
 
   def run!
-    @message
+    body @message
   end
 
 end
@@ -111,7 +111,7 @@ class ShowLatinJsonHandler
   include Deas::ViewHandler
 
   def run!
-    content_type :json, :charset => 'latin1'
+    content_type '.json', :charset => 'latin1'
   end
 
 end
@@ -177,7 +177,7 @@ class UseSessionHandler
   include Deas::ViewHandler
 
   def run!
-    session[:secret]
+    body session[:secret]
   end
 
 end
@@ -201,7 +201,8 @@ class HandlerTestsHandler
   end
 
   def run!
-    [200, {}, @data.inspect]
+    status 200
+    body   @data.inspect
   end
 
 end

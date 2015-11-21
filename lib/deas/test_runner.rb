@@ -9,8 +9,6 @@ module Deas
 
   class TestRunner < Runner
 
-    attr_reader :response_value
-
     def initialize(handler_class, args = nil)
       if !handler_class.include?(Deas::ViewHandler)
         raise InvalidServiceHandlerError, "#{handler_class.inspect} is not a"\
@@ -28,76 +26,67 @@ module Deas
       })
       args.each{|key, value| self.handler.send("#{key}=", value) }
 
-      @response_value = catch(:halt){ self.handler.init; nil }
+      @run_return_value = nil
+      @halted = false
+      catch(:halt){ self.handler.init }
     end
 
+    def halted?; @halted; end
+
     def run
-      @response_value ||= catch(:halt){ self.handler.run }
+      catch(:halt){ self.handler.run } if !self.halted?
+      @run_return_value
     end
 
     # Helpers
 
     def halt(*args)
-      throw(:halt, HaltArgs.new(args))
+      @halted = true
+      @run_return_value ||= HaltArgs.new(args)
+      super
     end
 
-    class HaltArgs < Struct.new(:body, :headers, :status)
+    def redirect(location, *halt_args)
+      @run_return_value ||= RedirectArgs.new(location, HaltArgs.new(halt_args))
+      super
+    end
+
+    def send_file(file_path, opts = nil)
+      @run_return_value ||= SendFileArgs.new(file_path, opts)
+      super
+    end
+
+    def source_render(source, template_name, locals = nil)
+      @run_return_value ||= RenderArgs.new(source, template_name, locals)
+      super
+    end
+
+    def source_partial(source, template_name, locals = nil)
+      # partials don't interact with the response body so they shouldn't affect
+      # the run return value (like renders do).  Render the markup and discard
+      # it to test the template.  Return the render args so you can test the
+      # expected partials were rendered.
+      super
+      RenderArgs.new(source, template_name, locals)
+    end
+
+    class HaltArgs < Struct.new(:status, :headers, :body)
       def initialize(args)
+        a = args.dup
         super(*[
-          !args.last.kind_of?(::Hash) && !args.last.kind_of?(::Integer) ? args.pop : nil,
-          args.last.kind_of?(::Hash) ? args.pop : nil,
-          args.first.kind_of?(::Integer) ? args.first : nil
+          a.first.instance_of?(::Fixnum) ? a.shift : nil,
+          a.first.kind_of?(::Hash)       ? a.shift : nil,
+          a.first.respond_to?(:each)     ? a.shift : nil
         ])
       end
     end
 
-    def redirect(path, *halt_args)
-      throw(:halt, RedirectArgs.new(path, halt_args))
-    end
-
-    class RedirectArgs < Struct.new(:path, :halt_args)
+    class RedirectArgs < Struct.new(:location, :halt_args)
       def redirect?; true; end
     end
 
-    def content_type(*args)
-      return @content_type if args.empty?
-      opts, value = [
-        args.last.kind_of?(Hash) ? args.pop : {},
-        args.last
-      ]
-      @content_type = ContentTypeArgs.new(value, opts)
-    end
-    ContentTypeArgs = Struct.new(:value, :opts)
-
-    def status(*args)
-      return @status if args.empty?
-      value = args.last
-      @status = StatusArgs.new(value)
-    end
-    StatusArgs = Struct.new(:value)
-
-    def headers(*args)
-      return @headers if args.empty?
-      value = args.last
-      @headers = HeadersArgs.new(value)
-    end
-    HeadersArgs = Struct.new(:value)
-
-    def send_file(file_path, options = nil, &block)
-      SendFileArgs.new(file_path, options, block)
-    end
-    SendFileArgs = Struct.new(:file_path, :options, :block)
-
-    def source_render(source, template_name, locals = nil)
-      super # render the markup and discard it
-      RenderArgs.new(source, template_name, locals)
-    end
-    RenderArgs = Struct.new(:source, :template_name, :locals)
-
-    def source_partial(source, template_name, locals = nil)
-      super # render the markup and discard it
-      RenderArgs.new(source, template_name, locals)
-    end
+    SendFileArgs = Struct.new(:file_path, :opts)
+    RenderArgs   = Struct.new(:source, :template_name, :locals)
 
     class NormalizedParams < Deas::Runner::NormalizedParams
       def file_type?(value)

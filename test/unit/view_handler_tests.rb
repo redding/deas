@@ -135,6 +135,15 @@ module Deas::ViewHandler
       assert_nil @meth_block
     end
 
+    should "call to the runner for its body helper" do
+      capture_runner_meth_args_for(:body)
+      exp_args = @args
+      subject.instance_eval{ body(*exp_args) }
+
+      assert_equal exp_args, @meth_args
+      assert_nil @meth_block
+    end
+
     should "call to the runner for its content type helper" do
       capture_runner_meth_args_for(:content_type)
       exp_args = @args

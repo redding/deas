@@ -125,7 +125,7 @@ class Deas::RedirectProxy
 
     should "redirect to the handler's redirect location" do
       assert_true @response.redirect?
-      assert_equal @handler.redirect_location, @response.path
+      assert_equal @handler.redirect_location, @response.location
     end
 
   end

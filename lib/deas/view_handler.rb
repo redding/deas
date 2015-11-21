@@ -72,6 +72,7 @@ module Deas
       # response
       def status(*args);       @deas_runner.status(*args);       end
       def headers(*args);      @deas_runner.headers(*args);      end
+      def body(*args);         @deas_runner.body(*args);         end
       def content_type(*args); @deas_runner.content_type(*args); end
       def halt(*args);         @deas_runner.halt(*args);         end
       def redirect(*args);     @deas_runner.redirect(*args);     end
