@@ -13,9 +13,9 @@ module Deas
 
     def run
       catch(:halt) do
-        run_callbacks self.handler_class.before_callbacks
+        self.handler.instance_eval{ run_callback 'before' }
         catch(:halt){ self.handler.init; self.handler.run }
-        run_callbacks self.handler_class.after_callbacks
+        self.handler.instance_eval{ run_callback 'after' }
       end
 
       self.to_rack.tap do |(status, headers, body)|
@@ -26,10 +26,6 @@ module Deas
     end
 
     private
-
-    def run_callbacks(callbacks)
-      callbacks.each{ |proc| self.handler.instance_eval(&proc) }
-    end
 
     class NormalizedParams < Deas::Runner::NormalizedParams
       def file_type?(value)
