@@ -43,8 +43,8 @@ module Deas::ViewHandler
     end
     subject{ @handler }
 
-    should have_imeths :init, :init!, :run, :run!
-    should have_imeths :layouts
+    should have_imeths :deas_init, :init!, :deas_run, :run!
+    should have_imeths :layouts, :deas_run_callback
 
     should "have called `init!` and it's callbacks" do
       assert_equal true, subject.before_init_called
@@ -57,6 +57,11 @@ module Deas::ViewHandler
       assert_nil subject.before_run_called
       assert_nil subject.run_bang_called
       assert_nil subject.after_run_called
+    end
+
+    should "run its callbacks with `deas_run_callback`" do
+      subject.deas_run_callback 'before_run'
+      assert_equal true, subject.before_run_called
     end
 
     should "know if it is equal to another view handler" do
@@ -73,7 +78,7 @@ module Deas::ViewHandler
     desc "and run"
 
     should "call `run!` and it's callbacks" do
-      subject.run
+      subject.deas_run
       assert_equal true, subject.before_run_called
       assert_equal true, subject.run_bang_called
       assert_equal true, subject.after_run_called

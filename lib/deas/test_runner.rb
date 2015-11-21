@@ -28,13 +28,13 @@ module Deas
 
       @run_return_value = nil
       @halted = false
-      catch(:halt){ self.handler.init }
+      catch(:halt){ self.handler.deas_init }
     end
 
     def halted?; @halted; end
 
     def run
-      catch(:halt){ self.handler.run } if !self.halted?
+      catch(:halt){ self.handler.deas_run } if !self.halted?
       @run_return_value
     end
 

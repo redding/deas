@@ -15,9 +15,9 @@ module Deas
 
     def run
       catch(:halt) do
-        self.handler.instance_eval{ run_callback 'before' }
-        catch(:halt){ self.handler.init; self.handler.run }
-        self.handler.instance_eval{ run_callback 'after' }
+        self.handler.deas_run_callback 'before'
+        catch(:halt){ self.handler.deas_init; self.handler.deas_run }
+        self.handler.deas_run_callback 'after'
       end
 
       self.to_rack.tap do |(status, headers, body)|
