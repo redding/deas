@@ -34,7 +34,6 @@ module Deas
       end
 
       def run!
-        raise NotImplementedError
       end
 
       def layouts
