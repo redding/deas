@@ -15,16 +15,16 @@ module Deas
                                           " Deas::ViewHandler"
       end
 
-      args = (args || {}).dup
+      a = (args || {}).dup
       super(handler_class, {
-        :logger          => args.delete(:logger),
-        :router          => args.delete(:router),
-        :template_source => args.delete(:template_source),
-        :request         => args.delete(:request),
-        :session         => args.delete(:session),
-        :params          => NormalizedParams.new(args.delete(:params) || {}).value
+        :logger          => a.delete(:logger),
+        :router          => a.delete(:router),
+        :template_source => a.delete(:template_source),
+        :request         => a.delete(:request),
+        :session         => a.delete(:session),
+        :params          => NormalizedParams.new(a.delete(:params) || {}).value
       })
-      args.each{|key, value| self.handler.send("#{key}=", value) }
+      a.each{|key, value| self.handler.send("#{key}=", value) }
 
       @run_return_value = nil
       @halted = false

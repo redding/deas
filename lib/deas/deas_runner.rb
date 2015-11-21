@@ -6,9 +6,11 @@ module Deas
   class DeasRunner < Runner
 
     def initialize(handler_class, args = nil)
-      a = args || {}
-      runner_args = a.merge(:params => NormalizedParams.new(a[:params]).value)
-      super(handler_class, runner_args)
+      args ||= {}
+      super(
+        handler_class,
+        args.merge(:params => NormalizedParams.new(args[:params]).value)
+      )
     end
 
     def run
