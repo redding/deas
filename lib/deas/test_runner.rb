@@ -5,14 +5,14 @@ require 'deas/view_handler'
 
 module Deas
 
-  InvalidServiceHandlerError = Class.new(StandardError)
+  InvalidViewHandlerError = Class.new(StandardError)
 
   class TestRunner < Runner
 
     def initialize(handler_class, args = nil)
       if !handler_class.include?(Deas::ViewHandler)
-        raise InvalidServiceHandlerError, "#{handler_class.inspect} is not a"\
-                                          " Deas::ViewHandler"
+        raise InvalidViewHandlerError, "#{handler_class.inspect} is not a " \
+                                       "Deas::ViewHandler"
       end
 
       a = (args || {}).dup

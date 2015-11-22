@@ -3,7 +3,7 @@ require 'deas/handler_proxy'
 
 require 'deas/exceptions'
 require 'deas/deas_runner'
-require 'test/support/view_handlers'
+require 'test/support/empty_view_handler'
 
 class Deas::HandlerProxy
 

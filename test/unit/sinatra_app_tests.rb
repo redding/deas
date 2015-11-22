@@ -8,7 +8,7 @@ require 'deas/route'
 require 'deas/router'
 require 'deas/server'
 require 'deas/server_data'
-require 'test/support/view_handlers'
+require 'test/support/empty_view_handler'
 
 module Deas::SinatraApp
 

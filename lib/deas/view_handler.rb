@@ -109,6 +109,7 @@ module Deas
       def after_init(&block);  self.after_init_callbacks  << block; end
       def before_run(&block);  self.before_run_callbacks  << block; end
       def after_run(&block);   self.after_run_callbacks   << block; end
+
       def prepend_before(&block); self.before_callbacks.unshift(block); end
       def prepend_after(&block);  self.after_callbacks.unshift(block);  end
       def prepend_before_init(&block); self.before_init_callbacks.unshift(block); end

@@ -1,7 +1,7 @@
 require 'assert'
 require 'deas/url'
 
-require 'test/support/view_handlers'
+require 'test/support/empty_view_handler'
 
 class Deas::Url
 

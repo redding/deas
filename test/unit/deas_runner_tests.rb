@@ -4,19 +4,18 @@ require 'deas/deas_runner'
 require 'deas/runner'
 require 'deas/template_source'
 require 'test/support/normalized_params_spy'
-require 'test/support/view_handlers'
 
 class Deas::DeasRunner
 
   class UnitTests < Assert::Context
     desc "Deas::DeasRunner"
     setup do
-      @handler_class = DeasRunnerViewHandler
+      @handler_class = TestViewHandler
       @runner_class  = Deas::DeasRunner
     end
     subject{ @runner_class }
 
-    should "be a `Runner`" do
+    should "be a runner" do
       assert subject < Deas::Runner
     end
 
@@ -71,14 +70,19 @@ class Deas::DeasRunner
       @response = @runner.run
     end
 
-    should "run the before and after callbacks" do
-      assert_equal true, @handler.before_called
-      assert_equal true, @handler.after_called
+    should "run the handler's before callbacks" do
+      assert_equal 1, @handler.first_before_call_order
+      assert_equal 2, @handler.second_before_call_order
     end
 
-    should "run the handler's init and run" do
-      assert_equal true, @handler.init_bang_called
-      assert_equal true, @handler.run_bang_called
+    should "run the handler's init and run methods" do
+      assert_equal 3, @handler.init_call_order
+      assert_equal 4, @handler.run_call_order
+    end
+
+    should "run the handler's after callbacks" do
+      assert_equal 5, @handler.first_after_call_order
+      assert_equal 6, @handler.second_after_call_order
     end
 
     should "set the content length header in its response" do
@@ -104,17 +108,23 @@ class Deas::DeasRunner
   class RunWithInitHaltTests < InitHandlerTests
     desc "with a handler that halts on init"
     setup do
-      Assert.stub(@handler, :init!){ @runner.halt }
+      @runner = @runner_class.new(@handler_class, :params => {
+        'halt' => 'init'
+      })
+      @handler  = @runner.handler
       @response = @runner.run
     end
 
     should "run the before and after callbacks despite the halt" do
-      assert_equal true, @handler.before_called
-      assert_equal true, @handler.after_called
+      assert_not_nil @handler.first_before_call_order
+      assert_not_nil @handler.second_before_call_order
+      assert_not_nil @handler.first_after_call_order
+      assert_not_nil @handler.second_after_call_order
     end
 
-    should "not run the handler's run b/c of the halt" do
-      assert_not_equal true, @handler.run_bang_called
+    should "stop processing when the halt is called" do
+      assert_not_nil @handler.init_call_order
+      assert_nil @handler.run_call_order
     end
 
     should "return its `to_rack` value despite the halt" do
@@ -126,17 +136,23 @@ class Deas::DeasRunner
   class RunWithRunHaltTests < InitHandlerTests
     desc "with a handler that halts on run"
     setup do
-      Assert.stub(@handler, :run!){ @runner.halt }
+      @runner = @runner_class.new(@handler_class, :params => {
+        'halt' => 'run'
+      })
+      @handler  = @runner.handler
       @response = @runner.run
     end
 
     should "run the before and after callbacks despite the halt" do
-      assert_equal true, @handler.before_called
-      assert_equal true, @handler.after_called
+      assert_not_nil @handler.first_before_call_order
+      assert_not_nil @handler.second_before_call_order
+      assert_not_nil @handler.first_after_call_order
+      assert_not_nil @handler.second_after_call_order
     end
 
-    should "run the handler's init despite the halt" do
-      assert_equal true, @handler.init_bang_called
+    should "stop processing when the halt is called" do
+      assert_not_nil @handler.init_call_order
+      assert_not_nil @handler.run_call_order
     end
 
     should "return its `to_rack` value despite the halt" do
@@ -148,17 +164,26 @@ class Deas::DeasRunner
   class RunWithBeforeHaltTests < InitHandlerTests
     desc "with a handler that halts in a before callback"
     setup do
-      @handler.halt_in_before = true
+      @runner = @runner_class.new(@handler_class, :params => {
+        'halt' => 'before'
+      })
+      @handler  = @runner.handler
       @response = @runner.run
     end
 
+    should "stop processing when the halt is called" do
+      assert_not_nil @handler.first_before_call_order
+      assert_nil @handler.second_before_call_order
+    end
+
     should "not run the after callbacks b/c of the halt" do
-      assert_not_equal true, @handler.after_called
+      assert_nil @handler.first_after_call_order
+      assert_nil @handler.second_after_call_order
     end
 
     should "not run the handler's init and run b/c of the halt" do
-      assert_not_equal true, @handler.init_bang_called
-      assert_not_equal true, @handler.run_bang_called
+      assert_nil @handler.init_call_order
+      assert_nil @handler.run_call_order
     end
 
     should "return its `to_rack` value despite the halt" do
@@ -170,17 +195,26 @@ class Deas::DeasRunner
   class RunWithAfterHaltTests < InitHandlerTests
     desc "with a handler that halts in an after callback"
     setup do
-      @handler.halt_in_after = true
+      @runner = @runner_class.new(@handler_class, :params => {
+        'halt' => 'after'
+      })
+      @handler  = @runner.handler
       @response = @runner.run
     end
 
     should "run the before callback despite the halt" do
-      assert_equal true, @handler.before_called
+      assert_not_nil @handler.first_before_call_order
+      assert_not_nil @handler.second_before_call_order
     end
 
     should "run the handler's init and run despite the halt" do
-      assert_equal true, @handler.init_bang_called
-      assert_equal true, @handler.run_bang_called
+      assert_not_nil @handler.init_call_order
+      assert_not_nil @handler.run_call_order
+    end
+
+    should "stop processing when the halt is called" do
+      assert_not_nil @handler.first_after_call_order
+      assert_nil @handler.second_after_call_order
     end
 
     should "return its `to_rack` value despite the halt" do
@@ -211,6 +245,41 @@ class Deas::DeasRunner
 
     def normalized(params)
       @norm_params_class.new(params).value
+    end
+
+  end
+
+  class TestViewHandler
+    include Deas::ViewHandler
+
+    attr_accessor :halt_in_before, :halt_in_after
+    attr_reader :first_before_call_order, :second_before_call_order
+    attr_reader :first_after_call_order, :second_after_call_order
+    attr_reader :init_call_order, :run_call_order
+
+    before{ @first_before_call_order = next_call_order; halt_if('before') }
+    before{ @second_before_call_order = next_call_order }
+
+    after{ @first_after_call_order = next_call_order; halt_if('after') }
+    after{ @second_after_call_order = next_call_order }
+
+    def init!
+      @init_call_order = next_call_order
+      halt_if('init')
+    end
+
+    def run!
+      @run_call_order = next_call_order
+      halt_if('run')
+      body Factory.integer(3).times.map{ Factory.text }
+    end
+
+    private
+
+    def next_call_order; @order ||= 0; @order += 1; end
+
+    def halt_if(value)
+      halt Factory.integer if params['halt'] == value
     end
 
   end
