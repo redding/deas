@@ -47,6 +47,7 @@ class Deas::TestRunner
     end
     subject{ @runner }
 
+    should have_readers :content_type_args
     should have_imeths :halted?, :run
 
     should "raise an invalid error when passed a non view handler" do
@@ -97,6 +98,10 @@ class Deas::TestRunner
       assert_nil subject.run
     end
 
+    should "have no content type args by default" do
+      assert_nil subject.content_type_args
+    end
+
     should "not be halted by default" do
       assert_false subject.halted?
     end
@@ -112,6 +117,30 @@ class Deas::TestRunner
       catch(:halt){ subject.halt }
       return_val = subject.run
       assert_kind_of HaltArgs, return_val
+    end
+
+  end
+
+  class ContentTypeTests < InitTests
+    desc "the `content_type` method"
+    setup do
+      @extname = ".#{Factory.string}"
+      @params  = { Factory.string => Factory.string }
+      @runner.content_type(@extname, @params)
+    end
+
+    should "set content type args" do
+      args = subject.content_type_args
+
+      assert_kind_of ContentTypeArgs, args
+      assert_equal @extname, args.extname
+      assert_equal @params,  args.params
+    end
+
+    should "super to the base runner" do
+      e = @extname; p = @params
+      exp = subject.instance_eval{ get_content_type(e, p) }
+      assert_equal exp, subject.headers['Content-Type']
     end
 
   end
@@ -284,6 +313,25 @@ class Deas::TestRunner
 
     should "not affect the run return val" do
       assert_nil subject.run
+    end
+
+  end
+
+  class ContentTypeArgsTests < UnitTests
+    desc "ContentTypeArgs"
+    setup do
+      @extname = ".#{Factory.string}"
+      @params  = { Factory.string => Factory.string }
+
+      @args = ContentTypeArgs.new(@extname, @params)
+    end
+    subject{ @args }
+
+    should have_imeths :extname, :params
+
+    should "know its attrs" do
+      assert_equal @extname, subject.extname
+      assert_equal @params,  subject.params
     end
 
   end
