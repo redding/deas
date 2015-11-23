@@ -20,9 +20,6 @@ module Deas
     def initialize(handler_class, args = nil)
       @status, @headers, @body = nil, Rack::Utils::HeaderHash.new, nil
 
-      @handler_class = handler_class
-      @handler = @handler_class.new(self)
-
       args ||= {}
       @logger          = args[:logger] || Deas::NullLogger.new
       @router          = args[:router] || Deas::Router.new
@@ -30,6 +27,9 @@ module Deas
       @request         = args[:request]
       @session         = args[:session]
       @params          = args[:params] || {}
+
+      @handler_class = handler_class
+      @handler = @handler_class.new(self)
     end
 
     def run
