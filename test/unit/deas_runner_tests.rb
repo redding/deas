@@ -47,7 +47,7 @@ class Deas::DeasRunner
 
   class InitHandlerTests < InitTests
     setup do
-      @handler = @runner.instance_variable_get("@handler")
+      @handler = @runner.handler
     end
 
     private

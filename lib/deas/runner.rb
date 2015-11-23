@@ -32,12 +32,12 @@ module Deas
       @status, @headers, @body = nil, Rack::Utils::HeaderHash.new, nil
     end
 
-    def to_rack
-      [self.status || DEFAULT_STATUS, self.headers.to_hash, self.body || DEFAULT_BODY]
-    end
-
     def run
       raise NotImplementedError
+    end
+
+    def to_rack
+      [self.status || DEFAULT_STATUS, self.headers.to_hash, self.body || DEFAULT_BODY]
     end
 
     def status(value = nil)

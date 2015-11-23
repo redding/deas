@@ -46,7 +46,7 @@ class Deas::Runner
     should have_readers :handler_class, :handler
     should have_readers :logger, :router, :template_source
     should have_readers :request, :session, :params
-    should have_imeths :to_rack, :run
+    should have_imeths :run, :to_rack
     should have_imeths :status, :headers, :body, :content_type
     should have_imeths :halt, :redirect, :send_file
     should have_imeths :render, :source_render, :partial, :source_partial

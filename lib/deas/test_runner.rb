@@ -38,7 +38,7 @@ module Deas
       @run_return_value
     end
 
-    # Helpers
+    # helpers
 
     def halt(*args)
       @halted = true
