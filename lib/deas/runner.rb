@@ -18,6 +18,8 @@ module Deas
     attr_reader :request, :session, :params
 
     def initialize(handler_class, args = nil)
+      @status, @headers, @body = nil, Rack::Utils::HeaderHash.new, nil
+
       @handler_class = handler_class
       @handler = @handler_class.new(self)
 
@@ -28,8 +30,6 @@ module Deas
       @request         = args[:request]
       @session         = args[:session]
       @params          = args[:params] || {}
-
-      @status, @headers, @body = nil, Rack::Utils::HeaderHash.new, nil
     end
 
     def run
