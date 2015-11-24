@@ -9,6 +9,8 @@ module Deas
 
   class TestRunner < Runner
 
+    attr_reader :content_type_args
+
     def initialize(handler_class, args = nil)
       if !handler_class.include?(Deas::ViewHandler)
         raise InvalidViewHandlerError, "#{handler_class.inspect} is not a " \
@@ -26,8 +28,10 @@ module Deas
       })
       a.each{|key, value| self.handler.send("#{key}=", value) }
 
-      @run_return_value = nil
-      @halted = false
+      @run_return_value  = nil
+      @content_type_args = nil
+      @halted            = false
+
       catch(:halt){ self.handler.deas_init }
     end
 
@@ -39,6 +43,11 @@ module Deas
     end
 
     # helpers
+
+    def content_type(extname, params = nil)
+      @content_type_args = ContentTypeArgs.new(extname, params)
+      super
+    end
 
     def halt(*args)
       @halted = true
@@ -69,6 +78,8 @@ module Deas
       super
       RenderArgs.new(source, template_name, locals)
     end
+
+    ContentTypeArgs = Struct.new(:extname, :params)
 
     class HaltArgs < Struct.new(:status, :headers, :body)
       def initialize(args)
