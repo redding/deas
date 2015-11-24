@@ -1,9 +1,10 @@
 require 'assert'
 require 'deas/view_handler'
 
-require 'deas/template_source'
+require 'much-plugin'
 require 'rack/request'
 require 'rack/response'
+require 'deas/template_source'
 require 'test/support/empty_view_handler'
 
 module Deas::ViewHandler
@@ -27,6 +28,10 @@ module Deas::ViewHandler
     should have_imeths :prepend_before, :prepend_after
     should have_imeths :prepend_before_init, :prepend_after_init
     should have_imeths :prepend_before_run,  :prepend_after_run
+
+    should "use much-plugin" do
+      assert_includes MuchPlugin, Deas::ViewHandler
+    end
 
     should "specify layouts" do
       subject.layout 'layouts/app'

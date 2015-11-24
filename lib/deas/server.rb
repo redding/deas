@@ -1,6 +1,7 @@
-require 'pathname'
+require 'much-plugin'
 require 'ns-options'
 require 'ns-options/boolean'
+require 'pathname'
 require 'deas/exceptions'
 require 'deas/logger'
 require 'deas/logging'
@@ -12,19 +13,20 @@ require 'deas/template_source'
 module Deas
 
   module Server
+    include MuchPlugin
 
-    def self.included(receiver)
-      receiver.class_eval do
-        extend ClassMethods
-        include InstanceMethods
-      end
+    plugin_included do
+      extend ClassMethods
+      include InstanceMethods
     end
 
     module InstanceMethods
+
       # TODO: once Deas is no longer powered by Sinatra, this should define an
       # `initialize` method that builds a server instance.  Right now there is
       # a `new` class method that builds a SinatraApp which does this init
       # behavior
+
     end
 
     module ClassMethods

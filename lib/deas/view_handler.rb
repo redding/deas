@@ -1,14 +1,14 @@
+require 'much-plugin'
 require 'deas/runner'
 
 module Deas
 
   module ViewHandler
+    include MuchPlugin
 
-    def self.included(klass)
-      klass.class_eval do
-        extend ClassMethods
-        include InstanceMethods
-      end
+    plugin_included do
+      extend ClassMethods
+      include InstanceMethods
     end
 
     module InstanceMethods

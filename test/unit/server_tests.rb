@@ -2,6 +2,7 @@ require 'assert'
 require 'deas/server'
 
 require 'logger'
+require 'much-plugin'
 require 'deas/exceptions'
 require 'deas/logger'
 require 'deas/router'
@@ -36,6 +37,10 @@ module Deas::Server
     should have_imeths :request_type_name
     should have_imeths :get, :post, :put, :patch, :delete
     should have_imeths :route, :redirect
+
+    should "use much-plugin" do
+      assert_includes MuchPlugin, Deas::Server
+    end
 
     should "allow setting it's configuration options" do
       config = subject.configuration
