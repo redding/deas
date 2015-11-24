@@ -17,6 +17,10 @@ module Deas
                                        "Deas::ViewHandler"
       end
 
+      @run_return_value  = nil
+      @content_type_args = nil
+      @halted            = false
+
       a = (args || {}).dup
       super(handler_class, {
         :logger          => a.delete(:logger),
@@ -27,10 +31,6 @@ module Deas
         :params          => NormalizedParams.new(a.delete(:params) || {}).value
       })
       a.each{|key, value| self.handler.send("#{key}=", value) }
-
-      @run_return_value  = nil
-      @content_type_args = nil
-      @halted            = false
 
       catch(:halt){ self.handler.deas_init }
     end
