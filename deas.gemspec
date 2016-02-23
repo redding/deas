@@ -20,8 +20,8 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency("much-plugin", ["~> 0.1"])
   gem.add_dependency("ns-options",  ["~> 1.1", ">= 1.1.4"])
-  gem.add_dependency("rack",        ["~> 1.5"])
-  gem.add_dependency("sinatra",     ["~> 1.4"])
+  gem.add_dependency("rack",        ["~> 1.1"])
+  gem.add_dependency("sinatra",     ["~> 1.2"])
 
   gem.add_development_dependency("assert", ["~> 2.15"])
   gem.add_development_dependency("assert-rack-test")
