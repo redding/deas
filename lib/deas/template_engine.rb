@@ -30,11 +30,10 @@ module Deas
   class NullTemplateEngine < TemplateEngine
 
     def render(template_name, view_handler, locals, &content)
-      template_file = self.source_path.join(template_name).to_s
-      unless File.exists?(template_file)
-        raise ArgumentError, "template file `#{template_file}` does not exist"
+      if (path = Dir.glob(self.source_path.join("#{template_name}*")).first).nil?
+        raise ArgumentError, "template file `#{path}` does not exist"
       end
-      File.read(template_file)
+      File.read(path)
     end
 
     def partial(template_name, locals, &content)

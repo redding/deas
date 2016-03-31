@@ -19,12 +19,12 @@ module Deas
         'default_template_source' => self
       }
       @engines = Hash.new{ |h, k| Deas::NullTemplateEngine.new(@default_engine_opts) }
-      @ext_cache = Hash.new do |hash, template_name|
-        paths = Dir.glob("#{File.join(@path, template_name.to_s)}.*")
-        paths = paths.reject{ |p| !@engines.keys.include?(parse_ext(p)) }
-        if !(ext = parse_ext(paths.first.to_s)).nil?
-          hash[template_name] = ext
-        end
+      @ext_lists = Hash.new do |hash, template_name|
+        # An ext list is an array of non-template-name extensions that have engines
+        # configured.  The first ext in the list is the most precedent. Its engine
+        # is used to do the initial render from the named template file. Any
+        # further exts are used to compile rendered content from upsteam engines.
+        hash[template_name] = parse_ext_list(template_name)
       end
     end
 
@@ -41,34 +41,39 @@ module Deas
       @engines.keys.include?(ext)
     end
 
-    def engine_for_template?(template_name)
-      self.engine_for?(get_template_ext(template_name))
-    end
-
     def render(template_name, view_handler, locals, &content)
       [ view_handler.layouts,
         template_name
       ].flatten.reverse.inject(content) do |render_proc, name|
-        proc{ get_engine(name).render(name, view_handler, locals, &render_proc) }
+        proc do
+          compile(name) do |engine|
+            engine.render(name, view_handler, locals, &render_proc)
+          end
+        end
       end.call
     end
 
     def partial(template_name, locals, &content)
-      get_engine(template_name).partial(template_name, locals, &content)
+      compile(template_name) do |engine|
+        engine.partial(template_name, locals, &content)
+      end
     end
 
     private
 
-    def get_engine(template_name)
-      @engines[get_template_ext(template_name)]
+    def compile(name)
+      ext_list = @ext_lists[name].dup
+      ext_list.inject(yield @engines[ext_list.shift]) do |content, ext|
+        @engines[ext].compile(name, content)
+      end
     end
 
-    def get_template_ext(template_name)
-      @ext_cache[template_name]
-    end
-
-    def parse_ext(template_name)
-      File.extname(template_name)[1..-1]
+    def parse_ext_list(template_name)
+      no_ext_path = "#{File.join(@path, template_name.to_s)}."
+      path = Dir.glob("#{no_ext_path}*").first || ''
+      path.sub(no_ext_path, '').split('.').reverse.reject do |ext|
+        !self.engine_for?(ext)
+      end
     end
 
   end

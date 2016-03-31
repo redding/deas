@@ -26,7 +26,7 @@ class Deas::TemplateSource
     subject{ @source }
 
     should have_readers :path, :engines
-    should have_imeths :engine, :engine_for?, :engine_for_template?
+    should have_imeths :engine, :engine_for?
     should have_imeths :render, :partial
 
     should "know its path" do
@@ -90,17 +90,6 @@ class Deas::TemplateSource
       assert_kind_of Deas::NullTemplateEngine, subject.engines['rb']
     end
 
-    should "know if it has an engine registered for a given template name" do
-      assert_false subject.engine_for?(Factory.string)
-      assert_false subject.engine_for?('test')
-      assert_false subject.engine_for_template?(Factory.string)
-      assert_false subject.engine_for_template?('test_template')
-
-      subject.engine 'test', @test_engine
-      assert_true subject.engine_for?('test')
-      assert_true subject.engine_for_template?('test_template')
-    end
-
   end
 
   class RenderOrPartialTests < InitTests
@@ -123,11 +112,19 @@ class Deas::TemplateSource
       assert_equal exp, subject.render('test_template', @v, @l)
     end
 
-    should "only try rendering template files its has engines for" do
+    should "only render the first template file matching the template name" do
       # there should be 2 files called "template" in `test/support` with diff
       # extensions
-      exp = 'render-json-engine'
+      exp = "render-json-engine on template\n"
       assert_equal exp, subject.render('template', @v, @l)
+    end
+
+    should "compile multiple engine outputs if template has multi-engine exts" do
+      exp = "render-json-engine on template-compiled1\ncompile-test-engine"
+      assert_equal exp, subject.render('template-compiled1', @v, @l)
+
+      exp = "render-test-engine on template-compiled2\ncompile-json-engine"
+      assert_equal exp, subject.render('template-compiled2', @v, @l)
     end
 
     should "use the null template engine when an engine can't be found" do
@@ -157,15 +154,23 @@ class Deas::TemplateSource
     desc "when partial rendering a template"
 
     should "call `partial` on the configured engine" do
-      exp = "partial-test-engine\n"
+      exp = "partial-test-engine on test_template\n"
       assert_equal exp, subject.partial('test_template', @l)
     end
 
-    should "only try rendering template files its has engines for" do
+    should "only render the first template file matching the template name" do
       # there should be 2 files called "template" in `test/support` with diff
       # extensions
-      exp = 'partial-json-engine'
+      exp = "partial-json-engine on template\n"
       assert_equal exp, subject.partial('template', @l)
+    end
+
+    should "compile multiple engine outputs if template has multi-engine exts" do
+      exp = "partial-json-engine on template-compiled1\ncompile-test-engine"
+      assert_equal exp, subject.partial('template-compiled1', @l)
+
+      exp = "partial-test-engine on template-compiled2\ncompile-json-engine"
+      assert_equal exp, subject.partial('template-compiled2', @l)
     end
 
     should "use the null template engine when an engine can't be found" do
@@ -195,26 +200,25 @@ class Deas::TemplateSource
 
   class TestEngine < Deas::TemplateEngine
     def render(template_name, view_handler, locals, &content)
-      "render-test-engine on #{template_name}\n" +
-      (content || proc{}).call.to_s
+      "render-test-engine on #{template_name}\n" + (content || proc{}).call.to_s
     end
     def partial(template_name, locals, &content)
-      "partial-test-engine\n" + (content || proc{}).call.to_s
+      "partial-test-engine on #{template_name}\n" + (content || proc{}).call.to_s
     end
-    def capture_partial(template_name, locals, &content)
-      'capture-partial-test-engine'
+    def compile(template_name, content)
+      "#{content}compile-test-engine"
     end
   end
 
   class JsonEngine < Deas::TemplateEngine
     def render(template_name, view_handler, locals, &content)
-      'render-json-engine'
+      "render-json-engine on #{template_name}\n" + (content || proc{}).call.to_s
     end
-    def partial(template_name, locals)
-      'partial-json-engine'
+    def partial(template_name, locals, &content)
+      "partial-json-engine on #{template_name}\n" + (content || proc{}).call.to_s
     end
-    def capture_partial(template_name, locals, &content)
-      'capture-partial-json-engine'
+    def compile(template_name, content)
+      "#{content}compile-json-engine"
     end
   end
 

@@ -86,25 +86,21 @@ class Deas::TemplateEngine
     end
 
     should "read and return the given path in its source path on `render`" do
-      exists_file = 'test/support/template.json'
-      exp = File.read(subject.source_path.join(exists_file).to_s)
-      assert_equal exp, subject.render(exists_file, @v, @l)
+      template = 'test/support/template'
+      exp = File.read(Dir.glob(subject.source_path.join("#{template}*")).first)
+      assert_equal exp, subject.render(template, @v, @l)
     end
 
     should "call `render` to implement its `partial` method" do
-      exists_file = 'test/support/template.json'
-      exp = subject.render(exists_file, nil, @l)
-      assert_equal exp, subject.partial(exists_file, @l)
+      template = 'test/support/template'
+      exp = subject.render(template, nil, @l)
+      assert_equal exp, subject.partial(template, @l)
     end
 
     should "complain if given a path that does not exist in its source path" do
-      no_exists_file = '/does/not/exists'
-      assert_raises ArgumentError do
-        subject.render(no_exists_file, @v, @l)
-      end
-      assert_raises ArgumentError do
-        subject.partial(no_exists_file, @l)
-      end
+      template = '/does/not/exists'
+      assert_raises(ArgumentError){ subject.render(template, @v, @l) }
+      assert_raises(ArgumentError){ subject.partial(template, @l) }
     end
 
     should "return any given content with its `compile` method" do
