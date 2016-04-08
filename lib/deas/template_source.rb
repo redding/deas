@@ -34,6 +34,7 @@ module Deas
                                         " engine extension."
       end
       engine_opts = @default_engine_opts.merge(registered_opts || {})
+      engine_opts['ext'] = input_ext.to_s
       @engines[input_ext.to_s] = engine_class.new(engine_opts)
     end
 

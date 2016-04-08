@@ -48,38 +48,39 @@ class Deas::TemplateSource
     end
 
     should "register with default options" do
-      subject.engine 'test', @test_engine
-      exp_opts = {
-        'source_path'             => subject.path,
-        'logger'                  => @logger,
-        'default_template_source' => subject
-      }
-      assert_equal exp_opts, subject.engines['test'].opts
-
-      subject.engine 'test', @test_engine, 'an' => 'opt'
+      engine_ext = Factory.string
+      subject.engine engine_ext, @test_engine
       exp_opts = {
         'source_path'             => subject.path,
         'logger'                  => @logger,
         'default_template_source' => subject,
-        'an'                      => 'opt'
+        'ext'                     => engine_ext
       }
-      assert_equal exp_opts, subject.engines['test'].opts
+      assert_equal exp_opts, subject.engines[engine_ext].opts
 
-      subject.engine('test', @test_engine, {
-        'source_path'             => 'something',
-        'logger'                  => 'another',
-        'default_template_source' => 'tempsource'
-      })
+      custom_opts = { Factory.string => Factory.string }
+      subject.engine engine_ext, @test_engine, custom_opts
       exp_opts = {
+        'source_path'             => subject.path,
+        'logger'                  => @logger,
+        'default_template_source' => subject,
+        'ext'                     => engine_ext
+      }.merge(custom_opts)
+      assert_equal exp_opts, subject.engines[engine_ext].opts
+
+      custom_opts = {
         'source_path'             => 'something',
         'logger'                  => 'another',
-        'default_template_source' => 'tempsource'
+        'default_template_source' => 'tempsource',
+        'ext'                     => Factory.string
       }
-      assert_equal exp_opts, subject.engines['test'].opts
+      subject.engine(engine_ext, @test_engine, custom_opts)
+      exp_opts = custom_opts.merge('ext' => engine_ext)
+      assert_equal exp_opts, subject.engines[engine_ext].opts
 
       source = Deas::TemplateSource.new(@source_path)
-      source.engine('test', @test_engine)
-      assert_instance_of Deas::NullLogger, source.engines['test'].opts['logger']
+      source.engine(engine_ext, @test_engine)
+      assert_instance_of Deas::NullLogger, source.engines[engine_ext].opts['logger']
     end
 
     should "complain if registering a disallowed temp" do
