@@ -30,10 +30,16 @@ module Deas
   class NullTemplateEngine < TemplateEngine
 
     def render(template_name, view_handler, locals, &content)
-      if (path = Dir.glob(self.source_path.join("#{template_name}*")).first).nil?
-        raise ArgumentError, "a template named `#{template_name}` does not exist"
+      paths = Dir.glob(self.source_path.join("#{template_name}*"))
+      if paths.size > 1
+        raise ArgumentError, "#{template_name.inspect} matches more than one " \
+                             "file, consider using a more specific template name"
       end
-      File.read(path)
+      if paths.size < 1
+        raise ArgumentError, "a template file named #{template_name.inspect} " \
+                             "does not exist"
+      end
+      File.read(paths.first)
     end
 
     def partial(template_name, locals, &content)
@@ -41,7 +47,7 @@ module Deas
     end
 
     def compile(template_name, compiled_content)
-      compiled_content  # no-op, pass-thru - just return the given content
+      compiled_content # no-op, pass-thru - just return the given content
     end
 
   end
