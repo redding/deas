@@ -31,7 +31,7 @@ module Deas
 
     def render(template_name, view_handler, locals, &content)
       if (path = Dir.glob(self.source_path.join("#{template_name}*")).first).nil?
-        raise ArgumentError, "template file `#{path}` does not exist"
+        raise ArgumentError, "a template named `#{template_name}` does not exist"
       end
       File.read(path)
     end
