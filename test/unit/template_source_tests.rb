@@ -40,6 +40,9 @@ class Deas::TemplateSource
       assert_kind_of Deas::NullTemplateEngine, subject.engines['test']
       subject.engine 'test', @test_engine
       assert_kind_of @test_engine, subject.engines['test']
+
+      assert_true  subject.engine_for?('test')
+      assert_false subject.engine_for?(Factory.string)
     end
 
     should "register with default options" do
@@ -52,6 +55,7 @@ class Deas::TemplateSource
         'ext'                     => engine_ext
       }
       assert_equal exp_opts, subject.engines[engine_ext].opts
+      assert_true subject.engine_for?(engine_ext)
 
       custom_opts = { Factory.string => Factory.string }
       subject.engine engine_ext, @test_engine, custom_opts
@@ -62,6 +66,7 @@ class Deas::TemplateSource
         'ext'                     => engine_ext
       }.merge(custom_opts)
       assert_equal exp_opts, subject.engines[engine_ext].opts
+      assert_true subject.engine_for?(engine_ext)
 
       custom_opts = {
         'source_path'             => 'something',
@@ -72,6 +77,7 @@ class Deas::TemplateSource
       subject.engine(engine_ext, @test_engine, custom_opts)
       exp_opts = custom_opts.merge('ext' => engine_ext)
       assert_equal exp_opts, subject.engines[engine_ext].opts
+      assert_true subject.engine_for?(engine_ext)
 
       source = Deas::TemplateSource.new(@source_path)
       source.engine(engine_ext, @test_engine)

@@ -14,7 +14,12 @@ module Deas
         'logger'                  => logger || Deas::NullLogger.new,
         'default_template_source' => self
       }
-      @engines = Hash.new{ |h, k| Deas::NullTemplateEngine.new(@default_engine_opts) }
+      @engines = Hash.new do |hash, ext|
+        # cache null template exts so we don't repeatedly call this block for
+        # known null template exts
+        hash[ext.to_s] = Deas::NullTemplateEngine.new(@default_engine_opts)
+      end
+      @engine_exts = []
       @ext_lists = Hash.new do |hash, template_name|
         # An ext list is an array of non-template-name extensions that have engines
         # configured.  The first ext in the list is the most precedent. Its engine
@@ -25,13 +30,15 @@ module Deas
     end
 
     def engine(input_ext, engine_class, registered_opts = nil)
+      @engine_exts << input_ext.to_s
+
       engine_opts = @default_engine_opts.merge(registered_opts || {})
       engine_opts['ext'] = input_ext.to_s
       @engines[input_ext.to_s] = engine_class.new(engine_opts)
     end
 
     def engine_for?(ext)
-      @engines.keys.include?(ext)
+      @engine_exts.include?(ext.to_s)
     end
 
     def render(template_name, view_handler, locals, &content)
