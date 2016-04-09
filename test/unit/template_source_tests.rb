@@ -106,6 +106,13 @@ class Deas::TemplateSource
 
       exp = "render-test-engine on template-compiled2\ncompile-json-engine"
       assert_equal exp, subject.render('template-compiled2', @v, @l)
+
+      exp = "render-json-engine on template-compiled3\n"
+      assert_equal exp, subject.render('template-compiled3', @v, @l)
+
+      exp = "This is a json template for use in template source/engine tests.\n"\
+            "compile-json-engine"
+      assert_equal exp, subject.render('template-compiled4', @v, @l)
     end
 
     should "complain if the given template name matches multiple templates" do

@@ -66,8 +66,18 @@ module Deas
         raise ArgumentError, "#{template_name.inspect} matches more than one " \
                              "file, consider using a more specific template name"
       end
-      File.basename(paths.first.to_s).split('.').drop(1).reverse.reject do |ext|
-        !self.engine_for?(ext)
+      get_ext_list(paths.first.to_s)
+    end
+
+    def get_ext_list(path)
+      # get the base name of the path (file name plus extensions).  Split on the
+      # periods and drop the first value (the file name).  reverse the list b/c
+      # we process exts right-to-left.  reject any unnecessary exts.
+      File.basename(path).split('.').drop(1).reverse.reject.each_with_index do |e, i|
+        # keep the first ext (for initial render from source) and any registered
+        # exts.  remove any non-first non-registered exts so you don't have the
+        # overhead of running through the null engine for each.
+        i != 0 && !self.engine_for?(e)
       end
     end
 
