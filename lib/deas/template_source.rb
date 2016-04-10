@@ -63,9 +63,8 @@ module Deas
     private
 
     def compile(name)
-      ext_list = @ext_lists[name].dup
-      ext_list.inject(yield @engines[ext_list.shift]) do |content, ext|
-        @engines[ext].compile(name, content)
+      @ext_lists[name].drop(1).inject(yield @engines[@ext_lists[name].first]) do |c, e|
+        @engines[e].compile(name, c)
       end
     end
 
