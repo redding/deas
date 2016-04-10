@@ -86,15 +86,21 @@ class Deas::TemplateEngine
     end
 
     should "read and return the given path in its source path on `render`" do
-      template = 'test/support/template'
+      template = ['test/support/template.a', 'test/support/template.a.json'].choice
       exp = File.read(Dir.glob(subject.source_path.join("#{template}*")).first)
       assert_equal exp, subject.render(template, @v, @l)
     end
 
     should "call `render` to implement its `partial` method" do
-      template = 'test/support/template'
+      template = ['test/support/template.a', 'test/support/template.a.json'].choice
       exp = subject.render(template, nil, @l)
       assert_equal exp, subject.partial(template, @l)
+    end
+
+    should "complain if given a path that matches multiple files" do
+      template = 'test/support/template'
+      assert_raises(ArgumentError){ subject.render(template, @v, @l) }
+      assert_raises(ArgumentError){ subject.partial(template, @l) }
     end
 
     should "complain if given a path that does not exist in its source path" do

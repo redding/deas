@@ -10,11 +10,6 @@ class Deas::TemplateSource
     desc "Deas::TemplateSource"
     subject{ Deas::TemplateSource }
 
-    should "disallow certain engine extensions" do
-      exp = [ 'rb' ]
-      assert_equal exp, subject::DISALLOWED_ENGINE_EXTS
-    end
-
   end
 
   class InitTests < Assert::Context
@@ -83,14 +78,6 @@ class Deas::TemplateSource
       assert_instance_of Deas::NullLogger, source.engines[engine_ext].opts['logger']
     end
 
-    should "complain if registering a disallowed temp" do
-      assert_kind_of Deas::NullTemplateEngine, subject.engines['rb']
-      assert_raises DisallowedEngineExtError do
-        subject.engine 'rb', @test_engine
-      end
-      assert_kind_of Deas::NullTemplateEngine, subject.engines['rb']
-    end
-
   end
 
   class RenderOrPartialTests < InitTests
@@ -113,13 +100,6 @@ class Deas::TemplateSource
       assert_equal exp, subject.render('test_template', @v, @l)
     end
 
-    should "only render the first template file matching the template name" do
-      # there should be 2 files called "template" in `test/support` with diff
-      # extensions
-      exp = "render-json-engine on template\n"
-      assert_equal exp, subject.render('template', @v, @l)
-    end
-
     should "compile multiple engine outputs if template has multi-engine exts" do
       exp = "render-json-engine on template-compiled1\ncompile-test-engine"
       assert_equal exp, subject.render('template-compiled1', @v, @l)
@@ -128,10 +108,14 @@ class Deas::TemplateSource
       assert_equal exp, subject.render('template-compiled2', @v, @l)
     end
 
+    should "complain if the given template name matches multiple templates" do
+      # there should be more than 1 file called "template" in `test/support`
+      # with various extensions
+      assert_raises(ArgumentError){ subject.render('template', @v, @l) }
+    end
+
     should "use the null template engine when an engine can't be found" do
-      assert_raises(ArgumentError) do
-        subject.render(Factory.string, @v, @l)
-      end
+      assert_raises(ArgumentError){ subject.render(Factory.string, @v, @l) }
     end
 
   end
@@ -159,13 +143,6 @@ class Deas::TemplateSource
       assert_equal exp, subject.partial('test_template', @l)
     end
 
-    should "only render the first template file matching the template name" do
-      # there should be 2 files called "template" in `test/support` with diff
-      # extensions
-      exp = "partial-json-engine on template\n"
-      assert_equal exp, subject.partial('template', @l)
-    end
-
     should "compile multiple engine outputs if template has multi-engine exts" do
       exp = "partial-json-engine on template-compiled1\ncompile-test-engine"
       assert_equal exp, subject.partial('template-compiled1', @l)
@@ -174,10 +151,14 @@ class Deas::TemplateSource
       assert_equal exp, subject.partial('template-compiled2', @l)
     end
 
+    should "complain if the given template name matches multiple templates" do
+      # there should be more than 1 file called "template" in `test/support`
+      # with various extensions
+      assert_raises(ArgumentError){ subject.partial('template', @l) }
+    end
+
     should "use the null template engine when an engine can't be found" do
-      assert_raises(ArgumentError) do
-        subject.partial(Factory.string, @l)
-      end
+      assert_raises(ArgumentError){ subject.partial(Factory.string, @l) }
     end
 
   end
