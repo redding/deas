@@ -1,7 +1,4 @@
 require 'much-plugin'
-require 'ns-options'
-require 'ns-options/boolean'
-require 'pathname'
 require 'deas/exceptions'
 require 'deas/logger'
 require 'deas/logging'
@@ -34,103 +31,78 @@ module Deas
       # TODO: needed while Deas is powered by Sinatra
       # eventually do an initialize method more like Sanford does
       def new
-        Deas::SinatraApp.new(self.configuration)
+        Deas::SinatraApp.new(self.config)
       end
 
-      def configuration
-        @configuration ||= Configuration.new
+      def config
+        @config ||= Config.new
       end
 
-      # sinatra settings DSL
-
-      def env(*args)
-        self.configuration.env *args
+      def env(value = nil)
+        self.config.env = value if !value.nil?
+        self.config.env
       end
 
-      def root(*args)
-        self.configuration.root *args
+      def root(value = nil)
+        self.config.root = value if !value.nil?
+        self.config.root
       end
 
-      def public_root(*args)
-        self.configuration.public_root *args
+      def views_path(value = nil)
+        self.config.views_path = value if !value.nil?
+        self.config.views_path
       end
 
-      def views_root(*args)
-        self.configuration.views_root *args
+      def public_path(value = nil)
+        self.config.public_path = value if !value.nil?
+        self.config.public_path
       end
 
-      def dump_errors(*args)
-        self.configuration.dump_errors *args
-      end
-
-      def method_override(*args)
-        self.configuration.method_override *args
-      end
-
-      def sessions(*args)
-        self.configuration.sessions *args
-      end
-
-      def show_exceptions(*args)
-        self.configuration.show_exceptions *args
-      end
-
-      def static_files(*args)
-        self.configuration.static_files *args
-      end
-
-      def reload_templates(*args)
-        self.configuration.reload_templates *args
-      end
-
-      # Server handling DSL
-
-      def init(&block)
-        self.configuration.init_procs << block
-      end
-
-      def error(&block)
-        self.configuration.error_procs << block
-      end
-
-      def template_helpers(*helper_modules)
-        helper_modules.each{ |m| self.configuration.template_helpers << m }
-        self.configuration.template_helpers
-      end
-
-      def template_helper?(helper_module)
-        self.configuration.template_helpers.include?(helper_module)
-      end
-
-      def use(*args)
-        self.configuration.middlewares << args
+      def default_encoding(value = nil)
+        self.config.default_encoding = value if !value.nil?
+        self.config.default_encoding
       end
 
       def set(name, value)
-        self.configuration.settings[name.to_sym] = value
+        self.config.settings[name.to_sym] = value
       end
 
-      def verbose_logging(*args)
-        self.configuration.verbose_logging *args
+      def template_helpers(*helper_modules)
+        helper_modules.each{ |m| self.config.template_helpers << m }
+        self.config.template_helpers
       end
 
-      def logger(*args)
-        self.configuration.logger *args
+      def template_helper?(helper_module)
+        self.config.template_helpers.include?(helper_module)
       end
 
-      def default_encoding(*args)
-        self.configuration.default_encoding *args
+      def use(*args)
+        self.config.middlewares << args
       end
 
-      def template_source(*args)
-        self.configuration.template_source *args
+      def init(&block)
+        self.config.init_procs << block
+      end
+
+      def error(&block)
+        self.config.error_procs << block
+      end
+
+      def template_source(value = nil)
+        self.config.template_source = value if !value.nil?
+        self.config.template_source
+      end
+
+      def logger(value = nil)
+        self.config.logger = value if !value.nil?
+        self.config.logger
       end
 
       # router handling
 
       def router(value = nil)
-        self.configuration.router = value if !value.nil?
-        self.configuration.router
+        self.config.router = value if !value.nil?
+        self.config.router
       end
 
       def view_handler_ns(*args); self.router.view_handler_ns(*args); end
@@ -152,51 +124,96 @@ module Deas
       def route(*args, &block);    self.router.route(*args, &block);    end
       def redirect(*args, &block); self.router.redirect(*args, &block); end
 
+      # flags
+
+      def dump_errors(value = nil)
+        self.config.dump_errors = value if !value.nil?
+        self.config.dump_errors
+      end
+
+      def method_override(value = nil)
+        self.config.method_override = value if !value.nil?
+        self.config.method_override
+      end
+
+      def reload_templates(value = nil)
+        self.config.reload_templates = value if !value.nil?
+        self.config.reload_templates
+      end
+
+      def sessions(value = nil)
+        self.config.sessions = value if !value.nil?
+        self.config.sessions
+      end
+
+      def show_exceptions(value = nil)
+        self.config.show_exceptions = value if !value.nil?
+        self.config.show_exceptions
+      end
+
+      def static_files(value = nil)
+        self.config.static_files = value if !value.nil?
+        self.config.static_files
+      end
+
+      def verbose_logging(value = nil)
+        self.config.verbose_logging = value if !value.nil?
+        self.config.verbose_logging
+      end
+
     end
 
-    class Configuration
-      include NsOptions::Proxy
+    class Config
 
-      # Sinatra-based options
+      DEFAULT_ENV         = 'development'.freeze
+      DEFAULT_VIEWS_PATH  = 'views'.freeze
+      DEFAULT_PUBLIC_PATH = 'public'.freeze
+      DEFAULT_ENCODING    = 'utf-8'.freeze
 
-      option :env,  String,   :default => 'development'
+      attr_accessor :env, :root, :views_path, :public_path, :default_encoding
+      attr_accessor :settings, :template_helpers, :middlewares
+      attr_accessor :init_procs, :error_procs, :template_source, :logger, :router
 
-      option :root,        Pathname, :required => true
-      option :public_root, Pathname
-      option :views_root,  Pathname
+      attr_accessor :dump_errors, :method_override, :reload_templates
+      attr_accessor :sessions, :show_exceptions, :static_files
+      attr_accessor :verbose_logging
 
-      option :dump_errors,      NsOptions::Boolean, :default => false
-      option :method_override,  NsOptions::Boolean, :default => true
-      option :sessions,         NsOptions::Boolean, :default => false
-      option :show_exceptions,  NsOptions::Boolean, :default => false
-      option :static_files,     NsOptions::Boolean, :default => true
-      option :reload_templates, NsOptions::Boolean, :default => false
-      option :default_encoding, String,             :default => 'utf-8'
+      def initialize
+        @env              = DEFAULT_ENV
+        @root             = ENV['PWD']
+        @views_path       = DEFAULT_VIEWS_PATH
+        @public_path      = DEFAULT_PUBLIC_PATH
+        @default_encoding = DEFAULT_ENCODING
+        @settings         = {}
+        @template_helpers = []
+        @middlewares      = []
+        @init_procs       = []
+        @error_procs      = []
+        @template_source  = nil
+        @logger           = Deas::NullLogger.new
+        @router           = Deas::Router.new
 
-      # server handling options
+        @dump_errors      = false
+        @method_override  = true
+        @reload_templates = false
+        @sessions         = false
+        @show_exceptions  = false
+        @static_files     = true
+        @verbose_logging  = true
 
-      option :verbose_logging, NsOptions::Boolean, :default => true
-      option :logger
-      option :template_source
+        @valid = nil
+      end
 
-      attr_accessor :settings, :init_procs, :error_procs, :template_helpers
-      attr_accessor :middlewares, :router
+      def views_root
+        File.expand_path(@views_path.to_s, @root.to_s)
+      end
 
-      def initialize(values = nil)
-        # these are defaulted here because we want to use the Configuration
-        # instance `root`. If we define a proc above, we will be using the
-        # Configuration class `root`, which will not update these options as
-        # expected.
-        super((values || {}).merge({
-          :public_root     => proc{ self.root.join('public') },
-          :views_root      => proc{ self.root.join('views') },
-          :logger          => proc{ Deas::NullLogger.new },
-          :template_source => proc{ Deas::NullTemplateSource.new(self.root) }
-        }))
-        @settings = {}
-        @init_procs, @error_procs, @template_helpers, @middlewares = [], [], [], []
-        @router = Deas::Router.new
-        @valid  = nil
+      def public_root
+        File.expand_path(@public_path.to_s, @root.to_s)
+      end
+
+      def template_source
+        @template_source ||= Deas::NullTemplateSource.new(self.root)
       end
 
       def urls
@@ -207,19 +224,12 @@ module Deas
         self.router.routes
       end
 
-      def to_hash
-        super.merge({
-          :error_procs => self.error_procs,
-          :router      => self.router
-        })
-      end
-
       def valid?
         !!@valid
       end
 
-      # for the config to be considered "valid", a few things need to happen.  The
-      # key here is that this only needs to be done _once_ for each config.
+      # for the config to be considered "valid", a few things need to happen.
+      # The key here is that this only needs to be done _once_ for each config.
 
       def validate!
         return @valid if !@valid.nil?  # only need to run this once per config
@@ -235,11 +245,10 @@ module Deas
         # that the logging and exception showing happens just before the app gets
         # the request and just after the app sends a response.
         self.middlewares << [Deas::ShowExceptions] if self.show_exceptions
-        [*Deas::Logging.middleware(self.verbose_logging)].tap do |mw_args|
-          self.middlewares << mw_args
-        end
+        logging_mw_args = [*Deas::Logging.middleware(self.verbose_logging)]
+        self.middlewares << logging_mw_args
 
-        @valid = true  # if it made it this far, its valid!
+        @valid = true # if it made it this far, its valid!
       end
 
     end

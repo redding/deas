@@ -11,23 +11,27 @@ module Deas
       # This is generic server initialization stuff.  Eventually do this in the
       # server's initialization logic more like Sanford does.
       server_config.validate!
-      server_data = ServerData.new(server_config.to_hash)
+      server_data = ServerData.new({
+        :error_procs     => server_config.error_procs,
+        :logger          => server_config.logger,
+        :router          => server_config.router,
+        :template_source => server_config.template_source
+      })
 
       Sinatra.new do
         # built-in settings
         set :environment,      server_config.env
         set :root,             server_config.root
-        set :public_folder,    server_config.public_root
         set :views,            server_config.views_root
+        set :public_folder,    server_config.public_root
+        set :default_encoding, server_config.default_encoding
         set :dump_errors,      server_config.dump_errors
         set :method_override,  server_config.method_override
+        set :reload_templates, server_config.reload_templates
         set :sessions,         server_config.sessions
         set :static,           server_config.static_files
-        set :reload_templates, server_config.reload_templates
-        set :default_encoding, server_config.default_encoding
-        set :logging,          false
 
-        # TODO: sucks to have to do this but b/c or Rack there is no better way
+        # TODO: sucks to have to do this but b/c of Rack there is no better way
         # to make the server data available to middleware.  We should remove this
         # once we remove Sinatra.  Whatever rack app implemenation will needs to
         # provide the server data or maybe the server data *will be* the rack app.
@@ -38,6 +42,9 @@ module Deas
         # called and Deas' logging doesn't finish. They should always be false.
         set :raise_errors,     false
         set :show_exceptions,  false
+
+        # turn off logging b/c Deas handles its own logging logic
+        set :logging,          false
 
         # TODO: rework with `server_config.default_encoding` once we move off of using Sinatra
         # TODO: could maybe move into a deas-json mixin once off of Sinatra
