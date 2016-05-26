@@ -18,218 +18,236 @@ module Deas::Server
     end
     subject{ @server_class }
 
-    should have_imeths :new, :configuration
+    should have_imeths :new, :config
 
-    # DSL for sinatra-based settings
-    should have_imeths :env, :root, :public_root, :views_root
-    should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
-    should have_imeths :static_files, :reload_templates
-
-    # DSL for server handling settings
-    should have_imeths :init, :error, :template_helpers, :template_helper?
-    should have_imeths :use, :set, :verbose_logging, :logger, :default_encoding
-    should have_imeths :template_source
-
-    # DSL for server routing settings
-    should have_imeths :router, :view_handler_ns, :base_url
+    should have_imeths :env, :root, :views_path, :public_path, :default_encoding
+    should have_imeths :set, :template_helpers, :template_helper?, :use
+    should have_imeths :init, :error, :template_source, :logger, :router
+    should have_imeths :view_handler_ns, :base_url
     should have_imeths :url, :url_for
     should have_imeths :default_request_type_name, :add_request_type
     should have_imeths :request_type_name
     should have_imeths :get, :post, :put, :patch, :delete
     should have_imeths :route, :redirect
 
+    should have_imeths :dump_errors, :method_override, :reload_templates
+    should have_imeths :sessions, :show_exceptions, :static_files
+    should have_imeths :verbose_logging
+
     should "use much-plugin" do
       assert_includes MuchPlugin, Deas::Server
     end
 
-    should "allow setting it's configuration options" do
-      config = subject.configuration
+    should "allow setting its config values" do
+      config = subject.config
 
-      subject.env 'staging'
-      assert_equal 'staging', config.env
+      exp = Factory.string
+      subject.env exp
+      assert_equal exp, config.env
 
-      subject.root '/path/to/root'
-      assert_equal '/path/to/root', config.root.to_s
+      exp = Factory.path
+      subject.root exp
+      assert_equal exp, config.root
 
-      subject.public_root '/path/to/public'
-      assert_equal '/path/to/public', config.public_root.to_s
+      exp = Factory.path
+      subject.views_path exp
+      assert_equal exp, config.views_path
 
-      subject.views_root '/path/to/views'
-      assert_equal '/path/to/views', config.views_root.to_s
+      exp = Factory.path
+      subject.public_path exp
+      assert_equal exp, config.public_path
 
-      subject.dump_errors true
-      assert_equal true, config.dump_errors
+      exp = Factory.string
+      subject.default_encoding exp
+      assert_equal exp, config.default_encoding
 
-      subject.method_override false
-      assert_equal false, config.method_override
+      exp = { Factory.string.to_sym => Factory.string }
+      subject.set exp.keys.first, exp.values.first
+      assert_equal exp, config.settings
 
-      subject.sessions false
-      assert_equal false, config.sessions
+      exp = ['MyMiddleware', Factory.string]
+      subject.use *exp
+      assert_equal [exp], config.middlewares
 
-      subject.show_exceptions true
-      assert_equal true, config.show_exceptions
-
-      subject.static_files false
-      assert_equal false, config.static_files
-
-      subject.reload_templates true
-      assert_equal true, config.reload_templates
-
+      exp = proc{ }
       assert_equal 0, config.init_procs.size
-      init_proc = proc{ }
-      subject.init(&init_proc)
+      subject.init(&exp)
       assert_equal 1, config.init_procs.size
-      assert_equal init_proc, config.init_procs.first
+      assert_equal exp, config.init_procs.first
 
+      exp = proc{ }
       assert_equal 0, config.error_procs.size
-      error_proc = proc{ }
-      subject.error(&error_proc)
+      subject.error(&exp)
       assert_equal 1, config.error_procs.size
-      assert_equal error_proc, config.error_procs.first
+      assert_equal exp, config.error_procs.first
 
-      subject.use 'MyMiddleware'
-      assert_equal [ ['MyMiddleware'] ], config.middlewares
+      exp = Deas::TemplateSource.new(Factory.path)
+      subject.template_source exp
+      assert_equal exp, config.template_source
 
-      subject.set :testing_set_meth, 'it works!'
-      assert_equal({ :testing_set_meth => 'it works!'}, config.settings)
+      exp = Logger.new(STDOUT)
+      subject.logger exp
+      assert_equal exp, config.logger
 
-      stdout_logger = Logger.new(STDOUT)
-      subject.logger stdout_logger
-      assert_equal stdout_logger, config.logger
+      exp = Factory.boolean
+      subject.dump_errors exp
+      assert_equal exp, config.dump_errors
 
-      a_source = Deas::TemplateSource.new(Factory.path)
-      subject.template_source a_source
-      assert_equal a_source, config.template_source
+      exp = Factory.boolean
+      subject.method_override exp
+      assert_equal exp, config.method_override
 
-      subject.default_encoding 'latin1'
-      assert_equal 'latin1', config.default_encoding
+      exp = Factory.boolean
+      subject.reload_templates exp
+      assert_equal exp, config.reload_templates
+
+      exp = Factory.boolean
+      subject.sessions exp
+      assert_equal exp, config.sessions
+
+      exp = Factory.boolean
+      subject.show_exceptions exp
+      assert_equal exp, config.show_exceptions
+
+      exp = Factory.boolean
+      subject.static_files exp
+      assert_equal exp, config.static_files
+
+      exp = Factory.boolean
+      subject.verbose_logging exp
+      assert_equal exp, config.verbose_logging
     end
 
     should "add and query helper modules" do
       subject.template_helpers(helper_module = Module.new)
-      assert subject.template_helper?(helper_module)
+      assert_true subject.template_helper?(helper_module)
     end
 
     should "have a router by default and allow overriding it" do
       assert_kind_of Deas::Router, subject.router
       assert_equal subject.router.view_handler_ns, subject.view_handler_ns
-      assert_equal subject.router.base_url, subject.base_url
+      assert_equal subject.router.base_url,        subject.base_url
 
       new_router = Deas::Router.new
       subject.router new_router
       assert_same new_router, subject.router
     end
 
+    # note: the remainder of the server router methods are tested implicitly
+    # via usage in the system tests
+
   end
 
-  class ConfigurationTests < UnitTests
-    desc "Configuration"
+  class ConfigTests < UnitTests
+    desc "Config"
     setup do
-      @configuration = Configuration.new
-      @configuration.root = TEST_SUPPORT_ROOT
+      @config_class = Config
+      @config = @config_class.new
     end
-    subject{ @configuration }
+    subject{ @config }
 
-    # sinatra-based options
+    should have_accessors :env, :root, :views_path, :public_path, :default_encoding
+    should have_accessors :settings, :template_helpers, :middlewares
+    should have_accessors :init_procs, :error_procs, :template_source, :logger, :router
 
-    should have_imeths :env, :root, :public_root, :views_root
-    should have_imeths :dump_errors, :method_override, :sessions, :show_exceptions
-    should have_imeths :static_files, :reload_templates, :default_encoding
+    should have_accessors :dump_errors, :method_override, :reload_templates
+    should have_accessors :sessions, :show_exceptions, :static_files
+    should have_accessors :verbose_logging
 
-    # server handling options
+    should have_imeths :views_root, :public_root, :urls, :routes
+    should have_imeths :valid?, :validate!
 
-    should have_imeths :verbose_logging, :logger, :template_source
-
-    should have_accessors :settings, :init_procs, :error_procs, :template_helpers
-    should have_accessors :middlewares, :router
-    should have_imeths :valid?, :validate!, :urls, :routes
-    should have_imeths :to_hash
-
-    should "default the env to 'development'" do
-      assert_equal 'development', subject.env
-    end
-
-    should "default the public and views folders based off the root" do
-      assert_equal subject.root.join('public'), subject.public_root
-      assert_equal subject.root.join('views'), subject.views_root
+    should "know its default attr values" do
+      assert_equal 'development', @config_class::DEFAULT_ENV
+      assert_equal 'views',       @config_class::DEFAULT_VIEWS_PATH
+      assert_equal 'public',      @config_class::DEFAULT_PUBLIC_PATH
+      assert_equal 'utf-8',       @config_class::DEFAULT_ENCODING
     end
 
-    should "default the Sinatra flags" do
+    should "default its attrs" do
+      exp = @config_class::DEFAULT_ENV
+      assert_equal exp, subject.env
+
+      exp = ENV['PWD']
+      assert_equal exp, subject.root
+
+      exp = @config_class::DEFAULT_VIEWS_PATH
+      assert_equal exp, subject.views_path
+
+      exp = @config_class::DEFAULT_PUBLIC_PATH
+      assert_equal exp, subject.public_path
+
+      exp = @config_class::DEFAULT_ENCODING
+      assert_equal exp, subject.default_encoding
+
+      assert_equal Hash.new, subject.settings
+      assert_equal [],       subject.template_helpers
+      assert_equal [],       subject.middlewares
+      assert_equal [],       subject.init_procs
+      assert_equal [],       subject.error_procs
+
+      assert_instance_of Deas::NullTemplateSource, subject.template_source
+      assert_instance_of Deas::NullLogger,         subject.logger
+      assert_instance_of Deas::Router,             subject.router
+
       assert_equal false, subject.dump_errors
       assert_equal true,  subject.method_override
+      assert_equal false, subject.reload_templates
       assert_equal false, subject.sessions
       assert_equal false, subject.show_exceptions
       assert_equal true,  subject.static_files
-      assert_equal false, subject.reload_templates
+      assert_equal true,  subject.verbose_logging
     end
 
-    should "default the handling options" do
-      assert_equal true, subject.verbose_logging
-      assert_instance_of Deas::NullLogger, subject.logger
-      assert_instance_of Deas::NullTemplateSource, subject.template_source
+    should "know its views root and public root" do
+      exp = File.expand_path(subject.views_path.to_s, subject.root.to_s)
+      assert_equal exp, subject.views_root
+
+      exp = File.expand_path(subject.public_path.to_s, subject.root.to_s)
+      assert_equal exp, subject.public_root
     end
 
-    should "default its stored configuration" do
-      assert_empty subject.settings
-      assert_empty subject.error_procs
-      assert_empty subject.init_procs
-      assert_empty subject.template_helpers
-      assert_empty subject.middlewares
-      assert_empty subject.routes
-      assert_empty subject.urls
-      assert_kind_of Deas::Router, subject.router
+    should "demeter its router" do
+      assert_equal subject.router.urls,   subject.urls
+      assert_equal subject.router.routes, subject.routes
     end
 
     should "not be valid until validate! has been run" do
-      assert_not subject.valid?
+      assert_false subject.valid?
 
       subject.validate!
-      assert subject.valid?
+      assert_true subject.valid?
     end
 
-    should "complain if validating and `root` isn't set" do
-      config = Configuration.new
+    should "complain if validating and its root value is nil" do
+      config = Config.new
+      config.root = nil
       assert_raises(Deas::ServerRootError){ config.validate! }
-      assert_nothing_raised{ config.root '/path/to/root'; config.validate! }
-    end
-
-    should "use `utf-8` as the default encoding by default" do
-      assert_equal 'utf-8', subject.default_encoding
-    end
-
-    should "include its error procs and router in its `to_hash`" do
-      config_hash = subject.to_hash
-
-      assert_equal subject.error_procs, config_hash[:error_procs]
-      assert_equal subject.router,      config_hash[:router]
+      assert_nothing_raised{ config.root = Factory.path; config.validate! }
     end
 
   end
 
-  class ValidationTests < ConfigurationTests
+  class ValidationTests < ConfigTests
     desc "when successfully validated"
     setup do
-      @initialized = false
-      @other_initialized = false
       @router = Deas::Router.new
-
       @router_validate_called = false
       Assert.stub(@router, :validate!){ @router_validate_called = true }
 
-      @configuration = Configuration.new.tap do |c|
-        c.env              = 'staging'
-        c.root             = 'path/to/somewhere'
-        c.dump_errors      = true
-        c.method_override  = false
-        c.sessions         = false
+      @config = Config.new.tap do |c|
+        c.root             = Factory.path
         c.show_exceptions  = true
-        c.static           = true
-        c.reload_templates = true
-        c.middlewares      = [ ['MyMiddleware'] ]
+        c.verbose_logging  = true
+        c.middlewares      = Factory.integer(3).times.map{ [Factory.string] }
         c.router           = @router
       end
-      @configuration.init_procs << proc{ @initialized = true }
-      @configuration.init_procs << proc{ @other_initialized = true }
+
+      @initialized = false
+      @config.init_procs << proc{ @initialized = true }
+
+      @other_initialized = false
+      @config.init_procs << proc{ @other_initialized = true }
     end
 
     should "call init procs" do
@@ -250,8 +268,10 @@ module Deas::Server
     end
 
     should "add the Logging and ShowExceptions middleware to the end" do
+      assert_true subject.show_exceptions
+      assert_true subject.verbose_logging
+
       num_middlewares = subject.middlewares.size
-      assert subject.verbose_logging
       assert_not_equal [Deas::ShowExceptions], subject.middlewares[-2]
       assert_not_equal [Deas::VerboseLogging], subject.middlewares[-1]
 

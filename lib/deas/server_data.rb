@@ -2,10 +2,10 @@ module Deas
 
   class ServerData
 
-    # The server uses this to "compile" its configuration for speed. NsOptions
-    # is relatively slow everytime an option is read. To avoid this, we read the
-    # options one time here and memoize their values. This way, we don't pay the
-    # NsOptions overhead when reading them while handling a request.
+    # The server uses this to "compile" the common configuration data used
+    # by the server instances, error handlers and routes. The goal here is
+    # to provide these with a simplified inteface with the minimal data needed
+    # and to decouple the configuration from each thing that needs its data.
 
     attr_reader :error_procs, :logger, :router, :template_source
 

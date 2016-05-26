@@ -19,58 +19,53 @@ module Deas::SinatraApp
       @router.get('/something', 'EmptyViewHandler')
       @router.validate!
 
-      @configuration = Deas::Server::Configuration.new.tap do |c|
-        c.env              = 'staging'
-        c.root             = 'path/to/somewhere'
-        c.dump_errors      = true
-        c.method_override  = false
-        c.sessions         = false
-        c.show_exceptions  = true
-        c.static           = true
-        c.reload_templates = true
-        c.default_encoding = 'latin1'
-        c.router           = @router
-      end
-      @sinatra_app = Deas::SinatraApp.new(@configuration)
+      @config = Deas::Server::Config.new
+      @config.router = @router
+
+      @sinatra_app = Deas::SinatraApp.new(@config)
     end
     subject{ @sinatra_app }
 
     should "ensure its config is valid" do
-      assert @configuration.valid?
+      assert @config.valid?
     end
 
     should "be a kind of Sinatra::Base" do
       assert_equal Sinatra::Base, subject.superclass
     end
 
-    should "have it's configuration set based on the server configuration" do
-      subject.settings.tap do |settings|
-        assert_equal 'staging',                  settings.environment
-        assert_equal 'path/to/somewhere',        settings.root.to_s
-        assert_equal 'path/to/somewhere/public', settings.public_folder.to_s
-        assert_equal 'path/to/somewhere/views',  settings.views.to_s
-        assert_equal true,                       settings.dump_errors
-        assert_equal false,                      settings.method_override
-        assert_equal false,                      settings.sessions
-        assert_equal true,                       settings.static
-        assert_equal true,                       settings.reload_templates
-        assert_equal 'latin1',                   settings.default_encoding
+    should "have it's configuration set based on the server config" do
+      s = subject.settings
 
-        # settings that are set but can't be changed
-        assert_equal false, settings.logging
-        assert_equal false, settings.raise_errors
-        assert_equal false, settings.show_exceptions
+      assert_equal @config.env,              s.environment
+      assert_equal @config.root,             s.root
+      assert_equal @config.views_root,       s.views
+      assert_equal @config.public_root,      s.public_folder
+      assert_equal @config.default_encoding, s.default_encoding
+      assert_equal @config.dump_errors,      s.dump_errors
+      assert_equal @config.method_override,  s.method_override
+      assert_equal @config.reload_templates, s.reload_templates
+      assert_equal @config.sessions,         s.sessions
+      assert_equal @config.static_files,     s.static
 
-        exp = Deas::ServerData.new(@configuration.to_hash)
-        sd = settings.deas_server_data
-        assert_instance_of Deas::ServerData,          sd
-        assert_instance_of exp.template_source.class, sd.template_source
-        assert_instance_of exp.logger.class,          sd.logger
-        assert_equal exp.error_procs, sd.error_procs
-        assert_equal exp.router,      sd.router
+      assert_equal false, s.raise_errors
+      assert_equal false, s.show_exceptions
+      assert_equal false, s.logging
 
-        assert_includes "application/json", settings.add_charset
-      end
+      exp = Deas::ServerData.new({
+        :error_procs     => @config.error_procs,
+        :logger          => @config.logger,
+        :router          => @config.router,
+        :template_source => @config.template_source
+      })
+      sd = s.deas_server_data
+      assert_instance_of Deas::ServerData, sd
+      assert_instance_of exp.template_source.class, sd.template_source
+      assert_instance_of exp.logger.class, sd.logger
+      assert_equal exp.error_procs, sd.error_procs
+      assert_equal exp.router,      sd.router
+
+      assert_includes "application/json", s.add_charset
     end
 
     should "define Sinatra routes for every route in the configuration" do

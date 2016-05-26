@@ -18,11 +18,10 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_development_dependency("assert",           ["~> 2.15.1"])
+  gem.add_development_dependency("assert",           ["~> 2.16.0"])
   gem.add_development_dependency("assert-rack-test", ["~> 1.0.3"])
 
   gem.add_dependency("much-plugin", ["~> 0.1.0"])
-  gem.add_dependency("ns-options",  ["~> 1.1.6"])
   gem.add_dependency("rack",        ["~> 1.1"])
   gem.add_dependency("sinatra",     ["~> 1.2"])
 
