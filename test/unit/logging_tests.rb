@@ -128,7 +128,7 @@ module Deas::Logging
   class VerboseLoggingInitTests < VerboseLoggingTests
     desc "when init"
     setup do
-      @resp_status = @middleware_class::RESPONSE_STATUS_NAMES.keys.choice
+      @resp_status = @middleware_class::RESPONSE_STATUS_NAMES.keys.sample
       @app_response[0] = @resp_status
 
       @middleware = Deas::VerboseLogging.new(@app)

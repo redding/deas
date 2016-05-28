@@ -86,13 +86,13 @@ class Deas::TemplateEngine
     end
 
     should "read and return the given path in its source path on `render`" do
-      template = ['test/support/template.a', 'test/support/template.a.json'].choice
+      template = ['test/support/template.a', 'test/support/template.a.json'].sample
       exp = File.read(Dir.glob(subject.source_path.join("#{template}*")).first)
       assert_equal exp, subject.render(template, @v, @l)
     end
 
     should "call `render` to implement its `partial` method" do
-      template = ['test/support/template.a', 'test/support/template.a.json'].choice
+      template = ['test/support/template.a', 'test/support/template.a.json'].sample
       exp = subject.render(template, nil, @l)
       assert_equal exp, subject.partial(template, @l)
     end

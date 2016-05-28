@@ -672,7 +672,7 @@ class Deas::Runner
   class NonPartialSendFileBodyTests < SendFileBodyIOTests
     desc "for non/multi/invalid partial content requests"
     setup do
-      range = [nil, 'bytes=', 'bytes=0-1,2-3', 'bytes=3-2', 'bytes=abc'].choice
+      range = [nil, 'bytes=', 'bytes=0-1,2-3', 'bytes=3-2', 'bytes=abc'].sample
       env = range.nil? ? {} : { 'HTTP_RANGE' => range }
       @body = SendFileBody.new(env, @path_name)
     end

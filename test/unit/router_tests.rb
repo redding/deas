@@ -26,7 +26,7 @@ class Deas::Router
 
     desc "when init"
     setup do
-      @base_url = a_base_url = [Factory.url, nil].choice
+      @base_url = a_base_url = [Factory.url, nil].sample
       @router = @router_class.new{ base_url a_base_url }
     end
     subject{ @router }
