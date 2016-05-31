@@ -87,6 +87,32 @@ class Deas::Url
       })
     end
 
+    should "complain if given an empty named param value" do
+      params = {
+        'some' => 'a',
+        :thing => 'goose'
+      }
+      empty_param_name  = params.keys.sample
+      empty_param_value = [nil, ''].sample
+      params[empty_param_name] = empty_param_value
+
+      err = assert_raises EmptyNamedValueError do
+        subject.path_for(params)
+      end
+      exp = "an empty value (`#{empty_param_value.inspect}`) "\
+            "was given for the `#{empty_param_name}` url param"
+      assert_equal exp, err.message
+    end
+
+    should "not complain if given empty splat param values" do
+      exp_path = "/a/goose/"
+      assert_equal exp_path, subject.path_for({
+        'some'  => 'a',
+        :thing  => 'goose',
+        'splat' => [nil, '']
+      })
+    end
+
     should "append other (additional) params as query params" do
       exp_path = "/a/goose/cooked/well?aye=a&bee=b"
       assert_equal exp_path, subject.path_for({
