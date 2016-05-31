@@ -154,38 +154,6 @@ class Deas::Url
       })
     end
 
-    should "generate given ordered params only" do
-      exp_path = "/a/:thing/*/*"
-      assert_equal exp_path, subject.path_for('a')
-
-      exp_path = "/a/goose/*/*"
-      assert_equal exp_path, subject.path_for('a', 'goose')
-
-      exp_path = "/a/goose/cooked-well/*"
-      assert_equal exp_path, subject.path_for('a', 'goose', 'cooked-well')
-
-      exp_path = "/a/goose/cooked/well"
-      assert_equal exp_path, subject.path_for('a', 'goose', 'cooked', 'well')
-    end
-
-    should "generate given mixed ordered and named params" do
-      exp_path = "/:some/:thing/*/*"
-      assert_equal exp_path, subject.path_for
-
-      exp_path = "/a/goose/*/*"
-      assert_equal exp_path, subject.path_for('a', 'thing' => 'goose')
-
-      exp_path = "/goose/a/well/*"
-      assert_equal exp_path, subject.path_for('a', 'well', 'some' => 'goose')
-
-      exp_path = "/a/goose/cooked/well"
-      assert_equal exp_path, subject.path_for('ignore', 'these', 'params', {
-        'some'  => 'a',
-        :thing  => 'goose',
-        'splat' => ['cooked', 'well']
-      })
-    end
-
     should "'squash' duplicate forward-slashes" do
       exp_path = "/a/goose/cooked/well/"
       assert_equal exp_path, subject.path_for({
@@ -206,6 +174,12 @@ class Deas::Url
 
       subject.path_for(params)
       assert_equal exp_params, params
+    end
+
+    should "complain if given non-hash params" do
+      assert_raises NonHashParamsError do
+        subject.path_for([Factory.string, Factory.integer, nil].sample)
+      end
     end
 
   end
