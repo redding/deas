@@ -53,7 +53,11 @@ module Deas
     def url_for(name, *args)
       url = self.urls[name.to_sym]
       raise ArgumentError, "no route named `#{name.to_sym.inspect}`" unless url
-      prepend_base_url(url.path_for(*args))
+      begin
+        prepend_base_url(url.path_for(*args))
+      rescue Deas::Url::NonHashParamsError => err
+        raise ArgumentError, "url param values must be passed as a Hash"
+      end
     end
 
     def default_request_type_name(value = nil)

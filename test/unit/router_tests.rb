@@ -405,18 +405,22 @@ class Deas::Router
     should "build a path for a url given params" do
       exp_path = subject.prepend_base_url("/info/now")
       assert_equal exp_path, subject.url_for(:get_info, :for => 'now')
-      assert_equal exp_path, subject.url_for(:get_info, 'now')
     end
 
     should "'squash' duplicate forward-slashes when building urls" do
       exp_path = subject.prepend_base_url("/info/now")
       assert_equal exp_path, subject.url_for(:get_info, :for => '/now')
-      assert_equal exp_path, subject.url_for(:get_info, '/now')
+    end
+
+    should "complain if buiding a named url with non-hash params" do
+      assert_raises ArgumentError do
+        subject.url_for(:get_info, ['now', :now, nil].sample)
+      end
     end
 
     should "complain if building a named url that hasn't been defined" do
       assert_raises ArgumentError do
-        subject.url_for(:get_all_info, 'now')
+        subject.url_for(:not_defined_url)
       end
     end
 
