@@ -139,13 +139,12 @@ class Deas::Runner
     should "know and set its response body" do
       assert_nil subject.body
 
-      exp = Factory.string
+      exp = [Factory.string]
       subject.body exp
       assert_equal exp, subject.body
 
-      assert_raises(ArgumentError) do
-        subject.body Factory.integer
-      end
+      subject.body exp.first
+      assert_equal exp, subject.body
     end
 
     should "know and set its response content type header" do
@@ -463,7 +462,7 @@ class Deas::Runner
   class SourceRenderTests < RenderSetupTests
     desc "source render method"
     setup do
-      body = @body = Factory.text
+      body = @body = [Factory.text]
       @render_called_with = nil
       @source = Deas::TemplateSource.new(Factory.path)
       Assert.stub(@source, :render){ |*args| @render_called_with = args; body }

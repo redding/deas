@@ -12,7 +12,7 @@ class Deas::RespondWithProxy
     setup do
       @status  = Factory.integer
       @headers = { Factory.string => Factory.string }
-      @body    = Factory.string
+      @body    = [Factory.string]
       @proxy    = Deas::RespondWithProxy.new([@status, @headers, @body])
     end
     subject{ @proxy }
