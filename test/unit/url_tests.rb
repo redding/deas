@@ -198,8 +198,8 @@ class Deas::Url
     should "not alter the given params" do
       params = {
         'some'    => 'thing',
-        :captures => 'captures',
-        :splat    => 'splat',
+        :captures => ['captures'],
+        :splat    => ['splat'],
         '#'       => 'anchor'
       }
       exp_params = params.dup

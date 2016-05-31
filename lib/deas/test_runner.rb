@@ -87,7 +87,7 @@ module Deas
         super(*[
           a.first.instance_of?(::Fixnum) ? a.shift : nil,
           a.first.kind_of?(::Hash)       ? a.shift : nil,
-          a.first.respond_to?(:each)     ? a.shift : nil
+          a.shift
         ])
       end
     end

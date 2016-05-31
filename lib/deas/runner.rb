@@ -52,11 +52,8 @@ module Deas
 
     def body(value = nil)
       if !value.nil?
-        unless value.respond_to?(:each)
-          raise ArgumentError, "this body value (class `#{value.class}`), does not "\
-                               "respond to `each`."
-        end
-        @body = value
+        # String#each is a thing in 1.8.7, so account for it here
+        @body = !value.respond_to?(:each) || value.kind_of?(String) ? [*value] : value
       end
       @body
     end
@@ -68,7 +65,7 @@ module Deas
     def halt(*args)
       self.status(args.shift)  if args.first.instance_of?(::Fixnum)
       self.headers(args.shift) if args.first.kind_of?(::Hash)
-      self.body(args.shift)    if args.first.respond_to?(:each)
+      self.body(args.shift)
       throw :halt
     end
 
