@@ -57,6 +57,8 @@ module Deas
         prepend_base_url(url.path_for(*args))
       rescue Deas::Url::NonHashParamsError => err
         raise ArgumentError, "url param values must be passed as a Hash"
+      rescue Deas::Url::EmptyNamedValueError => err
+        raise ArgumentError, err.message
       end
     end
 

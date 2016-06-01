@@ -418,6 +418,12 @@ class Deas::Router
       end
     end
 
+    should "complain if given an empty named param value" do
+      assert_raises ArgumentError do
+        subject.url_for(:get_info, :for => [nil, ''].sample)
+      end
+    end
+
     should "complain if building a named url that hasn't been defined" do
       assert_raises ArgumentError do
         subject.url_for(:not_defined_url)

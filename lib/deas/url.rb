@@ -42,8 +42,12 @@ module Deas
     def set_named(path, params)
       params.inject(path) do |path_string, (name, value)|
         if path_string.include?(":#{name}")
+          if (v = value.to_s).empty?
+            raise EmptyNamedValueError , "an empty value (`#{value.inspect}`) " \
+                                         "was given for the `#{name}` url param"
+          end
           params.delete(name)
-          path_string.gsub(":#{name}", value.to_s)
+          path_string.gsub(":#{name}", v)
         else
           path_string
         end
@@ -60,7 +64,8 @@ module Deas
       anchor.to_s.empty? ? path : "#{path}##{anchor}"
     end
 
-    NonHashParamsError = Class.new(ArgumentError)
+    NonHashParamsError   = Class.new(ArgumentError)
+    EmptyNamedValueError = Class.new(ArgumentError)
 
   end
 
