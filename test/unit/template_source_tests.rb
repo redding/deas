@@ -191,6 +191,12 @@ class Deas::TemplateSource
       assert_equal '', subject.path
     end
 
+    should "optionally take a root path" do
+      exp = Factory.path
+      source = Deas::NullTemplateSource.new(exp)
+      assert_equal exp, source.path
+    end
+
   end
 
   class TestEngine < Deas::TemplateEngine

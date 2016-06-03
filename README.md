@@ -9,10 +9,12 @@ Handler-based web framework powered by Sinatra.
 
 require 'deas'
 
-class MyApp
+class MyServer
   include Deas::Server
 
-  get '/', 'HelloWorldHandler'
+  router do
+    get '/', 'HelloWorldHandler'
+  end
 
 end
 
@@ -25,8 +27,8 @@ class HellowWorldHandler
 
 end
 
-app = MyApp.new
-run app
+server = MyServer.new
+run server
 ```
 
 ## Installation

@@ -23,12 +23,7 @@ module Deas::Server
     should have_imeths :env, :root, :views_path, :public_path, :default_encoding
     should have_imeths :set, :template_helpers, :template_helper?, :use
     should have_imeths :init, :error, :template_source, :logger, :router
-    should have_imeths :view_handler_ns, :base_url
-    should have_imeths :url, :url_for
-    should have_imeths :default_request_type_name, :add_request_type
-    should have_imeths :request_type_name
-    should have_imeths :get, :post, :put, :patch, :delete
-    should have_imeths :route, :redirect
+    should have_imeths :url_for
 
     should have_imeths :dump_errors, :method_override, :reload_templates
     should have_imeths :sessions, :show_exceptions, :static_files
@@ -125,16 +120,33 @@ module Deas::Server
 
     should "have a router by default and allow overriding it" do
       assert_kind_of Deas::Router, subject.router
-      assert_equal subject.router.view_handler_ns, subject.view_handler_ns
-      assert_equal subject.router.base_url,        subject.base_url
 
       new_router = Deas::Router.new
       subject.router new_router
+      assert_same new_router, subject.config.router
       assert_same new_router, subject.router
     end
 
-    # note: the remainder of the server router methods are tested implicitly
-    # via usage in the system tests
+    should "allow configuring the router by passing a block to `router`" do
+      block_scope = nil
+      subject.router{ block_scope = self }
+      assert_equal subject.router, block_scope
+    end
+
+    should "call the router's `url_for` method" do
+      url_for_called_args = nil
+      url_for_called_proc = nil
+      Assert.stub(subject.router, :url_for) do |*args, &block|
+        url_for_called_args = args
+        url_for_called_proc = block
+      end
+
+      exp_args = [Factory.string]
+      exp_proc = proc{ }
+      subject.url_for(*exp_args, &exp_proc)
+      assert_equal exp_args, url_for_called_args
+      assert_equal exp_proc, url_for_called_proc
+    end
 
   end
 
@@ -187,8 +199,10 @@ module Deas::Server
       assert_equal [],       subject.error_procs
 
       assert_instance_of Deas::NullTemplateSource, subject.template_source
-      assert_instance_of Deas::NullLogger,         subject.logger
-      assert_instance_of Deas::Router,             subject.router
+      assert_equal subject.root, subject.template_source.path
+
+      assert_instance_of Deas::NullLogger, subject.logger
+      assert_instance_of Deas::Router,     subject.router
 
       assert_equal false, subject.dump_errors
       assert_equal true,  subject.method_override
@@ -223,7 +237,6 @@ module Deas::Server
       config = Config.new
       config.root = nil
       assert_raises(Deas::ServerRootError){ config.validate! }
-      assert_nothing_raised{ config.root = Factory.path; config.validate! }
     end
 
   end
@@ -250,7 +263,7 @@ module Deas::Server
       @config.init_procs << proc{ @other_initialized = true }
     end
 
-    should "call init procs" do
+    should "call its init procs" do
       assert_equal false, @initialized
       assert_equal false, @other_initialized
 
@@ -280,6 +293,15 @@ module Deas::Server
       assert_equal (num_middlewares+2), subject.middlewares.size
       assert_equal [Deas::ShowExceptions], subject.middlewares[-2]
       assert_equal [Deas::VerboseLogging], subject.middlewares[-1]
+    end
+
+    should "only be able to be validated once" do
+      called = 0
+      subject.init_procs << proc{ called += 1 }
+      subject.validate!
+      assert_equal 1, called
+      subject.validate!
+      assert_equal 1, called
     end
 
   end
