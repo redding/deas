@@ -6,7 +6,7 @@ module Deas
 
   class Router
 
-    DEFAULT_REQUEST_TYPE_NAME = 'default'
+    DEFAULT_REQUEST_TYPE_NAME = 'default'.freeze
 
     attr_reader :request_types, :urls, :routes, :definitions
     attr_reader :escape_query_value_proc

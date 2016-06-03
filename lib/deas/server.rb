@@ -100,29 +100,13 @@ module Deas
 
       # router handling
 
-      def router(value = nil)
+      def router(value = nil, &block)
         self.config.router = value if !value.nil?
+        self.config.router.instance_eval(&block) if block
         self.config.router
       end
 
-      def view_handler_ns(*args); self.router.view_handler_ns(*args); end
-      def base_url(*args);        self.router.base_url(*args);        end
-
-      def url(*args, &block);     self.router.url(*args, &block);     end
       def url_for(*args, &block); self.router.url_for(*args, &block); end
-
-      def default_request_type_name(*args); self.router.default_request_type_name(*args); end
-      def add_request_type(*args, &block);  self.router.add_request_type(*args, &block);  end
-      def request_type_name(*args);         self.router.request_type_name(*args);         end
-
-      def get(*args, &block);    self.router.get(*args, &block);    end
-      def post(*args, &block);   self.router.post(*args, &block);   end
-      def put(*args, &block);    self.router.put(*args, &block);    end
-      def patch(*args, &block);  self.router.patch(*args, &block);  end
-      def delete(*args, &block); self.router.delete(*args, &block); end
-
-      def route(*args, &block);    self.router.route(*args, &block);    end
-      def redirect(*args, &block); self.router.redirect(*args, &block); end
 
       # flags
 
@@ -235,7 +219,7 @@ module Deas
         return @valid if !@valid.nil?  # only need to run this once per config
 
         # ensure all user and plugin configs/settings are applied
-        self.init_procs.each{ |p| p.call }
+        self.init_procs.each(&:call)
         raise Deas::ServerRootError if self.root.nil?
 
         # validate the router

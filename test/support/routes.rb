@@ -19,30 +19,32 @@ class DeasTestServer
     end
   end
 
-  default_request_type_name 'desktop'
-  add_request_type('regular'){ |r| r.path_info =~ /regular/ }
-  add_request_type('mobile'){ |r| r.path_info =~ /mobile/ }
+  router do
+    default_request_type_name 'desktop'
+    add_request_type('regular'){ |r| r.path_info =~ /regular/ }
+    add_request_type('mobile'){ |r| r.path_info =~ /mobile/ }
 
-  get  '/show',              'ShowHandler'
-  get  '/show.html',         'ShowHtmlHandler'
-  get  '/show.json',         'ShowJsonHandler'
-  get  '/show-latin1-json',  'ShowLatinJsonHandler'
-  get  '/show-text',         'ShowTextHandler'
-  get  '/show-headers-text', 'ShowHeadersTextHandler'
+    get  '/show',              'ShowHandler'
+    get  '/show.html',         'ShowHtmlHandler'
+    get  '/show.json',         'ShowJsonHandler'
+    get  '/show-latin1-json',  'ShowLatinJsonHandler'
+    get  '/show-text',         'ShowTextHandler'
+    get  '/show-headers-text', 'ShowHeadersTextHandler'
 
-  get '/req-type-show/:type', 'regular' => 'ShowHandler',
-                              'mobile'  => 'ShowMobileHandler'
+    get '/req-type-show/:type', 'regular' => 'ShowHandler',
+                                'mobile'  => 'ShowMobileHandler'
 
-  get  '/halt',     'HaltHandler'
-  get  '/error',    'ErrorHandler'
-  get  '/redirect', 'RedirectHandler'
-  post '/session',  'SetSessionHandler'
-  get  '/session',  'UseSessionHandler'
+    get  '/halt',     'HaltHandler'
+    get  '/error',    'ErrorHandler'
+    get  '/redirect', 'RedirectHandler'
+    post '/session',  'SetSessionHandler'
+    get  '/session',  'UseSessionHandler'
 
-  get '/handler/tests', 'HandlerTestsHandler'
+    get '/handler/tests', 'HandlerTestsHandler'
 
-  redirect '/route_redirect',   '/somewhere'
-  redirect('/:prefix/redirect'){ "/#{params['prefix']}/somewhere" }
+    redirect '/route_redirect',   '/somewhere'
+    redirect('/:prefix/redirect'){ "/#{params['prefix']}/somewhere" }
+  end
 
 end
 
@@ -59,7 +61,9 @@ class DeasDevServer
 
   show_exceptions true
 
-  get '/error', 'ErrorHandler'
+  router do
+    get '/error', 'ErrorHandler'
+  end
 
 end
 
