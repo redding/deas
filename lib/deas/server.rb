@@ -53,9 +53,17 @@ module Deas
         self.config.views_path
       end
 
+      def views_root
+        self.config.views_root
+      end
+
       def public_path(value = nil)
         self.config.public_path = value if !value.nil?
         self.config.public_path
+      end
+
+      def public_root
+        self.config.public_root
       end
 
       def default_encoding(value = nil)
@@ -65,6 +73,10 @@ module Deas
 
       def set(name, value)
         self.config.settings[name.to_sym] = value
+      end
+
+      def settings
+        self.config.settings
       end
 
       def template_helpers(*helper_modules)
@@ -80,12 +92,24 @@ module Deas
         self.config.middlewares << args
       end
 
+      def middlewares
+        self.config.middlewares
+      end
+
       def init(&block)
         self.config.init_procs << block
       end
 
+      def init_procs
+        self.config.init_procs
+      end
+
       def error(&block)
         self.config.error_procs << block
+      end
+
+      def error_procs
+        self.config.error_procs
       end
 
       def template_source(value = nil)

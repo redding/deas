@@ -20,10 +20,11 @@ module Deas::Server
 
     should have_imeths :new, :config
 
-    should have_imeths :env, :root, :views_path, :public_path, :default_encoding
-    should have_imeths :set, :template_helpers, :template_helper?, :use
-    should have_imeths :init, :error, :template_source, :logger, :router
-    should have_imeths :url_for
+    should have_imeths :env, :root, :views_path, :views_root
+    should have_imeths :public_path, :public_root, :default_encoding
+    should have_imeths :set, :settings, :template_helpers, :template_helper?
+    should have_imeths :use, :middlewares, :init, :init_procs, :error, :error_procs
+    should have_imeths :template_source, :logger, :router, :url_for
 
     should have_imeths :dump_errors, :method_override, :reload_templates
     should have_imeths :sessions, :show_exceptions, :static_files
@@ -111,6 +112,15 @@ module Deas::Server
       exp = Factory.boolean
       subject.verbose_logging exp
       assert_equal exp, config.verbose_logging
+    end
+
+    should "demeter its config values that aren't directly set" do
+      assert_equal subject.config.views_root,  subject.views_root
+      assert_equal subject.config.public_root, subject.public_root
+      assert_equal subject.config.settings,    subject.settings
+      assert_equal subject.config.middlewares, subject.middlewares
+      assert_equal subject.config.init_procs,  subject.init_procs
+      assert_equal subject.config.error_procs, subject.error_procs
     end
 
     should "add and query helper modules" do
