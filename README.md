@@ -22,7 +22,7 @@ class HellowWorldHandler
   include Deas::ViewHandler
 
   def run!
-    "<h1>Hello World</h1>"
+    body "<h1>Hello World</h1>"
   end
 
 end
