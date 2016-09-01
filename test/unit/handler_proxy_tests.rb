@@ -38,11 +38,13 @@ class Deas::HandlerProxy
 
       Assert.stub(@proxy, :handler_class){ EmptyViewHandler }
 
-      @server_data       = Factory.server_data
-      @fake_sinatra_call = Factory.sinatra_call
+      @server_data        = Factory.server_data
+      @fake_sinatra_call  = Factory.sinatra_call
+      @splat_sym_param    = Factory.string
+      @splat_string_param = Factory.string
       @fake_sinatra_call.params = {
-        :splat     => Factory.string,
-        'splat'    => Factory.string,
+        :splat     => [@splat_sym_param],
+        'splat'    => [@splat_string_param],
         :captures  => [Factory.string],
         'captures' => [Factory.string]
       }
@@ -65,11 +67,22 @@ class Deas::HandlerProxy
         :template_source => @server_data.template_source,
         :request         => @fake_sinatra_call.request,
         :session         => @fake_sinatra_call.session,
-        :params          => @fake_sinatra_call.params
+        :params          => @fake_sinatra_call.params,
+        :splat           => @splat_sym_param
       }
       assert_equal exp_args, @runner_spy.args
 
       assert_true @runner_spy.run_called
+    end
+
+    should "prefer splat sym params over splat string params" do
+      assert_equal @splat_sym_param, @runner_spy.args[:splat]
+
+      @fake_sinatra_call.params['splat'] = [@splat_string_param]
+      proxy = Deas::HandlerProxy.new('EmptyViewHandler')
+      Assert.stub(proxy, :handler_class){ EmptyViewHandler }
+      proxy.run(@server_data, @fake_sinatra_call)
+      assert_equal @splat_string_param, @runner_spy.args[:splat]
     end
 
     should "add data to the request env to make it available to Rack" do
@@ -86,7 +99,8 @@ class Deas::HandlerProxy
     should "log the handler class name and the params" do
       exp_msgs = [
         "  Handler: #{subject.handler_class.name}",
-        "  Params:  #{@runner_spy.params.inspect}"
+        "  Params:  #{@runner_spy.params.inspect}",
+        "  Splat:   #{@runner_spy.splat.inspect}"
       ]
       assert_equal exp_msgs, @fake_sinatra_call.request.logging_msgs
     end
@@ -98,7 +112,7 @@ class Deas::HandlerProxy
     attr_reader :run_called
     attr_reader :handler_class, :handler, :args
     attr_reader :logger, :router, :template_source
-    attr_reader :request, :session, :params
+    attr_reader :request, :session, :params, :splat
 
     def initialize
       @run_called = false
@@ -115,6 +129,7 @@ class Deas::HandlerProxy
       @request         = args[:request]
       @session         = args[:session]
       @params          = args[:params]
+      @splat           = args[:splat]
     end
 
     def run

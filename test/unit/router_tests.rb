@@ -402,6 +402,27 @@ class Deas::Router
       end
     end
 
+    should "complain if defining a url with invalid splats" do
+      assert_raises ArgumentError do
+        subject.url(:get_info, "/something/*/other/*")
+      end
+      assert_raises ArgumentError do
+        subject.url(:get_info, "/something/*/other")
+      end
+      assert_raises ArgumentError do
+        subject.url(:get_info, "/something/*/")
+      end
+      assert_raises ArgumentError do
+        subject.url(:get_info, "/*/something")
+      end
+      assert_nothing_raised do
+        subject.url(:get_info, "/something/*")
+      end
+      assert_nothing_raised do
+        subject.url(:get_info, "/*")
+      end
+    end
+
     should "build a path for a url given params" do
       exp_path = subject.prepend_base_url("/info/now")
       assert_equal exp_path, subject.url_for(:get_info, :for => 'now')

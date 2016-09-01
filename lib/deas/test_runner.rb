@@ -28,7 +28,8 @@ module Deas
         :template_source => a.delete(:template_source),
         :request         => a.delete(:request),
         :session         => a.delete(:session),
-        :params          => NormalizedParams.new(a.delete(:params) || {}).value
+        :params          => NormalizedParams.new(a.delete(:params) || {}).value,
+        :splat           => a.delete(:splat)
       })
       a.each{|key, value| self.handler.send("#{key}=", value) }
 

@@ -67,6 +67,7 @@ module Deas
       def request; @deas_runner.request; end
       def session; @deas_runner.session; end
       def params;  @deas_runner.params;  end
+      def splat;   @deas_runner.splat;   end
 
       # response
       def status(*args);       @deas_runner.status(*args);       end

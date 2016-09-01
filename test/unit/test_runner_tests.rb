@@ -35,6 +35,7 @@ class Deas::TestRunner
         :request         => @request,
         :session         => Factory.string,
         :params          => @params,
+        :splat           => Factory.path,
         :custom_value    => Factory.integer
       }
 
@@ -63,6 +64,7 @@ class Deas::TestRunner
       assert_equal @args[:request],         subject.request
       assert_equal @args[:session],         subject.session
       assert_equal @args[:params],          subject.params
+      assert_equal @args[:splat],           subject.splat
     end
 
     should "call to normalize its params" do

@@ -16,13 +16,19 @@ module Deas
     end
 
     def run(server_data, sinatra_call)
-      # these are not part of Deas' intended behavior and route matching
-      # they are side-effects of using Sinatra.  remove them so they won't
+      # captures are not part of Deas' intended behavior and route matching
+      # they are a side-effects of using Sinatra.  remove them so they won't
       # be relied upon in Deas apps.
-      sinatra_call.params.delete(:splat)
-      sinatra_call.params.delete('splat')
       sinatra_call.params.delete(:captures)
       sinatra_call.params.delete('captures')
+
+      # splat will be provided to the handlers via a special `splat` helper.
+      # only single splat values are allowed (see router `url` method).  this
+      # takes the last splat value from Sinatra and provides it standalone to
+      # the runner.
+      splat_sym_param    = sinatra_call.params.delete(:splat)
+      splat_string_param = sinatra_call.params.delete('splat')
+      splat_value        = (splat_sym_param || splat_string_param || []).last
 
       runner = DeasRunner.new(self.handler_class, {
         :logger          => server_data.logger,
@@ -30,7 +36,8 @@ module Deas
         :template_source => server_data.template_source,
         :request         => sinatra_call.request,
         :session         => sinatra_call.session,
-        :params          => sinatra_call.params
+        :params          => sinatra_call.params,
+        :splat           => splat_value
       })
 
       runner.request.env.tap do |env|
@@ -45,6 +52,7 @@ module Deas
         # this handles the verbose logging (it is a no-op if summary logging)
         env['deas.logging'].call "  Handler: #{self.handler_class.name}"
         env['deas.logging'].call "  Params:  #{runner.params.inspect}"
+        env['deas.logging'].call "  Splat:   #{runner.splat.inspect}" if !runner.splat.nil?
       end
 
       runner.run
