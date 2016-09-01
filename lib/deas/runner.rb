@@ -15,7 +15,7 @@ module Deas
 
     attr_reader :handler_class, :handler
     attr_reader :logger, :router, :template_source
-    attr_reader :request, :session, :params
+    attr_reader :request, :session, :params, :splat
 
     def initialize(handler_class, args = nil)
       @status, @headers, @body = nil, Rack::Utils::HeaderHash.new, nil
@@ -27,6 +27,7 @@ module Deas
       @request         = args[:request]
       @session         = args[:session]
       @params          = args[:params] || {}
+      @splat           = args[:splat]
 
       @handler_class = handler_class
       @handler = @handler_class.new(self)

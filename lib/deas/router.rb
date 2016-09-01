@@ -45,7 +45,11 @@ module Deas
     def url(name, path, options = nil)
       if !path.kind_of?(::String)
         raise ArgumentError, "invalid path `#{path.inspect}` - "\
-                             "can only provide a url name with String paths"
+                             "named urls must be defined with String paths"
+      end
+      if path =~ /\*(?!$)/ # splat not at end of path
+        raise ArgumentError, "invalid path `#{path.inspect}` - "\
+                             "named urls can only have a single splat at the end of the path"
       end
       add_url(name.to_sym, path, options || {})
     end

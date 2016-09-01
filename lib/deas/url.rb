@@ -23,7 +23,7 @@ module Deas
 
       h = params.dup # don't alter the given params
       c = h.delete(:captures) || h.delete('captures') || []
-      s = h.delete(:splat)    || h.delete('splat')    || []
+      s = h.delete(:splat)    || h.delete('splat')    || nil
       a = h.delete(:'#')      || h.delete('#')        || nil
 
       # ignore captures when setting params
@@ -33,10 +33,8 @@ module Deas
 
     private
 
-    def set_splat(path, params)
-      params.inject(path) do |path_string, value|
-        path_string.sub(/\*+/, value.to_s)
-      end
+    def set_splat(path, value)
+      path.sub(/\*+/, value.to_s)
     end
 
     def set_named(path, params)

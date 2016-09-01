@@ -59,31 +59,31 @@ class Deas::Url
   class PathForTests < InitTests
     desc "when generating paths"
     setup do
-      @url = Deas::Url.new(:some_thing, '/:some/:thing/*/*')
-      @url_with_escape = Deas::Url.new(:some_thing, '/:some/:thing/*/*', {
+      @url = Deas::Url.new(:some_thing, '/:some/:thing/*')
+      @url_with_escape = Deas::Url.new(:some_thing, '/:some/:thing/*', {
         :escape_query_value => proc{ |v| Rack::Utils.escape(v) }
       })
     end
 
     should "generate given named params only" do
-      exp_path = "/a/goose/*/*"
+      exp_path = '/a/goose/'
       assert_equal exp_path, subject.path_for({
         'some' => 'a',
         :thing => 'goose'
       })
 
-      exp_path = "/a/goose/cooked-well/*"
+      exp_path = '/a/goose/cooked'
       assert_equal exp_path, subject.path_for({
         'some' => 'a',
         :thing => 'goose',
-        :splat => ['cooked-well']
+        :splat => 'cooked'
       })
 
-      exp_path = "/a/goose/cooked/well"
+      exp_path = '/a/goose/cooked'
       assert_equal exp_path, subject.path_for({
         'some'  => 'a',
         :thing  => 'goose',
-        'splat' => ['cooked', 'well']
+        'splat' => 'cooked'
       })
     end
 
@@ -105,95 +105,86 @@ class Deas::Url
     end
 
     should "not complain if given empty splat param values" do
-      exp_path = "/a/goose/"
+      exp_path = '/a/goose/'
       assert_equal exp_path, subject.path_for({
         'some'  => 'a',
         :thing  => 'goose',
-        'splat' => [nil, '']
+        'splat' => [nil, ''].sample
       })
     end
 
     should "append other (additional) params as query params" do
-      exp_path = "/a/goose/cooked/well?aye=a&bee=b"
+      exp_path = '/a/goose/cooked?aye=a&bee=b'
       assert_equal exp_path, subject.path_for({
         'some'  => 'a',
         :thing  => 'goose',
-        'splat' => ['cooked', 'well'],
+        'splat' => 'cooked',
         'bee'   => 'b',
         :aye    => 'a'
       })
     end
 
     should "escape query values when built with an escape query value proc" do
-      exp_path = "/a/goose/cooked/well?aye=a?a&a"
+      exp_path = '/a/goose/cooked?aye=a?a&a'
       assert_equal exp_path, subject.path_for({
         'some'  => 'a',
         :thing  => 'goose',
-        'splat' => ['cooked', 'well'],
+        'splat' => 'cooked',
         :aye    => 'a?a&a'
       })
 
-      exp_path = "/a/goose/cooked/well?aye=a%3Fa%26a"
+      exp_path = "/a/goose/cooked?aye=a%3Fa%26a"
       assert_equal exp_path, @url_with_escape.path_for({
         'some'  => 'a',
         :thing  => 'goose',
-        'splat' => ['cooked', 'well'],
+        'splat' => 'cooked',
         :aye    => 'a?a&a'
       })
     end
 
     should "ignore any 'captures'" do
-      exp_path = "/a/goose/cooked/well"
+      exp_path = '/a/goose/cooked'
       assert_equal exp_path, subject.path_for({
-        'some'  => 'a',
-        :thing  => 'goose',
-        'splat' => ['cooked', 'well'],
+        'some'     => 'a',
+        :thing     => 'goose',
+        'splat'    => 'cooked',
         'captures' => 'some-captures'
       })
     end
 
     should "append anchors" do
-      exp_path = "/a/goose/cooked/well#an-anchor"
+      exp_path = '/a/goose/cooked#an-anchor'
       assert_equal exp_path, subject.path_for({
         'some'  => 'a',
         :thing  => 'goose',
-        'splat' => ['cooked', 'well'],
+        'splat' => 'cooked',
         '#'     => 'an-anchor'
       })
     end
 
     should "ignore empty anchors" do
-      exp_path = "/a/goose/cooked/well"
+      exp_path = '/a/goose/cooked'
       assert_equal exp_path, subject.path_for({
         'some'  => 'a',
         :thing  => 'goose',
-        'splat' => ['cooked', 'well'],
-        '#'     => nil
-      })
-
-      exp_path = "/a/goose/cooked/well"
-      assert_equal exp_path, subject.path_for({
-        'some'  => 'a',
-        :thing  => 'goose',
-        'splat' => ['cooked', 'well'],
-        '#'     => ''
+        'splat' => 'cooked',
+        '#'     => [nil, ''].sample
       })
     end
 
     should "'squash' duplicate forward-slashes" do
-      exp_path = "/a/goose/cooked/well/"
+      exp_path = '/a/goose/cooked'
       assert_equal exp_path, subject.path_for({
         'some'  => '/a',
         :thing  => '/goose',
-        'splat' => ['///cooked', 'well//']
+        'splat' => '///cooked'
       })
     end
 
     should "not alter the given params" do
       params = {
         'some'    => 'thing',
-        :captures => ['captures'],
-        :splat    => ['splat'],
+        :splat    => 'splat',
         '#'       => 'anchor'
       }
       exp_params = params.dup

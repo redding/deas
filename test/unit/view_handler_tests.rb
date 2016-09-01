@@ -242,6 +242,11 @@ module Deas::ViewHandler
       assert_equal @runner.params, subject.instance_eval{ params }
     end
 
+    should "call to the runner for its splat" do
+      stub_runner_with_something_for(:splat)
+      assert_equal @runner.splat, subject.instance_eval{ splat }
+    end
+
     should "call to the runner for its status helper" do
       capture_runner_meth_args_for(:status)
       exp_args = @args
