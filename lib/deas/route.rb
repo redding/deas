@@ -16,15 +16,13 @@ module Deas
       end
     end
 
-    def run(server_data, sinatra_call)
-      type = server_data.router.request_type_name(sinatra_call.request)
-      proxy = begin
-        @handler_proxies[type]
+    def run(server_data, request_data)
+      request_type_name = server_data.router.request_type_name(request_data.request)
+      begin
+        @handler_proxies[request_type_name].run(server_data, request_data)
       rescue HandlerProxyNotFound
-        sinatra_call.halt(404)
+        [404, Rack::Utils::HeaderHash.new, []]
       end
-      # TODO: eventually stop sending sinatra call (part of phasing out Sinatra)
-      proxy.run(server_data, sinatra_call)
     end
 
   end

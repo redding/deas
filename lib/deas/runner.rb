@@ -15,19 +15,19 @@ module Deas
 
     attr_reader :handler_class, :handler
     attr_reader :logger, :router, :template_source
-    attr_reader :request, :session, :params, :splat
+    attr_reader :request, :params, :route_path, :splat
 
     def initialize(handler_class, args = nil)
       @status, @headers, @body = nil, Rack::Utils::HeaderHash.new, nil
 
       args ||= {}
-      @logger          = args[:logger] || Deas::NullLogger.new
-      @router          = args[:router] || Deas::Router.new
+      @logger          = args[:logger]          || Deas::NullLogger.new
+      @router          = args[:router]          || Deas::Router.new
       @template_source = args[:template_source] || Deas::NullTemplateSource.new
       @request         = args[:request]
-      @session         = args[:session]
-      @params          = args[:params] || {}
-      @splat           = args[:splat]
+      @params          = args[:params]          || {}
+      @route_path      = args[:route_path].to_s
+      @splat           = args[:splat] # TODO: lazily parse from route path
 
       @handler_class = handler_class
       @handler = @handler_class.new(self)

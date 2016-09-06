@@ -149,11 +149,6 @@ module Deas
         self.config.reload_templates
       end
 
-      def sessions(value = nil)
-        self.config.sessions = value if !value.nil?
-        self.config.sessions
-      end
-
       def show_exceptions(value = nil)
         self.config.show_exceptions = value if !value.nil?
         self.config.show_exceptions
@@ -183,7 +178,7 @@ module Deas
       attr_accessor :init_procs, :error_procs, :template_source, :logger, :router
 
       attr_accessor :dump_errors, :method_override, :reload_templates
-      attr_accessor :sessions, :show_exceptions, :static_files
+      attr_accessor :show_exceptions, :static_files
       attr_accessor :verbose_logging
 
       def initialize
@@ -204,7 +199,6 @@ module Deas
         @dump_errors      = false
         @method_override  = true
         @reload_templates = false
-        @sessions         = false
         @show_exceptions  = false
         @static_files     = true
         @verbose_logging  = true

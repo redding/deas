@@ -45,12 +45,12 @@ module Deas::SinatraApp
       assert_equal @config.dump_errors,      s.dump_errors
       assert_equal @config.method_override,  s.method_override
       assert_equal @config.reload_templates, s.reload_templates
-      assert_equal @config.sessions,         s.sessions
       assert_equal @config.static_files,     s.static
 
-      assert_equal false, s.raise_errors
-      assert_equal false, s.show_exceptions
-      assert_equal false, s.logging
+      assert_false s.sessions
+      assert_false s.raise_errors
+      assert_false s.show_exceptions
+      assert_false s.logging
 
       exp = Deas::ServerData.new({
         :error_procs     => @config.error_procs,
@@ -74,6 +74,8 @@ module Deas::SinatraApp
 
       assert_not_nil sinatra_routes.detect{ |r| r[0].match(router_route.path) }
     end
+
+    # System tests ensure that routes get applied to the sinatra app correctly.
 
   end
 

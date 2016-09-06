@@ -28,8 +28,8 @@ module Deas
         set :dump_errors,      server_config.dump_errors
         set :method_override,  server_config.method_override
         set :reload_templates, server_config.reload_templates
-        set :sessions,         server_config.sessions
         set :static,           server_config.static_files
+        set :sessions,         false
 
         # TODO: sucks to have to do this but b/c of Rack there is no better way
         # to make the server data available to middleware.  We should remove this
@@ -57,9 +57,17 @@ module Deas
 
         # routes
         server_config.routes.each do |route|
-          # TODO: `self` is the sinatra_call; eventually stop sending it
-          # (part of phasing out Sinatra)
-          send(route.method, route.path){ route.run(server_data, self) }
+          send(route.method, route.path) do
+            route.run(
+              server_data,
+              RequestData.new({
+                :route_path => route.path,
+                :request    => request,
+                :response   => response,
+                :params     => params
+              })
+            )
+          end
         end
 
         # error handling
