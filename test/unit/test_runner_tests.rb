@@ -49,7 +49,7 @@ class Deas::TestRunner
     subject{ @runner }
 
     should have_readers :content_type_args
-    should have_imeths :halted?, :run
+    should have_imeths :splat, :halted?, :run
 
     should "raise an invalid error when passed a non view handler" do
       assert_raises(Deas::InvalidViewHandlerError) do
@@ -64,7 +64,10 @@ class Deas::TestRunner
       assert_equal @args[:request],         subject.request
       assert_equal @args[:params],          subject.params
       assert_equal @args[:route_path],      subject.route_path
-      assert_equal @args[:splat],           subject.splat
+    end
+
+    should "know its splat value" do
+      assert_equal @args[:splat], subject.splat
     end
 
     should "call to normalize its params" do
