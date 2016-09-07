@@ -15,6 +15,7 @@ class Deas::ErrorHandler
       @handler_class    = Factory.string
       @handler          = Factory.string
       @params           = Factory.string
+      @route_path       = Factory.string
 
       @context_hash = {
         :server_data   => @server_data,
@@ -23,6 +24,7 @@ class Deas::ErrorHandler
         :handler_class => @handler_class,
         :handler       => @handler,
         :params        => @params,
+        :route_path    => @route_path
       }
 
       @handler_class = Deas::ErrorHandler
@@ -113,7 +115,8 @@ class Deas::ErrorHandler
     subject{ @context }
 
     should have_readers :server_data
-    should have_readers :request, :response, :handler_class, :handler, :params
+    should have_readers :request, :response, :handler_class, :handler
+    should have_readers :params, :route_path
 
     should "know its attributes" do
       assert_equal @context_hash[:server_data],   subject.server_data
@@ -122,6 +125,7 @@ class Deas::ErrorHandler
       assert_equal @context_hash[:handler_class], subject.handler_class
       assert_equal @context_hash[:handler],       subject.handler
       assert_equal @context_hash[:params],        subject.params
+      assert_equal @context_hash[:route_path],    subject.route_path
     end
 
     should "know if it equals another context" do

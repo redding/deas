@@ -35,7 +35,8 @@ module Deas
     class Context
 
       attr_reader :server_data
-      attr_reader :request, :response, :handler_class, :handler, :params
+      attr_reader :request, :response, :handler_class, :handler
+      attr_reader :params, :route_path
 
       def initialize(args)
         @server_data   = args[:server_data]
@@ -44,6 +45,7 @@ module Deas
         @handler_class = args[:handler_class]
         @handler       = args[:handler]
         @params        = args[:params]
+        @route_path    = args[:route_path]
       end
 
       def ==(other)
@@ -53,7 +55,8 @@ module Deas
           self.request       == other.request &&
           self.response      == other.response &&
           self.handler       == other.handler &&
-          self.params        == other.params
+          self.params        == other.params &&
+          self.route_path    == other.route_path
         else
           super
         end

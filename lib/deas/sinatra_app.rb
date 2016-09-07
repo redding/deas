@@ -76,10 +76,10 @@ module Deas
               route.run(
                 server_data,
                 RequestData.new({
-                  :route_path => route.path,
                   :request    => request,
                   :response   => response,
-                  :params     => params
+                  :params     => params,
+                  :route_path => route.path
                 })
               )
             rescue *STANDARD_ERROR_CLASSES => err
@@ -92,6 +92,7 @@ module Deas
                 :handler_class => request.env['deas.handler_class'],
                 :handler       => request.env['deas.handler'],
                 :params        => request.env['deas.params'],
+                :route_path    => request.env['deas.route_path']
               })
             end
           end
