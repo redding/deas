@@ -14,7 +14,7 @@ class DeasTestServer
     case exception
     when Deas::NotFound
       [404, "Couldn't be found"]
-    when Exception
+    when *Deas::SinatraApp::STANDARD_ERROR_CLASSES
       [500, "Oops, something went wrong"]
     end
   end
@@ -157,7 +157,7 @@ class ErrorHandler
   include Deas::ViewHandler
 
   def run!
-    raise 'test'
+    raise Deas::SinatraApp::STANDARD_ERROR_CLASSES.sample, 'sinatra app standard error'
   end
 
 end

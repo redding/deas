@@ -160,7 +160,7 @@ module Deas
 
       assert_equal 500, last_response.status
       assert_equal "text/plain", last_response.headers['Content-Type']
-      assert_match "RuntimeError: test", last_response.body
+      assert_match "sinatra app standard error", last_response.body
     end
 
   end
