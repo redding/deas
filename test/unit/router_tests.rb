@@ -370,11 +370,35 @@ class Deas::Router
       assert_equal [404, {}, body], handler.halt_args
     end
 
+    should "complain if adding a route with invalid splats in its path" do
+      [ "/something/*/other/*",
+        "/something/*/other",
+        "/something/*/",
+        "/*/something",
+      ].each do |path|
+        assert_raises ArgumentError do
+          router = @router_class.new
+          router.route(:get, path)
+          router.apply_definitions!
+        end
+      end
+
+      [ "/something/*",
+        "/*"
+      ].each do |path|
+        assert_nothing_raised do
+          router = @router_class.new
+          router.route(:get, path)
+          router.apply_definitions!
+        end
+      end
+    end
+
   end
 
   class NamedUrlTests < InitTests
     setup do
-      @router.url('get_info', '/info/:for')
+      @router.url(:get_info, '/info/:for')
     end
 
     should "define a url given a name and a path" do
@@ -388,38 +412,23 @@ class Deas::Router
     end
 
     should "define a url with a custom escape query value proc" do
-      name = Factory.string
+      name = Factory.string.to_sym
       escape_proc = proc{ Factory.string }
       @router.url(name, Factory.path, :escape_query_value => escape_proc)
 
-      url = subject.urls[name.to_sym]
+      url = subject.urls[name]
       assert_equal escape_proc, url.escape_query_value_proc
+    end
+
+    should "complain if defining a url with a non-symbol name" do
+      assert_raises ArgumentError do
+        subject.url('get_info', '/info')
+      end
     end
 
     should "complain if defining a url with a non-string path" do
       assert_raises ArgumentError do
         subject.url(:get_info, /^\/info/)
-      end
-    end
-
-    should "complain if defining a url with invalid splats" do
-      assert_raises ArgumentError do
-        subject.url(:get_info, "/something/*/other/*")
-      end
-      assert_raises ArgumentError do
-        subject.url(:get_info, "/something/*/other")
-      end
-      assert_raises ArgumentError do
-        subject.url(:get_info, "/something/*/")
-      end
-      assert_raises ArgumentError do
-        subject.url(:get_info, "/*/something")
-      end
-      assert_nothing_raised do
-        subject.url(:get_info, "/something/*")
-      end
-      assert_nothing_raised do
-        subject.url(:get_info, "/*")
       end
     end
 
@@ -510,7 +519,7 @@ class Deas::Router
       url = Factory.url
       subject.base_url url
       path = Factory.path
-      subject.url('base_get_info', path)
+      subject.url(:base_get_info, path)
 
       exp_path = subject.prepend_base_url(path)
       assert_equal exp_path, subject.url_for(:base_get_info)

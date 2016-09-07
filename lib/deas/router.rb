@@ -43,15 +43,15 @@ module Deas
     end
 
     def url(name, path, options = nil)
+      if !name.kind_of?(::Symbol)
+        raise ArgumentError, "invalid name `#{name.inspect}` - "\
+                             "named urls must be defined with Symbol names"
+      end
       if !path.kind_of?(::String)
         raise ArgumentError, "invalid path `#{path.inspect}` - "\
                              "named urls must be defined with String paths"
       end
-      if path =~ /\*(?!$)/ # splat not at end of path
-        raise ArgumentError, "invalid path `#{path.inspect}` - "\
-                             "named urls can only have a single splat at the end of the path"
-      end
-      add_url(name.to_sym, path, options || {})
+      add_url(name, path, options || {})
     end
 
     def url_for(name, *args)
@@ -179,6 +179,10 @@ module Deas
     end
 
     def add_route(http_method, path, proxies)
+      if path =~ /\*(?!$)/ # splat not at end of path
+        raise ArgumentError, "invalid path `#{path.inspect}` - "\
+                             "routes can only have a single splat at the end of their path"
+      end
       proxies = HandlerProxies.new(proxies, self.default_request_type_name)
       require 'deas/route'
       Deas::Route.new(http_method, path, proxies).tap{ |r| self.routes.push(r) }
