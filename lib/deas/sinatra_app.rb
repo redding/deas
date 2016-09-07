@@ -7,6 +7,20 @@ module Deas
 
   module SinatraApp
 
+    DEFAULT_ERROR_RESPONSE_STATUS = 500.freeze
+
+    # these are standard error classes that we rescue, handle and don't reraise
+    # in the rack app, this keeps the app from shutting down unexpectedly;
+    # `LoadError`, `NotImplementedError` and `Timeout::Error` are common non
+    # `StandardError` exceptions that should be treated like a `StandardError`
+    # so we don't want one of these to shutdown the app
+    STANDARD_ERROR_CLASSES = [
+      StandardError,
+      LoadError,
+      NotImplementedError,
+      Timeout::Error
+    ].freeze
+
     def self.new(server_config)
       # This is generic server initialization stuff.  Eventually do this in the
       # server's initialization logic more like Sanford does.
@@ -58,15 +72,28 @@ module Deas
         # routes
         server_config.routes.each do |route|
           send(route.method, route.path) do
-            route.run(
-              server_data,
-              RequestData.new({
-                :route_path => route.path,
-                :request    => request,
-                :response   => response,
-                :params     => params
+            begin
+              route.run(
+                server_data,
+                RequestData.new({
+                  :route_path => route.path,
+                  :request    => request,
+                  :response   => response,
+                  :params     => params
+                })
+              )
+            rescue *STANDARD_ERROR_CLASSES => err
+              request.env['deas.error'] = err
+              response.status = DEFAULT_ERROR_RESPONSE_STATUS
+              ErrorHandler.run(request.env['deas.error'], {
+                :server_data   => server_data,
+                :request       => request,
+                :response      => response,
+                :handler_class => request.env['deas.handler_class'],
+                :handler       => request.env['deas.handler'],
+                :params        => request.env['deas.params'],
               })
-            )
+            end
           end
         end
 
@@ -82,20 +109,6 @@ module Deas
             else
               env['sinatra.error']
             end
-            ErrorHandler.run(env['deas.error'], {
-              :server_data   => server_data,
-              :request       => self.request,
-              :response      => self.response,
-              :handler_class => self.request.env['deas.handler_class'],
-              :handler       => self.request.env['deas.handler'],
-              :params        => self.request.env['deas.params'],
-            })
-          end
-        end
-        error do
-          # `self` is the sinatra call in this context
-          if env['sinatra.error']
-            env['deas.error'] = env['sinatra.error']
             ErrorHandler.run(env['deas.error'], {
               :server_data   => server_data,
               :request       => self.request,

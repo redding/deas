@@ -14,6 +14,23 @@ module Deas::SinatraApp
 
   class UnitTests < Assert::Context
     desc "Deas::SinatraApp"
+    subject{ Deas::SinatraApp }
+
+    should have_imeths :new
+
+    should "know its default error response status" do
+      assert_equal 500, subject::DEFAULT_ERROR_RESPONSE_STATUS
+    end
+
+    should "know its standard error classes" do
+      exp = [StandardError, LoadError, NotImplementedError, Timeout::Error]
+      assert_equal exp, subject::STANDARD_ERROR_CLASSES
+    end
+
+  end
+
+  class InitTests < UnitTests
+    desc "when init"
     setup do
       @router = Deas::Router.new
       @router.get('/something', 'EmptyViewHandler')
