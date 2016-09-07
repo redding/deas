@@ -65,7 +65,6 @@ module Deas
 
       # request
       def request; @deas_runner.request; end
-      def session; @deas_runner.session; end
       def params;  @deas_runner.params;  end
       def splat;   @deas_runner.splat;   end
 
@@ -131,7 +130,6 @@ module Deas
       def test_runner(handler_class, args = nil)
         args ||= {}
         args[:request] ||= Rack::Request.new({})
-        args[:session] ||= args[:request].session
         TestRunner.new(handler_class, args)
       end
 

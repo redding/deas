@@ -1,6 +1,7 @@
 require 'ostruct'
 
 class FakeRequest < Struct.new(:http_method, :path, :params, :session, :env)
+
   alias :request_method :http_method
 
   attr_reader :logging_msgs

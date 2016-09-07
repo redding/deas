@@ -1,4 +1,5 @@
 require 'test/support/fake_request'
+require 'test/support/fake_response'
 
 class FakeSinatraCall
 
@@ -67,15 +68,4 @@ class FakeSinatraCall
   end
   SendFileArgs = Struct.new(:file_path, :options, :block_call_result)
 
-end
-
-class FakeResponse < Struct.new(:status, :headers, :body)
-  def initialize(args = nil)
-    args ||= {}
-    super(*[
-      args[:status]  || Factory.integer,
-      args[:headers] || {},
-      args[:body]    || [Factory.text]
-    ])
-  end
 end
