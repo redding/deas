@@ -205,9 +205,11 @@ module Deas::Logging
     desc "when init"
     setup do
       @params = { Factory.string => Factory.string }
+      @splat  = Factory.string
       @handler_class = TestHandler
       @env.merge!({
         'deas.params'        => @params,
+        'deas.splat'         => @splat,
         'deas.handler_class' => @handler_class
       })
 
@@ -237,6 +239,7 @@ module Deas::Logging
         'method'  => @env['REQUEST_METHOD'],
         'path'    => @env['PATH_INFO'],
         'params'  => @env['deas.params'],
+        'splat'   => @env['deas.splat'],
         'time'    => @env['deas.time_taken'],
         'status'  => @resp_status,
         'handler' => @handler_class.name,
@@ -253,6 +256,7 @@ module Deas::Logging
         'method'  => @env['REQUEST_METHOD'],
         'path'    => @env['PATH_INFO'],
         'params'  => @env['deas.params'],
+        'splat'   => @env['deas.splat'],
         'time'    => @env['deas.time_taken'],
         'status'  => @resp_status,
         'redir'   => @resp_headers['Location']
@@ -268,6 +272,7 @@ module Deas::Logging
         'method'  => @env['REQUEST_METHOD'],
         'path'    => @env['PATH_INFO'],
         'params'  => @env['deas.params'],
+        'splat'   => @env['deas.splat'],
         'time'    => @env['deas.time_taken'],
         'status'  => @resp_status,
         'handler' => @handler_class.name,
@@ -282,7 +287,7 @@ module Deas::Logging
     subject{ Deas::SummaryLine }
 
     should "output its attributes in a specific order" do
-      assert_equal %w{time status method path handler params redir}, subject.keys
+      assert_equal %w{time status method path handler params splat redir}, subject.keys
     end
 
     should "output its attributes in a single line" do
@@ -293,6 +298,7 @@ module Deas::Logging
         'path'    => 'pth',
         'handler' => 'h',
         'params'  => 'p',
+        'splat'   => 'spl',
         'redir'   => 'r'
       }
       exp_line = "time=\"t\" "\
@@ -301,6 +307,7 @@ module Deas::Logging
                  "path=\"pth\" "\
                  "handler=\"h\" "\
                  "params=\"p\" "\
+                 "splat=\"spl\" "\
                  "redir=\"r\""
       assert_equal exp_line, subject.new(line_attrs)
     end
