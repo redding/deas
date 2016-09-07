@@ -232,11 +232,6 @@ module Deas::ViewHandler
       assert_equal @runner.request, subject.instance_eval{ request }
     end
 
-    should "call to the runner for its session" do
-      stub_runner_with_something_for(:session)
-      assert_equal @runner.session, subject.instance_eval{ session }
-    end
-
     should "call to the runner for its params" do
       stub_runner_with_something_for(:params)
       assert_equal @runner.params, subject.instance_eval{ params }
@@ -391,8 +386,7 @@ module Deas::ViewHandler
       runner  = subject.test_runner(@handler_class)
 
       assert_kind_of ::Deas::TestRunner, runner
-      assert_kind_of Rack::Request,  runner.request
-      assert_equal runner.request.session, runner.session
+      assert_kind_of ::Rack::Request,    runner.request
     end
 
     should "return an initialized handler instance" do

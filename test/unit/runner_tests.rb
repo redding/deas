@@ -45,7 +45,7 @@ class Deas::Runner
 
     should have_readers :handler_class, :handler
     should have_readers :logger, :router, :template_source
-    should have_readers :request, :session, :params, :splat
+    should have_readers :request, :params, :route_path, :splat
     should have_imeths :run, :to_rack
     should have_imeths :status, :headers, :body, :content_type
     should have_imeths :halt, :redirect, :send_file
@@ -63,20 +63,22 @@ class Deas::Runner
       assert_kind_of Deas::NullTemplateSource, runner.template_source
 
       assert_nil runner.request
-      assert_nil runner.session
 
-      assert_equal({}, runner.params)
+      assert_equal Hash.new, runner.params
+      assert_equal '',       runner.route_path
+
+      assert_nil runner.splat
     end
 
     should "know its attrs" do
       args = {
-        :logger          => 'a-logger',
-        :router          => 'a-router',
-        :template_source => 'a-source',
-        :request         => 'a-request',
-        :session         => 'a-session',
-        :params          => {},
-        :splat           => 'a-splat'
+        :logger          => Factory.string,
+        :router          => Factory.string,
+        :template_source => Factory.string,
+        :request         => Factory.request,
+        :params          => { Factory.string => Factory.string },
+        :route_path      => Factory.string,
+        :splat           => Factory.string
       }
 
       runner = @runner_class.new(@handler_class, args)
@@ -85,8 +87,8 @@ class Deas::Runner
       assert_equal args[:router],          runner.router
       assert_equal args[:template_source], runner.template_source
       assert_equal args[:request],         runner.request
-      assert_equal args[:session],         runner.session
       assert_equal args[:params],          runner.params
+      assert_equal args[:route_path],      runner.route_path
       assert_equal args[:splat],           runner.splat
     end
 

@@ -27,7 +27,7 @@ module Deas::Server
     should have_imeths :template_source, :logger, :router, :url_for
 
     should have_imeths :dump_errors, :method_override, :reload_templates
-    should have_imeths :sessions, :show_exceptions, :static_files
+    should have_imeths :show_exceptions, :static_files
     should have_imeths :verbose_logging
 
     should "use much-plugin" do
@@ -96,10 +96,6 @@ module Deas::Server
       exp = Factory.boolean
       subject.reload_templates exp
       assert_equal exp, config.reload_templates
-
-      exp = Factory.boolean
-      subject.sessions exp
-      assert_equal exp, config.sessions
 
       exp = Factory.boolean
       subject.show_exceptions exp
@@ -173,7 +169,7 @@ module Deas::Server
     should have_accessors :init_procs, :error_procs, :template_source, :logger, :router
 
     should have_accessors :dump_errors, :method_override, :reload_templates
-    should have_accessors :sessions, :show_exceptions, :static_files
+    should have_accessors :show_exceptions, :static_files
     should have_accessors :verbose_logging
 
     should have_imeths :views_root, :public_root, :urls, :routes
@@ -217,7 +213,6 @@ module Deas::Server
       assert_equal false, subject.dump_errors
       assert_equal true,  subject.method_override
       assert_equal false, subject.reload_templates
-      assert_equal false, subject.sessions
       assert_equal false, subject.show_exceptions
       assert_equal true,  subject.static_files
       assert_equal true,  subject.verbose_logging

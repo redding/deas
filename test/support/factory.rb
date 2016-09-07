@@ -1,9 +1,11 @@
 require 'assert/factory'
 require 'deas/logger'
+require 'deas/request_data'
 require 'deas/router'
 require 'deas/server_data'
 require 'deas/template_source'
 require 'test/support/fake_request'
+require 'test/support/fake_response'
 require 'test/support/fake_sinatra_call'
 
 module Factory
@@ -28,6 +30,20 @@ module Factory
 
   def self.request(args = nil)
     FakeRequest.new(args)
+  end
+
+  def self.response(args = nil)
+    FakeResponse.new(args)
+  end
+
+  def self.request_data(args = nil)
+    args ||= {}
+    Deas::RequestData.new({
+      :route_path => args[:route_path] || Factory.string,
+      :request    => args[:request]    || Factory.request,
+      :response   => args[:response]   || Factory.response,
+      :params     => args[:params]     || { Factory.string => Factory.string }
+    })
   end
 
   def self.sinatra_call(settings = nil)

@@ -46,6 +46,10 @@ class DeasTestServer
     redirect('/:prefix/redirect'){ "/#{params['prefix']}/somewhere" }
   end
 
+  use Rack::Session::Cookie, :key          => 'my.session',
+                             :expire_after => Factory.integer,
+                             :secret       => Factory.string
+
 end
 
 class DeasDevServer
@@ -171,7 +175,7 @@ class SetSessionHandler
   include Deas::ViewHandler
 
   def run!
-    session[:secret] = 'session_secret'
+    request.session[:secret] = 'session_secret'
     redirect '/session'
   end
 
@@ -181,7 +185,7 @@ class UseSessionHandler
   include Deas::ViewHandler
 
   def run!
-    body session[:secret]
+    body request.session[:secret]
   end
 
 end
@@ -194,7 +198,6 @@ class HandlerTestsHandler
     set_data('logger_class_name'){ logger.class.name }
     set_data('request_method'){ request.request_method.to_s }
     set_data('params_a_param'){ params['a-param'] }
-    set_data('session_inspect'){ session.inspect }
   end
 
   def set_data(a, &block)
