@@ -8,13 +8,13 @@ module Deas
     # decouple the rack app from the handlers (we can use any rack app as long
     # as they provide this data).
 
-    attr_reader :route_path, :request, :response, :params
+    attr_reader :request, :response, :params, :route_path
 
     def initialize(args)
-      @route_path = args[:route_path]
       @request    = args[:request]
       @response   = args[:response]
       @params     = args[:params]
+      @route_path = args[:route_path]
     end
 
   end

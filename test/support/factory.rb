@@ -39,10 +39,10 @@ module Factory
   def self.request_data(args = nil)
     args ||= {}
     Deas::RequestData.new({
-      :route_path => args[:route_path] || Factory.string,
       :request    => args[:request]    || Factory.request,
       :response   => args[:response]   || Factory.response,
-      :params     => args[:params]     || { Factory.string => Factory.string }
+      :params     => args[:params]     || { Factory.string => Factory.string },
+      :route_path => args[:route_path] || Factory.string
     })
   end
 
