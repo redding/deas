@@ -12,9 +12,10 @@ class Deas::ErrorHandler
       @server_data      = Factory.server_data(:error_procs => @error_proc_spies)
       @request          = Factory.string
       @response         = Factory.string
-      @handler_class    = Factory.string
+      @handler_class    = Deas::ErrorHandler
       @handler          = Factory.string
       @params           = Factory.string
+      @splat            = Factory.string
       @route_path       = Factory.string
 
       @context_hash = {
@@ -24,10 +25,9 @@ class Deas::ErrorHandler
         :handler_class => @handler_class,
         :handler       => @handler,
         :params        => @params,
+        :splat         => @splat,
         :route_path    => @route_path
       }
-
-      @handler_class = Deas::ErrorHandler
     end
     subject{ @handler_class }
 
@@ -116,7 +116,7 @@ class Deas::ErrorHandler
 
     should have_readers :server_data
     should have_readers :request, :response, :handler_class, :handler
-    should have_readers :params, :route_path
+    should have_readers :params, :splat, :route_path
 
     should "know its attributes" do
       assert_equal @context_hash[:server_data],   subject.server_data
@@ -125,6 +125,7 @@ class Deas::ErrorHandler
       assert_equal @context_hash[:handler_class], subject.handler_class
       assert_equal @context_hash[:handler],       subject.handler
       assert_equal @context_hash[:params],        subject.params
+      assert_equal @context_hash[:splat],         subject.splat
       assert_equal @context_hash[:route_path],    subject.route_path
     end
 
@@ -132,7 +133,16 @@ class Deas::ErrorHandler
       exp = Context.new(@context_hash)
       assert_equal exp, subject
 
-      exp = Context.new({})
+      exp = Context.new({
+        :server_data   => Factory.server_data,
+        :request       => Factory.string,
+        :response      => Factory.string,
+        :handler_class => Factory.string,
+        :handler       => Factory.string,
+        :params        => Factory.string,
+        :splat         => Factory.string,
+        :route_path    => Factory.string
+      })
       assert_not_equal exp, subject
     end
 

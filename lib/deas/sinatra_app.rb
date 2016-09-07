@@ -92,6 +92,7 @@ module Deas
                 :handler_class => request.env['deas.handler_class'],
                 :handler       => request.env['deas.handler'],
                 :params        => request.env['deas.params'],
+                :splat         => request.env['deas.splat'],
                 :route_path    => request.env['deas.route_path']
               })
             end
@@ -112,11 +113,13 @@ module Deas
             end
             ErrorHandler.run(env['deas.error'], {
               :server_data   => server_data,
-              :request       => self.request,
-              :response      => self.response,
-              :handler_class => self.request.env['deas.handler_class'],
-              :handler       => self.request.env['deas.handler'],
-              :params        => self.request.env['deas.params'],
+              :request       => request,
+              :response      => response,
+              :handler_class => request.env['deas.handler_class'],
+              :handler       => request.env['deas.handler'],
+              :params        => request.env['deas.params'],
+              :splat         => request.env['deas.splat'],
+              :route_path    => request.env['deas.route_path']
             })
           end
         end

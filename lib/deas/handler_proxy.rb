@@ -49,13 +49,14 @@ module Deas
         env['deas.handler_class'] = self.handler_class
         env['deas.handler']       = runner.handler
         env['deas.params']        = runner.params
-        # TODO: add runner.splat as deas.splat env value
+        env['deas.splat']         = runner.splat
         env['deas.route_path']    = runner.route_path
 
         # this handles the verbose logging (it is a no-op if summary logging)
         env['deas.logging'].call "  Handler: #{self.handler_class.name}"
         env['deas.logging'].call "  Params:  #{runner.params.inspect}"
         env['deas.logging'].call "  Splat:   #{runner.splat.inspect}" if !runner.splat.nil?
+        env['deas.logging'].call "  Route:   #{runner.route_path.inspect}"
       end
 
       runner.run

@@ -102,6 +102,7 @@ module Deas
         'method'  => request.request_method,
         'path'    => request.path,
         'params'  => env['deas.params'],
+        'splat'   => env['deas.splat'],
         'time'    => env['deas.time_taken'],
         'status'  => status
       }
@@ -119,7 +120,7 @@ module Deas
 
   module SummaryLine
     def self.keys
-      %w{time status method path handler params redir}
+      %w{time status method path handler params splat redir}
     end
     def self.new(line_attrs)
       self.keys.select{ |k| line_attrs.key?(k) }.

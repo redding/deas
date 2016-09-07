@@ -94,6 +94,9 @@ class Deas::HandlerProxy
       exp = @runner_spy.params
       assert_equal exp, @request_data.request.env['deas.params']
 
+      exp = @runner_spy.splat
+      assert_equal exp, @request_data.request.env['deas.splat']
+
       exp = @runner_spy.route_path
       assert_equal exp, @request_data.request.env['deas.route_path']
     end
@@ -102,7 +105,8 @@ class Deas::HandlerProxy
       exp_msgs = [
         "  Handler: #{subject.handler_class.name}",
         "  Params:  #{@runner_spy.params.inspect}",
-        "  Splat:   #{@runner_spy.splat.inspect}"
+        "  Splat:   #{@runner_spy.splat.inspect}",
+        "  Route:   #{@runner_spy.route_path.inspect}"
       ]
       assert_equal exp_msgs, @request_data.request.logging_msgs
     end
@@ -114,7 +118,7 @@ class Deas::HandlerProxy
     attr_reader :run_called
     attr_reader :handler_class, :handler, :args
     attr_reader :logger, :router, :template_source
-    attr_reader :request, :params, :route_path, :splat
+    attr_reader :request, :params, :splat, :route_path
 
     def initialize
       @run_called = false
@@ -130,8 +134,8 @@ class Deas::HandlerProxy
       @template_source = args[:template_source]
       @request         = args[:request]
       @params          = args[:params]
-      @route_path      = args[:route_path]
       @splat           = args[:splat]
+      @route_path      = args[:route_path]
     end
 
     def run
