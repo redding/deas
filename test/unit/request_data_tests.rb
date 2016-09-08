@@ -11,14 +11,14 @@ class Deas::RequestData
       @params     = Factory.string
       @route_path = Factory.string
 
-      @server_data = Deas::RequestData.new({
+      @request_data = Deas::RequestData.new({
         :request    => @request,
         :response   => @response,
         :params     => @params,
         :route_path => @route_path
       })
     end
-    subject{ @server_data }
+    subject{ @request_data }
 
     should have_readers :request, :response, :params, :route_path
 
@@ -37,6 +37,20 @@ class Deas::RequestData
       assert_nil request_data.params
       assert_nil request_data.route_path
     end
+
+    should "know if it is equal to another request data" do
+      request_data = Deas::RequestData.new({
+        :request    => @request,
+        :response   => @response,
+        :params     => @params,
+        :route_path => @route_path
+      })
+      assert_equal request_data, subject
+
+      request_data = Deas::RequestData.new({})
+      assert_not_equal request_data, subject
+    end
+
 
   end
 

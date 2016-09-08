@@ -75,12 +75,7 @@ module Deas::SinatraApp
         :router          => @config.router,
         :template_source => @config.template_source
       })
-      sd = s.deas_server_data
-      assert_instance_of Deas::ServerData, sd
-      assert_instance_of exp.template_source.class, sd.template_source
-      assert_instance_of exp.logger.class, sd.logger
-      assert_equal exp.error_procs, sd.error_procs
-      assert_equal exp.router,      sd.router
+      assert_equal exp, s.deas_server_data
 
       assert_includes "application/json", s.add_charset
     end
