@@ -71,14 +71,6 @@ module Deas
         self.config.default_encoding
       end
 
-      def set(name, value)
-        self.config.settings[name.to_sym] = value
-      end
-
-      def settings
-        self.config.settings
-      end
-
       def template_helpers(*helper_modules)
         helper_modules.each{ |m| self.config.template_helpers << m }
         self.config.template_helpers
@@ -174,7 +166,7 @@ module Deas
       DEFAULT_ENCODING    = 'utf-8'.freeze
 
       attr_accessor :env, :root, :views_path, :public_path, :default_encoding
-      attr_accessor :settings, :template_helpers, :middlewares
+      attr_accessor :template_helpers, :middlewares
       attr_accessor :init_procs, :error_procs, :template_source, :logger, :router
 
       attr_accessor :dump_errors, :method_override, :reload_templates
@@ -187,7 +179,6 @@ module Deas
         @views_path       = DEFAULT_VIEWS_PATH
         @public_path      = DEFAULT_PUBLIC_PATH
         @default_encoding = DEFAULT_ENCODING
-        @settings         = {}
         @template_helpers = []
         @middlewares      = []
         @init_procs       = []
@@ -236,7 +227,7 @@ module Deas
       def validate!
         return @valid if !@valid.nil?  # only need to run this once per config
 
-        # ensure all user and plugin configs/settings are applied
+        # ensure all user and plugin configs are applied
         self.init_procs.each(&:call)
         raise Deas::ServerRootError if self.root.nil?
 

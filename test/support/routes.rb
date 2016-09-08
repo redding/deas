@@ -8,8 +8,6 @@ class DeasTestServer
   logger TEST_LOGGER
   verbose_logging Factory.boolean
 
-  set :a_setting, 'something'
-
   error do |exception, context|
     case exception
     when Deas::NotFound
