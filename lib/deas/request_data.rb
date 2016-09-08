@@ -17,6 +17,17 @@ module Deas
       @route_path = args[:route_path]
     end
 
+    def ==(other_request_data)
+      if other_request_data.kind_of?(RequestData)
+        self.request    == other_request_data.request    &&
+        self.response   == other_request_data.response   &&
+        self.params     == other_request_data.params     &&
+        self.route_path == other_request_data.route_path
+      else
+        super
+      end
+    end
+
   end
 
 end

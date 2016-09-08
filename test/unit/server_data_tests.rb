@@ -30,12 +30,25 @@ class Deas::ServerData
     end
 
     should "default its attributes when they aren't provided" do
-      server_data = Deas::ServerData.new
+      server_data = Deas::ServerData.new({})
 
       assert_equal [], server_data.error_procs
       assert_nil server_data.logger
       assert_nil server_data.router
       assert_nil server_data.template_source
+    end
+
+    should "know if it is equal to another server data" do
+      server_data = Deas::ServerData.new({
+        :error_procs     => @error_procs,
+        :logger          => @logger,
+        :router          => @router,
+        :template_source => @template_source
+      })
+      assert_equal server_data, subject
+
+      server_data = Deas::ServerData.new({})
+      assert_not_equal server_data, subject
     end
 
   end
