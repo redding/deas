@@ -43,7 +43,7 @@ class Deas::Router
     should have_imeths :route, :redirect, :not_found
     should have_imeths :apply_definitions!, :validate!
 
-    should "default its settings" do
+    should "default its attrs" do
       router = @router_class.new
       assert_nil router.view_handler_ns
       assert_nil router.base_url

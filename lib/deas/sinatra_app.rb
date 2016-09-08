@@ -66,7 +66,6 @@ module Deas
         # ["application/javascript", "application/xml", "application/xhtml+xml", /^text\//]
         settings.add_charset << "application/json"
 
-        server_config.settings.each{ |set_args| set *set_args }
         server_config.middlewares.each{ |use_args| use *use_args }
 
         # routes

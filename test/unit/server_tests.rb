@@ -22,7 +22,7 @@ module Deas::Server
 
     should have_imeths :env, :root, :views_path, :views_root
     should have_imeths :public_path, :public_root, :default_encoding
-    should have_imeths :set, :settings, :template_helpers, :template_helper?
+    should have_imeths :template_helpers, :template_helper?
     should have_imeths :use, :middlewares, :init, :init_procs, :error, :error_procs
     should have_imeths :template_source, :logger, :router, :url_for
 
@@ -56,10 +56,6 @@ module Deas::Server
       exp = Factory.string
       subject.default_encoding exp
       assert_equal exp, config.default_encoding
-
-      exp = { Factory.string.to_sym => Factory.string }
-      subject.set exp.keys.first, exp.values.first
-      assert_equal exp, config.settings
 
       exp = ['MyMiddleware', Factory.string]
       subject.use *exp
@@ -113,7 +109,6 @@ module Deas::Server
     should "demeter its config values that aren't directly set" do
       assert_equal subject.config.views_root,  subject.views_root
       assert_equal subject.config.public_root, subject.public_root
-      assert_equal subject.config.settings,    subject.settings
       assert_equal subject.config.middlewares, subject.middlewares
       assert_equal subject.config.init_procs,  subject.init_procs
       assert_equal subject.config.error_procs, subject.error_procs
@@ -165,7 +160,7 @@ module Deas::Server
     subject{ @config }
 
     should have_accessors :env, :root, :views_path, :public_path, :default_encoding
-    should have_accessors :settings, :template_helpers, :middlewares
+    should have_accessors :template_helpers, :middlewares
     should have_accessors :init_procs, :error_procs, :template_source, :logger, :router
 
     should have_accessors :dump_errors, :method_override, :reload_templates
@@ -198,11 +193,10 @@ module Deas::Server
       exp = @config_class::DEFAULT_ENCODING
       assert_equal exp, subject.default_encoding
 
-      assert_equal Hash.new, subject.settings
-      assert_equal [],       subject.template_helpers
-      assert_equal [],       subject.middlewares
-      assert_equal [],       subject.init_procs
-      assert_equal [],       subject.error_procs
+      assert_equal [], subject.template_helpers
+      assert_equal [], subject.middlewares
+      assert_equal [], subject.init_procs
+      assert_equal [], subject.error_procs
 
       assert_instance_of Deas::NullTemplateSource, subject.template_source
       assert_equal subject.root, subject.template_source.path
