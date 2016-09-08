@@ -38,16 +38,20 @@ module Deas
     end
 
     def set_named(path, params)
-      params.inject(path) do |path_string, (name, value)|
-        if path_string.include?(":#{name}")
-          if (v = value.to_s).empty?
-            raise EmptyNamedValueError , "an empty value (`#{value.inspect}`) " \
-                                         "was given for the `#{name}` url param"
+      # Process longer param names first. This ensures that shorter names that
+      # compose longer names won't be set as a part of the longer name.
+      params.keys.sort{ |a, b| b.to_s.size <=> a.to_s.size }.inject(path) do |p, name|
+        if p.include?(":#{name}")
+          if (v = params[name].to_s).empty?
+            raise EmptyNamedValueError , "an empty value, " \
+                                         "`#{params[name].inspect}`, " \
+                                         "was given for the " \
+                                         "`#{name.inspect}` url param"
           end
           params.delete(name)
-          path_string.gsub(":#{name}", v)
+          p.gsub(":#{name}", v)
         else
-          path_string
+          p
         end
       end
     end
