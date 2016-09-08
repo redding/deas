@@ -38,13 +38,10 @@ class Deas::HandlerProxy
 
       Assert.stub(@proxy, :handler_class){ EmptyViewHandler }
 
-      @splat_sym_param    = Factory.string
-      @splat_string_param = Factory.string
-
       @server_data  = Factory.server_data
       @request_data = Factory.request_data(:params => {
-        :splat     => [@splat_sym_param],
-        'splat'    => [@splat_string_param],
+        :splat     => [Factory.string],
+        'splat'    => [Factory.string],
         :captures  => [Factory.string],
         'captures' => [Factory.string]
       })
@@ -66,22 +63,11 @@ class Deas::HandlerProxy
         :template_source => @server_data.template_source,
         :request         => @request_data.request,
         :params          => @request_data.params,
-        :route_path      => @request_data.route_path,
-        :splat           => @splat_sym_param
+        :route_path      => @request_data.route_path
       }
       assert_equal exp_args, @runner_spy.args
 
       assert_true @runner_spy.run_called
-    end
-
-    should "prefer splat sym params over splat string params" do
-      assert_equal @splat_sym_param, @runner_spy.args[:splat]
-
-      @request_data.params['splat'] = [@splat_string_param]
-      proxy = Deas::HandlerProxy.new('EmptyViewHandler')
-      Assert.stub(proxy, :handler_class){ EmptyViewHandler }
-      proxy.run(@server_data, @request_data)
-      assert_equal @splat_string_param, @runner_spy.args[:splat]
     end
 
     should "add data to the request env to make it available to Rack" do
@@ -134,8 +120,11 @@ class Deas::HandlerProxy
       @template_source = args[:template_source]
       @request         = args[:request]
       @params          = args[:params]
-      @splat           = args[:splat]
       @route_path      = args[:route_path]
+
+      # runners parse the splat value from the PATH_INFO and route path. just
+      # use a placeholder value for the spy.
+      @splat = Factory.string
     end
 
     def run

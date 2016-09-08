@@ -77,8 +77,7 @@ class Deas::Runner
         :template_source => Factory.string,
         :request         => Factory.request,
         :params          => { Factory.string => Factory.string },
-        :route_path      => Factory.string,
-        :splat           => Factory.string
+        :route_path      => Factory.string
       }
 
       runner = @runner_class.new(@handler_class, args)
@@ -89,7 +88,60 @@ class Deas::Runner
       assert_equal args[:request],         runner.request
       assert_equal args[:params],          runner.params
       assert_equal args[:route_path],      runner.route_path
-      assert_equal args[:splat],           runner.splat
+    end
+
+    should "know its splat value" do
+      route_path = [
+        '/some/:value/other/:value/*',
+        '/some/:value/*'
+      ].sample
+
+      params      = { 'value' => Factory.string }
+      splat       = Factory.integer(3).times.map{ Factory.string}.join('/')
+      path_info   = route_path.gsub(':value', params['value']).sub('*', splat)
+      request_env = { 'PATH_INFO' => path_info }
+
+      args = {
+        :request    => Factory.request(:env => request_env),
+        :params     => params,
+        :route_path => route_path
+      }
+
+      runner = @runner_class.new(@handler_class, args)
+      assert_equal splat, runner.splat
+    end
+
+    should "not have a splat value if there is no splat in the route path" do
+      route_path  = '/some/:value'
+      params      = { 'value' => Factory.string }
+      path_info   = route_path.gsub(':value', params['value'])
+      request_env = { 'PATH_INFO' => path_info }
+
+      args = {
+        :request    => Factory.request(:env => request_env),
+        :params     => params,
+        :route_path => route_path
+      }
+
+      runner = @runner_class.new(@handler_class, args)
+      assert_nil runner.splat
+    end
+
+    should "complain if it can't parse the splat param" do
+      route_path  = '/some/:value/*'
+      params      = { 'value' => Factory.string }
+      splat       = Factory.integer(3).times.map{ Factory.string}.join('/')
+      path_info   = "/some/#{Factory.string}"
+      request_env = { 'PATH_INFO' => path_info }
+
+      args = {
+        :request    => Factory.request(:env => request_env),
+        :params     => params,
+        :route_path => route_path
+      }
+
+      runner = @runner_class.new(@handler_class, args)
+      assert_raises(SplatParseError){ runner.splat }
     end
 
     should "not implement its run method" do
