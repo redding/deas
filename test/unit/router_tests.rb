@@ -371,12 +371,17 @@ class Deas::Router
     end
 
     should "complain if adding a route with invalid splats in its path" do
-      [ "/something/*/other/*",
+      [ "/something/other*/",
+        "/something/other*",
+        "/something/*other",
+        "/something*/other",
+        "/*something/other",
+        "/something/*/other/*",
         "/something/*/other",
         "/something/*/",
         "/*/something",
       ].each do |path|
-        assert_raises ArgumentError do
+        assert_raises InvalidSplatError do
           router = @router_class.new
           router.route(:get, path)
           router.apply_definitions!

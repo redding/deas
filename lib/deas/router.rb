@@ -179,14 +179,20 @@ module Deas
     end
 
     def add_route(http_method, path, proxies)
-      if path =~ /\*(?!$)/ # splat not at end of path
-        raise ArgumentError, "invalid path `#{path.inspect}` - "\
-                             "routes can only have a single splat at the end of their path"
+      # splat not at end of path OR
+      # at end of path without preceding forward slash
+      if path =~ /\*(?!$)|[^\/]\*/
+        raise InvalidSplatError, "invalid path `#{path.inspect}` - "\
+                                 "routes can only have a single splat and " \
+                                 "it must be the last path segment " \
+                                 "(ie '/something/*')"
       end
       proxies = HandlerProxies.new(proxies, self.default_request_type_name)
       require 'deas/route'
       Deas::Route.new(http_method, path, proxies).tap{ |r| self.routes.push(r) }
     end
+
+    InvalidSplatError = Class.new(ArgumentError)
 
     class HandlerProxies
 
