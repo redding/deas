@@ -60,12 +60,6 @@ module Deas
         # turn off logging b/c Deas handles its own logging logic
         set :logging,          false
 
-        # TODO: rework with `server_config.default_encoding` once we move off of using Sinatra
-        # TODO: could maybe move into a deas-json mixin once off of Sinatra
-        # Add charset to json content type responses - by default only added to these:
-        # ["application/javascript", "application/xml", "application/xhtml+xml", /^text\//]
-        settings.add_charset << "application/json"
-
         server_config.middlewares.each{ |use_args| use *use_args }
 
         # routes
@@ -97,8 +91,6 @@ module Deas
             end
           end
         end
-
-        # error handling
 
         not_found do
           # `self` is the sinatra call in this context

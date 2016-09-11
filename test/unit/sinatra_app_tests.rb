@@ -76,8 +76,6 @@ module Deas::SinatraApp
         :template_source => @config.template_source
       })
       assert_equal exp, s.deas_server_data
-
-      assert_includes "application/json", s.add_charset
     end
 
     should "define Sinatra routes for every route in the configuration" do
