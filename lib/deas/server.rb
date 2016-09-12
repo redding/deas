@@ -31,7 +31,12 @@ module Deas
       # TODO: needed while Deas is powered by Sinatra
       # eventually do an initialize method more like Sanford does
       def new
-        Deas::SinatraApp.new(self.config)
+        begin
+          Deas::SinatraApp.new(self.config)
+        rescue Router::InvalidSplatError => e
+          # reset the exception backtrace to hide Deas internals
+          raise e.class, e.message, caller
+        end
       end
 
       def config
