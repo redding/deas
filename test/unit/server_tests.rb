@@ -20,15 +20,11 @@ module Deas::Server
 
     should have_imeths :new, :config
 
-    should have_imeths :env, :root, :views_path, :views_root
-    should have_imeths :public_path, :public_root, :default_encoding
-    should have_imeths :template_helpers, :template_helper?
-    should have_imeths :use, :middlewares, :init, :init_procs, :error, :error_procs
+    should have_imeths :env, :root
+    should have_imeths :method_override, :show_exceptions, :verbose_logging
+    should have_imeths :use, :middlewares
+    should have_imeths :init, :init_procs, :error, :error_procs
     should have_imeths :template_source, :logger, :router, :url_for
-
-    should have_imeths :dump_errors, :method_override, :reload_templates
-    should have_imeths :show_exceptions, :static_files
-    should have_imeths :verbose_logging
 
     should "use much-plugin" do
       assert_includes MuchPlugin, Deas::Server
@@ -45,17 +41,17 @@ module Deas::Server
       subject.root exp
       assert_equal exp, config.root
 
-      exp = Factory.path
-      subject.views_path exp
-      assert_equal exp, config.views_path
+      exp = Factory.boolean
+      subject.method_override exp
+      assert_equal exp, config.method_override
 
-      exp = Factory.path
-      subject.public_path exp
-      assert_equal exp, config.public_path
+      exp = Factory.boolean
+      subject.show_exceptions exp
+      assert_equal exp, config.show_exceptions
 
-      exp = Factory.string
-      subject.default_encoding exp
-      assert_equal exp, config.default_encoding
+      exp = Factory.boolean
+      subject.verbose_logging exp
+      assert_equal exp, config.verbose_logging
 
       exp = ['MyMiddleware', Factory.string]
       subject.use *exp
@@ -80,43 +76,12 @@ module Deas::Server
       exp = Logger.new(STDOUT)
       subject.logger exp
       assert_equal exp, config.logger
-
-      exp = Factory.boolean
-      subject.dump_errors exp
-      assert_equal exp, config.dump_errors
-
-      exp = Factory.boolean
-      subject.method_override exp
-      assert_equal exp, config.method_override
-
-      exp = Factory.boolean
-      subject.reload_templates exp
-      assert_equal exp, config.reload_templates
-
-      exp = Factory.boolean
-      subject.show_exceptions exp
-      assert_equal exp, config.show_exceptions
-
-      exp = Factory.boolean
-      subject.static_files exp
-      assert_equal exp, config.static_files
-
-      exp = Factory.boolean
-      subject.verbose_logging exp
-      assert_equal exp, config.verbose_logging
     end
 
-    should "demeter its config values that aren't directly set" do
-      assert_equal subject.config.views_root,  subject.views_root
-      assert_equal subject.config.public_root, subject.public_root
+    should "demeter its config values that aren't set directly" do
       assert_equal subject.config.middlewares, subject.middlewares
       assert_equal subject.config.init_procs,  subject.init_procs
       assert_equal subject.config.error_procs, subject.error_procs
-    end
-
-    should "add and query helper modules" do
-      subject.template_helpers(helper_module = Module.new)
-      assert_true subject.template_helper?(helper_module)
     end
 
     should "have a router by default and allow overriding it" do
@@ -159,22 +124,16 @@ module Deas::Server
     end
     subject{ @config }
 
-    should have_accessors :env, :root, :views_path, :public_path, :default_encoding
-    should have_accessors :template_helpers, :middlewares
-    should have_accessors :init_procs, :error_procs, :template_source, :logger, :router
+    should have_accessors :env, :root
+    should have_accessors :method_override, :show_exceptions, :verbose_logging
+    should have_accessors :middlewares, :init_procs, :error_procs
+    should have_accessors :template_source, :logger, :router
 
-    should have_accessors :dump_errors, :method_override, :reload_templates
-    should have_accessors :show_exceptions, :static_files
-    should have_accessors :verbose_logging
-
-    should have_imeths :views_root, :public_root, :urls, :routes
+    should have_imeths :urls, :routes
     should have_imeths :valid?, :validate!
 
-    should "know its default attr values" do
+    should "know its default env" do
       assert_equal 'development', @config_class::DEFAULT_ENV
-      assert_equal 'views',       @config_class::DEFAULT_VIEWS_PATH
-      assert_equal 'public',      @config_class::DEFAULT_PUBLIC_PATH
-      assert_equal 'utf-8',       @config_class::DEFAULT_ENCODING
     end
 
     should "default its attrs" do
@@ -184,16 +143,10 @@ module Deas::Server
       exp = ENV['PWD']
       assert_equal exp, subject.root
 
-      exp = @config_class::DEFAULT_VIEWS_PATH
-      assert_equal exp, subject.views_path
+      assert_equal true,  subject.method_override
+      assert_equal false, subject.show_exceptions
+      assert_equal true,  subject.verbose_logging
 
-      exp = @config_class::DEFAULT_PUBLIC_PATH
-      assert_equal exp, subject.public_path
-
-      exp = @config_class::DEFAULT_ENCODING
-      assert_equal exp, subject.default_encoding
-
-      assert_equal [], subject.template_helpers
       assert_equal [], subject.middlewares
       assert_equal [], subject.init_procs
       assert_equal [], subject.error_procs
@@ -203,21 +156,6 @@ module Deas::Server
 
       assert_instance_of Deas::NullLogger, subject.logger
       assert_instance_of Deas::Router,     subject.router
-
-      assert_equal false, subject.dump_errors
-      assert_equal true,  subject.method_override
-      assert_equal false, subject.reload_templates
-      assert_equal false, subject.show_exceptions
-      assert_equal true,  subject.static_files
-      assert_equal true,  subject.verbose_logging
-    end
-
-    should "know its views root and public root" do
-      exp = File.expand_path(subject.views_path.to_s, subject.root.to_s)
-      assert_equal exp, subject.views_root
-
-      exp = File.expand_path(subject.public_path.to_s, subject.root.to_s)
-      assert_equal exp, subject.public_root
     end
 
     should "demeter its router" do
