@@ -33,17 +33,15 @@ module Deas
       })
 
       Sinatra.new do
-        # built-in settings
-        set :environment,      server_config.env
-        set :root,             server_config.root
-        set :views,            server_config.views_root
-        set :public_folder,    server_config.public_root
-        set :default_encoding, server_config.default_encoding
-        set :dump_errors,      server_config.dump_errors
-        set :method_override,  server_config.method_override
-        set :reload_templates, server_config.reload_templates
-        set :static,           server_config.static_files
-        set :sessions,         false
+        # unifying settings - these are used by Deas so extensions can have a
+        # common way to identify these low-level settings.  Deas does not use
+        # them directly
+        set :environment, server_config.env
+        set :root,        server_config.root
+
+        # TODO: rework this and handle it when the router is reworked.  maybe
+        # turn on by default and have setting to force on/off???
+        set :method_override, server_config.method_override
 
         # TODO: sucks to have to do this but b/c of Rack there is no better way
         # to make the server data available to middleware.  We should remove this
@@ -52,12 +50,26 @@ module Deas
         # Not sure right now, just jotting down notes.
         set :deas_server_data, server_data
 
+        # static settings - Deas doesn't care about these anymore so just
+        # use some intelligent defaults
+        set :views,            server_config.root
+        set :public_folder,    server_config.root
+        set :default_encoding, 'utf-8'
+        set :reload_templates, false
+        set :static,           false
+        set :sessions,         false
+
+        # Turn this off b/c Deas won't auto provide it.  We may add an extension
+        # gem or something??
+        disable :protection
+
         # raise_errors and show_exceptions prevent Deas error handlers from being
         # called and Deas' logging doesn't finish. They should always be false.
         set :raise_errors,     false
         set :show_exceptions,  false
 
-        # turn off logging b/c Deas handles its own logging logic
+        # turn off logging, dump_errors b/c Deas handles its own logging logic
+        set :dump_errors,      false
         set :logging,          false
 
         server_config.middlewares.each{ |use_args| use *use_args }
