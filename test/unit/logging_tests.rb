@@ -7,11 +7,11 @@ module Deas::Logging
     desc "Deas::Logging"
     subject{ Deas::Logging }
 
-    should have_imeths :middleware
+    should have_imeths :middleware_args
 
-    should "return a middleware class given a verbose flag" do
-      assert_equal Deas::VerboseLogging, subject.middleware(true)
-      assert_equal Deas::SummaryLogging, subject.middleware(false)
+    should "return middleware args given a verbose flag" do
+      assert_equal [Deas::VerboseLogging], subject.middleware_args(true)
+      assert_equal [Deas::SummaryLogging], subject.middleware_args(false)
     end
 
   end

@@ -186,11 +186,12 @@ module Deas::Server
       Assert.stub(@router, :validate!){ @router_validate_called = true }
 
       @config = Config.new.tap do |c|
-        c.root             = Factory.path
-        c.show_exceptions  = true
-        c.verbose_logging  = true
-        c.middlewares      = Factory.integer(3).times.map{ [Factory.string] }
-        c.router           = @router
+        c.root            = Factory.path
+        c.method_override = true
+        c.show_exceptions = true
+        c.verbose_logging = true
+        c.middlewares     = Factory.integer(3).times.map{ [Factory.string] }
+        c.router          = @router
       end
 
       @initialized = false
@@ -217,19 +218,26 @@ module Deas::Server
       assert_true @router_validate_called
     end
 
-    should "add the Logging and ShowExceptions middleware to the end" do
+    should "prepend and append middleware based" do
+      assert_true subject.method_override
       assert_true subject.show_exceptions
       assert_true subject.verbose_logging
 
       num_middlewares = subject.middlewares.size
+      assert_not_equal [Rack::MethodOverride], subject.middlewares[0]
       assert_not_equal [Deas::ShowExceptions], subject.middlewares[-2]
       assert_not_equal [Deas::VerboseLogging], subject.middlewares[-1]
 
       subject.validate!
 
-      assert_equal (num_middlewares+2), subject.middlewares.size
+      assert_equal (num_middlewares+3), subject.middlewares.size
+      assert_equal [Rack::MethodOverride], subject.middlewares[0]
       assert_equal [Deas::ShowExceptions], subject.middlewares[-2]
       assert_equal [Deas::VerboseLogging], subject.middlewares[-1]
+
+      assert_raises do
+        subject.middlewares << [Factory.string]
+      end
     end
 
     should "only be able to be validated once" do

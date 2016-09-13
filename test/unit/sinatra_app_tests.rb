@@ -54,9 +54,8 @@ module Deas::SinatraApp
     should "have it's configuration set based on the server config or defaults" do
       s = subject.settings
 
-      assert_equal @config.env,              s.environment
-      assert_equal @config.root,             s.root
-      assert_equal @config.method_override,  s.method_override
+      assert_equal @config.env,  s.environment
+      assert_equal @config.root, s.root
 
       exp = Deas::ServerData.new({
         :error_procs     => @config.error_procs,
@@ -70,8 +69,9 @@ module Deas::SinatraApp
       assert_equal @config.root, s.public_folder
       assert_equal 'utf-8',      s.default_encoding
 
-      assert_false s.static
+      assert_false s.method_override
       assert_false s.reload_templates
+      assert_false s.static
       assert_false s.sessions
       assert_false s.protection
       assert_false s.raise_errors

@@ -39,10 +39,6 @@ module Deas
         set :environment, server_config.env
         set :root,        server_config.root
 
-        # TODO: rework this and handle it when the router is reworked.  maybe
-        # turn on by default and have setting to force on/off???
-        set :method_override, server_config.method_override
-
         # TODO: sucks to have to do this but b/c of Rack there is no better way
         # to make the server data available to middleware.  We should remove this
         # once we remove Sinatra.  Whatever rack app implemenation will needs to
@@ -55,6 +51,7 @@ module Deas
         set :views,            server_config.root
         set :public_folder,    server_config.root
         set :default_encoding, 'utf-8'
+        set :method_override,  false
         set :reload_templates, false
         set :static,           false
         set :sessions,         false

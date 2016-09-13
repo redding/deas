@@ -168,12 +168,19 @@ module Deas
         # validate the router
         self.router.validate!
 
+        # TODO: build final middleware stack when building the rack app, not here
+        # (once Sinatra is removed)
+
+        # prepend the method override middleware first.  This ensures that the
+        # it is run before any other middleware
+        self.middlewares.unshift([Rack::MethodOverride]) if self.method_override
+
         # append the show exceptions and logging middlewares last.  This ensures
         # that the logging and exception showing happens just before the app gets
         # the request and just after the app sends a response.
         self.middlewares << [Deas::ShowExceptions] if self.show_exceptions
-        logging_mw_args = [*Deas::Logging.middleware(self.verbose_logging)]
-        self.middlewares << logging_mw_args
+        self.middlewares << Deas::Logging.middleware_args(self.verbose_logging)
+        self.middlewares.freeze
 
         @valid = true # if it made it this far, its valid!
       end
