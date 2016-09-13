@@ -4,8 +4,8 @@ require 'sinatra/base'
 module Deas
 
   module Logging
-    def self.middleware(verbose)
-      verbose ? VerboseLogging : SummaryLogging
+    def self.middleware_args(verbose)
+      verbose ? [VerboseLogging] : [SummaryLogging]
     end
   end
 
