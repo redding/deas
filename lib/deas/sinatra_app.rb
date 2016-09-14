@@ -1,6 +1,7 @@
 require 'sinatra/base'
 require 'deas/error_handler'
 require 'deas/exceptions'
+require 'deas/request_data'
 require 'deas/server_data'
 
 module Deas
