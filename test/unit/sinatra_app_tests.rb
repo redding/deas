@@ -14,6 +14,23 @@ module Deas::SinatraApp
 
   class UnitTests < Assert::Context
     desc "Deas::SinatraApp"
+    subject{ Deas::SinatraApp }
+
+    should have_imeths :new
+
+    should "know its default error response status" do
+      assert_equal 500, subject::DEFAULT_ERROR_RESPONSE_STATUS
+    end
+
+    should "know its standard error classes" do
+      exp = [StandardError, LoadError, NotImplementedError, Timeout::Error]
+      assert_equal exp, subject::STANDARD_ERROR_CLASSES
+    end
+
+  end
+
+  class InitTests < UnitTests
+    desc "when init"
     setup do
       @router = Deas::Router.new
       @router.get('/something', 'EmptyViewHandler')
@@ -30,27 +47,15 @@ module Deas::SinatraApp
       assert @config.valid?
     end
 
-    should "be a kind of Sinatra::Base" do
+    should "be a kind of Sinatra::Base app" do
       assert_equal Sinatra::Base, subject.superclass
     end
 
-    should "have it's configuration set based on the server config" do
+    should "have it's configuration set based on the server config or defaults" do
       s = subject.settings
 
-      assert_equal @config.env,              s.environment
-      assert_equal @config.root,             s.root
-      assert_equal @config.views_root,       s.views
-      assert_equal @config.public_root,      s.public_folder
-      assert_equal @config.default_encoding, s.default_encoding
-      assert_equal @config.dump_errors,      s.dump_errors
-      assert_equal @config.method_override,  s.method_override
-      assert_equal @config.reload_templates, s.reload_templates
-      assert_equal @config.sessions,         s.sessions
-      assert_equal @config.static_files,     s.static
-
-      assert_equal false, s.raise_errors
-      assert_equal false, s.show_exceptions
-      assert_equal false, s.logging
+      assert_equal @config.env,  s.environment
+      assert_equal @config.root, s.root
 
       exp = Deas::ServerData.new({
         :error_procs     => @config.error_procs,
@@ -58,14 +63,21 @@ module Deas::SinatraApp
         :router          => @config.router,
         :template_source => @config.template_source
       })
-      sd = s.deas_server_data
-      assert_instance_of Deas::ServerData, sd
-      assert_instance_of exp.template_source.class, sd.template_source
-      assert_instance_of exp.logger.class, sd.logger
-      assert_equal exp.error_procs, sd.error_procs
-      assert_equal exp.router,      sd.router
+      assert_equal exp, s.deas_server_data
 
-      assert_includes "application/json", s.add_charset
+      assert_equal @config.root, s.views
+      assert_equal @config.root, s.public_folder
+      assert_equal 'utf-8',      s.default_encoding
+
+      assert_false s.method_override
+      assert_false s.reload_templates
+      assert_false s.static
+      assert_false s.sessions
+      assert_false s.protection
+      assert_false s.raise_errors
+      assert_false s.show_exceptions
+      assert_false s.dump_errors
+      assert_false s.logging
     end
 
     should "define Sinatra routes for every route in the configuration" do
@@ -74,6 +86,8 @@ module Deas::SinatraApp
 
       assert_not_nil sinatra_routes.detect{ |r| r[0].match(router_route.path) }
     end
+
+    # System tests ensure that routes get applied to the sinatra app correctly.
 
   end
 

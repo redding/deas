@@ -27,15 +27,16 @@ module Deas
         :router          => a.delete(:router),
         :template_source => a.delete(:template_source),
         :request         => a.delete(:request),
-        :session         => a.delete(:session),
         :params          => NormalizedParams.new(a.delete(:params) || {}).value,
-        :splat           => a.delete(:splat)
+        :route_path      => a.delete(:route_path)
       })
+      @splat = a.delete(:splat)
       a.each{|key, value| self.handler.send("#{key}=", value) }
 
       catch(:halt){ self.handler.deas_init }
     end
 
+    def splat;   @splat;  end
     def halted?; @halted; end
 
     def run

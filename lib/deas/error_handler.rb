@@ -35,25 +35,30 @@ module Deas
     class Context
 
       attr_reader :server_data
-      attr_reader :request, :response, :handler_class, :handler, :params
+      attr_reader :request, :response, :handler_class, :handler
+      attr_reader :params, :splat, :route_path
 
       def initialize(args)
-        @server_data   = args[:server_data]
-        @request       = args[:request]
-        @response      = args[:response]
-        @handler_class = args[:handler_class]
-        @handler       = args[:handler]
-        @params        = args[:params]
+        @server_data   = args.fetch(:server_data)
+        @request       = args.fetch(:request)
+        @response      = args.fetch(:response)
+        @handler_class = args.fetch(:handler_class)
+        @handler       = args.fetch(:handler)
+        @params        = args.fetch(:params)
+        @splat         = args.fetch(:splat)
+        @route_path    = args.fetch(:route_path)
       end
 
       def ==(other)
         if other.kind_of?(self.class)
-          self.server_data   == other.server_data &&
+          self.server_data   == other.server_data   &&
           self.handler_class == other.handler_class &&
-          self.request       == other.request &&
-          self.response      == other.response &&
-          self.handler       == other.handler &&
-          self.params        == other.params
+          self.request       == other.request       &&
+          self.response      == other.response      &&
+          self.handler       == other.handler       &&
+          self.params        == other.params        &&
+          self.splat         == other.splat         &&
+          self.route_path    == other.route_path
         else
           super
         end

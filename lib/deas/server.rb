@@ -31,7 +31,12 @@ module Deas
       # TODO: needed while Deas is powered by Sinatra
       # eventually do an initialize method more like Sanford does
       def new
-        Deas::SinatraApp.new(self.config)
+        begin
+          Deas::SinatraApp.new(self.config)
+        rescue Router::InvalidSplatError => e
+          # reset the exception backtrace to hide Deas internals
+          raise e.class, e.message, caller
+        end
       end
 
       def config
@@ -48,44 +53,19 @@ module Deas
         self.config.root
       end
 
-      def views_path(value = nil)
-        self.config.views_path = value if !value.nil?
-        self.config.views_path
+      def method_override(value = nil)
+        self.config.method_override = value if !value.nil?
+        self.config.method_override
       end
 
-      def views_root
-        self.config.views_root
+      def show_exceptions(value = nil)
+        self.config.show_exceptions = value if !value.nil?
+        self.config.show_exceptions
       end
 
-      def public_path(value = nil)
-        self.config.public_path = value if !value.nil?
-        self.config.public_path
-      end
-
-      def public_root
-        self.config.public_root
-      end
-
-      def default_encoding(value = nil)
-        self.config.default_encoding = value if !value.nil?
-        self.config.default_encoding
-      end
-
-      def set(name, value)
-        self.config.settings[name.to_sym] = value
-      end
-
-      def settings
-        self.config.settings
-      end
-
-      def template_helpers(*helper_modules)
-        helper_modules.each{ |m| self.config.template_helpers << m }
-        self.config.template_helpers
-      end
-
-      def template_helper?(helper_module)
-        self.config.template_helpers.include?(helper_module)
+      def verbose_logging(value = nil)
+        self.config.verbose_logging = value if !value.nil?
+        self.config.verbose_logging
       end
 
       def use(*args)
@@ -132,92 +112,31 @@ module Deas
 
       def url_for(*args, &block); self.router.url_for(*args, &block); end
 
-      # flags
-
-      def dump_errors(value = nil)
-        self.config.dump_errors = value if !value.nil?
-        self.config.dump_errors
-      end
-
-      def method_override(value = nil)
-        self.config.method_override = value if !value.nil?
-        self.config.method_override
-      end
-
-      def reload_templates(value = nil)
-        self.config.reload_templates = value if !value.nil?
-        self.config.reload_templates
-      end
-
-      def sessions(value = nil)
-        self.config.sessions = value if !value.nil?
-        self.config.sessions
-      end
-
-      def show_exceptions(value = nil)
-        self.config.show_exceptions = value if !value.nil?
-        self.config.show_exceptions
-      end
-
-      def static_files(value = nil)
-        self.config.static_files = value if !value.nil?
-        self.config.static_files
-      end
-
-      def verbose_logging(value = nil)
-        self.config.verbose_logging = value if !value.nil?
-        self.config.verbose_logging
-      end
-
     end
 
     class Config
 
-      DEFAULT_ENV         = 'development'.freeze
-      DEFAULT_VIEWS_PATH  = 'views'.freeze
-      DEFAULT_PUBLIC_PATH = 'public'.freeze
-      DEFAULT_ENCODING    = 'utf-8'.freeze
+      DEFAULT_ENV = 'development'.freeze
 
-      attr_accessor :env, :root, :views_path, :public_path, :default_encoding
-      attr_accessor :settings, :template_helpers, :middlewares
-      attr_accessor :init_procs, :error_procs, :template_source, :logger, :router
-
-      attr_accessor :dump_errors, :method_override, :reload_templates
-      attr_accessor :sessions, :show_exceptions, :static_files
-      attr_accessor :verbose_logging
+      attr_accessor :env, :root
+      attr_accessor :method_override, :show_exceptions, :verbose_logging
+      attr_accessor :middlewares, :init_procs, :error_procs
+      attr_accessor :template_source, :logger, :router
 
       def initialize
-        @env              = DEFAULT_ENV
-        @root             = ENV['PWD']
-        @views_path       = DEFAULT_VIEWS_PATH
-        @public_path      = DEFAULT_PUBLIC_PATH
-        @default_encoding = DEFAULT_ENCODING
-        @settings         = {}
-        @template_helpers = []
-        @middlewares      = []
-        @init_procs       = []
-        @error_procs      = []
-        @template_source  = nil
-        @logger           = Deas::NullLogger.new
-        @router           = Deas::Router.new
-
-        @dump_errors      = false
-        @method_override  = true
-        @reload_templates = false
-        @sessions         = false
-        @show_exceptions  = false
-        @static_files     = true
-        @verbose_logging  = true
+        @env             = DEFAULT_ENV
+        @root            = ENV['PWD']
+        @method_override = true
+        @show_exceptions = false
+        @verbose_logging = true
+        @middlewares     = []
+        @init_procs      = []
+        @error_procs     = []
+        @template_source = nil
+        @logger          = Deas::NullLogger.new
+        @router          = Deas::Router.new
 
         @valid = nil
-      end
-
-      def views_root
-        File.expand_path(@views_path.to_s, @root.to_s)
-      end
-
-      def public_root
-        File.expand_path(@public_path.to_s, @root.to_s)
       end
 
       def template_source
@@ -242,19 +161,26 @@ module Deas
       def validate!
         return @valid if !@valid.nil?  # only need to run this once per config
 
-        # ensure all user and plugin configs/settings are applied
+        # ensure all user and plugin configs are applied
         self.init_procs.each(&:call)
         raise Deas::ServerRootError if self.root.nil?
 
         # validate the router
         self.router.validate!
 
+        # TODO: build final middleware stack when building the rack app, not here
+        # (once Sinatra is removed)
+
+        # prepend the method override middleware first.  This ensures that the
+        # it is run before any other middleware
+        self.middlewares.unshift([Rack::MethodOverride]) if self.method_override
+
         # append the show exceptions and logging middlewares last.  This ensures
         # that the logging and exception showing happens just before the app gets
         # the request and just after the app sends a response.
         self.middlewares << [Deas::ShowExceptions] if self.show_exceptions
-        logging_mw_args = [*Deas::Logging.middleware(self.verbose_logging)]
-        self.middlewares << logging_mw_args
+        self.middlewares << Deas::Logging.middleware_args(self.verbose_logging)
+        self.middlewares.freeze
 
         @valid = true # if it made it this far, its valid!
       end

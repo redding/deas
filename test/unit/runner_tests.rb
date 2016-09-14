@@ -45,7 +45,7 @@ class Deas::Runner
 
     should have_readers :handler_class, :handler
     should have_readers :logger, :router, :template_source
-    should have_readers :request, :session, :params, :splat
+    should have_readers :request, :params, :route_path, :splat
     should have_imeths :run, :to_rack
     should have_imeths :status, :headers, :body, :content_type
     should have_imeths :halt, :redirect, :send_file
@@ -63,20 +63,21 @@ class Deas::Runner
       assert_kind_of Deas::NullTemplateSource, runner.template_source
 
       assert_nil runner.request
-      assert_nil runner.session
 
-      assert_equal({}, runner.params)
+      assert_equal Hash.new, runner.params
+      assert_equal '',       runner.route_path
+
+      assert_nil runner.splat
     end
 
     should "know its attrs" do
       args = {
-        :logger          => 'a-logger',
-        :router          => 'a-router',
-        :template_source => 'a-source',
-        :request         => 'a-request',
-        :session         => 'a-session',
-        :params          => {},
-        :splat           => 'a-splat'
+        :logger          => Factory.string,
+        :router          => Factory.string,
+        :template_source => Factory.string,
+        :request         => Factory.request,
+        :params          => { Factory.string => Factory.string },
+        :route_path      => Factory.string
       }
 
       runner = @runner_class.new(@handler_class, args)
@@ -85,9 +86,62 @@ class Deas::Runner
       assert_equal args[:router],          runner.router
       assert_equal args[:template_source], runner.template_source
       assert_equal args[:request],         runner.request
-      assert_equal args[:session],         runner.session
       assert_equal args[:params],          runner.params
-      assert_equal args[:splat],           runner.splat
+      assert_equal args[:route_path],      runner.route_path
+    end
+
+    should "know its splat value" do
+      route_path = [
+        '/some/:value/other/:value/*',
+        '/some/:value/*'
+      ].sample
+
+      params      = { 'value' => Factory.string }
+      splat       = Factory.integer(3).times.map{ Factory.string}.join('/')
+      path_info   = route_path.gsub(':value', params['value']).sub('*', splat)
+      request_env = { 'PATH_INFO' => path_info }
+
+      args = {
+        :request    => Factory.request(:env => request_env),
+        :params     => params,
+        :route_path => route_path
+      }
+
+      runner = @runner_class.new(@handler_class, args)
+      assert_equal splat, runner.splat
+    end
+
+    should "not have a splat value if there is no splat in the route path" do
+      route_path  = '/some/:value'
+      params      = { 'value' => Factory.string }
+      path_info   = route_path.gsub(':value', params['value'])
+      request_env = { 'PATH_INFO' => path_info }
+
+      args = {
+        :request    => Factory.request(:env => request_env),
+        :params     => params,
+        :route_path => route_path
+      }
+
+      runner = @runner_class.new(@handler_class, args)
+      assert_nil runner.splat
+    end
+
+    should "complain if it can't parse the splat param" do
+      route_path  = '/some/:value/*'
+      params      = { 'value' => Factory.string }
+      splat       = Factory.integer(3).times.map{ Factory.string}.join('/')
+      path_info   = "/some/#{Factory.string}"
+      request_env = { 'PATH_INFO' => path_info }
+
+      args = {
+        :request    => Factory.request(:env => request_env),
+        :params     => params,
+        :route_path => route_path
+      }
+
+      runner = @runner_class.new(@handler_class, args)
+      assert_raises(SplatParseError){ runner.splat }
     end
 
     should "not implement its run method" do

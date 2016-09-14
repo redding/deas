@@ -38,23 +38,19 @@ class Deas::HandlerProxy
 
       Assert.stub(@proxy, :handler_class){ EmptyViewHandler }
 
-      @server_data        = Factory.server_data
-      @fake_sinatra_call  = Factory.sinatra_call
-      @splat_sym_param    = Factory.string
-      @splat_string_param = Factory.string
-      @fake_sinatra_call.params = {
-        :splat     => [@splat_sym_param],
-        'splat'    => [@splat_string_param],
+      @server_data  = Factory.server_data
+      @request_data = Factory.request_data(:params => {
+        :splat     => [Factory.string],
+        'splat'    => [Factory.string],
         :captures  => [Factory.string],
         'captures' => [Factory.string]
-      }
-
-      @proxy.run(@server_data, @fake_sinatra_call)
+      })
+      @proxy.run(@server_data, @request_data)
     end
 
     should "remove any 'splat' or 'captures' params added by Sinatra's router" do
       [:splat, 'splat', :captures, 'captures'].each do |param_name|
-        assert_nil @fake_sinatra_call.params[param_name]
+        assert_nil @request_data.params[param_name]
       end
     end
 
@@ -65,44 +61,40 @@ class Deas::HandlerProxy
         :logger          => @server_data.logger,
         :router          => @server_data.router,
         :template_source => @server_data.template_source,
-        :request         => @fake_sinatra_call.request,
-        :session         => @fake_sinatra_call.session,
-        :params          => @fake_sinatra_call.params,
-        :splat           => @splat_sym_param
+        :request         => @request_data.request,
+        :params          => @request_data.params,
+        :route_path      => @request_data.route_path
       }
       assert_equal exp_args, @runner_spy.args
 
       assert_true @runner_spy.run_called
     end
 
-    should "prefer splat sym params over splat string params" do
-      assert_equal @splat_sym_param, @runner_spy.args[:splat]
-
-      @fake_sinatra_call.params['splat'] = [@splat_string_param]
-      proxy = Deas::HandlerProxy.new('EmptyViewHandler')
-      Assert.stub(proxy, :handler_class){ EmptyViewHandler }
-      proxy.run(@server_data, @fake_sinatra_call)
-      assert_equal @splat_string_param, @runner_spy.args[:splat]
-    end
-
     should "add data to the request env to make it available to Rack" do
       exp = subject.handler_class
-      assert_equal exp, @fake_sinatra_call.request.env['deas.handler_class']
+      assert_equal exp, @request_data.request.env['deas.handler_class']
 
       exp = @runner_spy.handler
-      assert_equal exp, @fake_sinatra_call.request.env['deas.handler']
+      assert_equal exp, @request_data.request.env['deas.handler']
 
       exp = @runner_spy.params
-      assert_equal exp, @fake_sinatra_call.request.env['deas.params']
+      assert_equal exp, @request_data.request.env['deas.params']
+
+      exp = @runner_spy.splat
+      assert_equal exp, @request_data.request.env['deas.splat']
+
+      exp = @runner_spy.route_path
+      assert_equal exp, @request_data.request.env['deas.route_path']
     end
 
     should "log the handler class name and the params" do
       exp_msgs = [
         "  Handler: #{subject.handler_class.name}",
         "  Params:  #{@runner_spy.params.inspect}",
-        "  Splat:   #{@runner_spy.splat.inspect}"
+        "  Splat:   #{@runner_spy.splat.inspect}",
+        "  Route:   #{@runner_spy.route_path.inspect}"
       ]
-      assert_equal exp_msgs, @fake_sinatra_call.request.logging_msgs
+      assert_equal exp_msgs, @request_data.request.logging_msgs
     end
 
   end
@@ -112,7 +104,7 @@ class Deas::HandlerProxy
     attr_reader :run_called
     attr_reader :handler_class, :handler, :args
     attr_reader :logger, :router, :template_source
-    attr_reader :request, :session, :params, :splat
+    attr_reader :request, :params, :splat, :route_path
 
     def initialize
       @run_called = false
@@ -127,9 +119,12 @@ class Deas::HandlerProxy
       @router          = args[:router]
       @template_source = args[:template_source]
       @request         = args[:request]
-      @session         = args[:session]
       @params          = args[:params]
-      @splat           = args[:splat]
+      @route_path      = args[:route_path]
+
+      # runners parse the splat value from the PATH_INFO and route path. just
+      # use a placeholder value for the spy.
+      @splat = Factory.string
     end
 
     def run

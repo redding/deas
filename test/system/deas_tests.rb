@@ -111,14 +111,7 @@ module Deas
   end
 
   class SessionTests < RackTests
-    desc "with sessions enabled"
-    setup do
-      @orig_sessions = @app.settings.sessions
-      @app.set :sessions, true
-    end
-    teardown do
-      @app.set :sessions, @orig_sessions
-    end
+    desc "using sessions"
 
     should "return a 200 response and the session value" do
       post '/session'
@@ -141,8 +134,7 @@ module Deas
       exp = {
         'logger_class_name' => 'Logger',
         'request_method'    => 'GET',
-        'params_a_param'    => 'something',
-        'session_inspect'   => '{}'
+        'params_a_param'    => 'something'
       }
       assert_equal exp.inspect, @data_inspect
     end
@@ -168,7 +160,7 @@ module Deas
 
       assert_equal 500, last_response.status
       assert_equal "text/plain", last_response.headers['Content-Type']
-      assert_match "RuntimeError: test", last_response.body
+      assert_match "sinatra app standard error", last_response.body
     end
 
   end

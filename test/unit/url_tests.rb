@@ -87,6 +87,17 @@ class Deas::Url
       })
     end
 
+    should "apply composed named params" do
+      url = Deas::Url.new(:some_thing, '/:some/:something/:something_else')
+
+      exp_path = '/a/goose/cooked'
+      assert_equal exp_path, url.path_for({
+        'some'           => 'a',
+        :something       => 'goose',
+        'something_else' => 'cooked'
+      })
+    end
+
     should "complain if given an empty named param value" do
       params = {
         'some' => 'a',
@@ -99,8 +110,8 @@ class Deas::Url
       err = assert_raises EmptyNamedValueError do
         subject.path_for(params)
       end
-      exp = "an empty value (`#{empty_param_value.inspect}`) "\
-            "was given for the `#{empty_param_name}` url param"
+      exp = "an empty value, `#{empty_param_value.inspect}`, "\
+            "was given for the `#{empty_param_name.inspect}` url param"
       assert_equal exp, err.message
     end
 

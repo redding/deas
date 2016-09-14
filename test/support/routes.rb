@@ -8,13 +8,11 @@ class DeasTestServer
   logger TEST_LOGGER
   verbose_logging Factory.boolean
 
-  set :a_setting, 'something'
-
   error do |exception, context|
     case exception
     when Deas::NotFound
       [404, "Couldn't be found"]
-    when Exception
+    when *Deas::SinatraApp::STANDARD_ERROR_CLASSES
       [500, "Oops, something went wrong"]
     end
   end
@@ -45,6 +43,10 @@ class DeasTestServer
     redirect '/route_redirect',   '/somewhere'
     redirect('/:prefix/redirect'){ "/#{params['prefix']}/somewhere" }
   end
+
+  use Rack::Session::Cookie, :key          => 'my.session',
+                             :expire_after => Factory.integer,
+                             :secret       => Factory.string
 
 end
 
@@ -153,7 +155,7 @@ class ErrorHandler
   include Deas::ViewHandler
 
   def run!
-    raise 'test'
+    raise Deas::SinatraApp::STANDARD_ERROR_CLASSES.sample, 'sinatra app standard error'
   end
 
 end
@@ -171,7 +173,7 @@ class SetSessionHandler
   include Deas::ViewHandler
 
   def run!
-    session[:secret] = 'session_secret'
+    request.session[:secret] = 'session_secret'
     redirect '/session'
   end
 
@@ -181,7 +183,7 @@ class UseSessionHandler
   include Deas::ViewHandler
 
   def run!
-    body session[:secret]
+    body request.session[:secret]
   end
 
 end
@@ -194,7 +196,6 @@ class HandlerTestsHandler
     set_data('logger_class_name'){ logger.class.name }
     set_data('request_method'){ request.request_method.to_s }
     set_data('params_a_param'){ params['a-param'] }
-    set_data('session_inspect'){ session.inspect }
   end
 
   def set_data(a, &block)
