@@ -12,7 +12,7 @@ class Deas::ErrorHandler
       @server_data      = Factory.server_data(:error_procs => @error_proc_spies)
       @request          = Factory.string
       @response         = Factory.string
-      @handler_class    = Deas::ErrorHandler
+      @handler_class    = Factory.string
       @handler          = Factory.string
       @params           = Factory.string
       @splat            = Factory.string
@@ -28,8 +28,10 @@ class Deas::ErrorHandler
         :splat         => @splat,
         :route_path    => @route_path
       }
+
+      @error_handler_class = Deas::ErrorHandler
     end
-    subject{ @handler_class }
+    subject{ @error_handler_class }
 
     should have_imeths :run
 
@@ -39,7 +41,7 @@ class Deas::ErrorHandler
     desc "when init"
     setup do
       @exception = Factory.exception
-      @error_handler = @handler_class.new(@exception, @context_hash)
+      @error_handler = @error_handler_class.new(@exception, @context_hash)
     end
     subject{ @error_handler }
 
