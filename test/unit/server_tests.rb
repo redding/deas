@@ -158,6 +158,13 @@ module Deas::Server
       assert_instance_of Deas::Router,     subject.router
     end
 
+    should "prefer RACK ENV over its default env" do
+      prev_env = ENV['RACK_ENV']
+      ENV['RACK_ENV'] = Factory.string
+      assert_equal ENV['RACK_ENV'], @config_class.new.env
+      ENV['RACK_ENV'] = prev_env
+    end
+
     should "demeter its router" do
       assert_equal subject.router.urls,   subject.urls
       assert_equal subject.router.routes, subject.routes

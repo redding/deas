@@ -124,7 +124,7 @@ module Deas
       attr_accessor :template_source, :logger, :router
 
       def initialize
-        @env             = DEFAULT_ENV
+        @env             = ENV['RACK_ENV'] || DEFAULT_ENV
         @root            = ENV['PWD']
         @method_override = true
         @show_exceptions = false
