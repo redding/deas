@@ -3,9 +3,11 @@ require 'deas/server'
 
 require 'logger'
 require 'much-plugin'
+require 'sinatra/base'
 require 'deas/exceptions'
 require 'deas/logger'
 require 'deas/router'
+require 'deas/server_data'
 require 'deas/template_source'
 require 'test/support/empty_view_handler'
 
@@ -18,8 +20,7 @@ module Deas::Server
     end
     subject{ @server_class }
 
-    should have_imeths :new, :config
-
+    should have_imeths :config
     should have_imeths :env, :root
     should have_imeths :method_override, :show_exceptions, :verbose_logging
     should have_imeths :use, :middlewares
@@ -28,6 +29,15 @@ module Deas::Server
 
     should "use much-plugin" do
       assert_includes MuchPlugin, Deas::Server
+    end
+
+    should "know its default error response status" do
+      assert_equal 500, subject::DEFAULT_ERROR_RESPONSE_STATUS
+    end
+
+    should "know its standard error classes" do
+      exp = [StandardError, LoadError, NotImplementedError, Timeout::Error]
+      assert_equal exp, subject::STANDARD_ERROR_CLASSES
     end
 
     should "allow setting its config values" do
@@ -113,6 +123,79 @@ module Deas::Server
       assert_equal exp_args, url_for_called_args
       assert_equal exp_proc, url_for_called_proc
     end
+
+  end
+
+  class InitTests < UnitTests
+    desc "when init"
+    setup do
+      skip
+      @router = Deas::Router.new
+      @router.get('/something', 'EmptyViewHandler')
+      @router.validate!
+
+      @server_class.config.router = @router
+
+      @builder_spy = BuilderSpy.new
+      @server = @server_class.new(@builder_spy)
+    end
+    subject{ @server }
+
+    should have_reader :deas_server_data
+
+    should "ensure its config is valid" do
+      assert @config.valid?
+    end
+
+    should "know its server data" do
+      exp = Deas::ServerData.new({
+        :error_procs     => @server_class.config.error_procs,
+        :logger          => @server_class.config.logger,
+        :router          => @server_class.config.router,
+        :template_source => @server_class.config.template_source
+      })
+      assert_equal exp, s.deas_server_data
+    end
+
+    should "setup Sinatra as a middleware"
+
+    # should "have it's configuration set based on the server config or defaults" do
+    #   s = subject.settings
+
+    #   assert_equal @config.env,  s.environment
+    #   assert_equal @config.root, s.root
+
+    #   exp = Deas::ServerData.new({
+    #     :error_procs     => @config.error_procs,
+    #     :logger          => @config.logger,
+    #     :router          => @config.router,
+    #     :template_source => @config.template_source
+    #   })
+    #   assert_equal exp, s.deas_server_data
+
+    #   assert_equal @config.root, s.views
+    #   assert_equal @config.root, s.public_folder
+    #   assert_equal 'utf-8',      s.default_encoding
+
+    #   assert_false s.method_override
+    #   assert_false s.reload_templates
+    #   assert_false s.static
+    #   assert_false s.sessions
+    #   assert_false s.protection
+    #   assert_false s.raise_errors
+    #   assert_false s.show_exceptions
+    #   assert_false s.dump_errors
+    #   assert_false s.logging
+    # end
+
+    # should "define Sinatra routes for every route in the configuration" do
+    #   router_route   = @router.routes.last
+    #   sinatra_routes = subject.routes[router_route.method.to_s.upcase] || []
+
+    #   assert_not_nil sinatra_routes.detect{ |r| r[0].match(router_route.path) }
+    # end
+
+    # System tests ensure that routes get applied to the sinatra app correctly.
 
   end
 

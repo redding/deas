@@ -19,14 +19,14 @@ module Deas
       # captures are not part of Deas' intended behavior and route matching -
       # they are a side-effect of using Sinatra.  remove them so they won't
       # be relied upon in Deas apps.  Remove all of this when Sinatra is removed.
-      request_data.params.delete(:captures)
-      request_data.params.delete('captures')
+      # request_data.params.delete(:captures)
+      # request_data.params.delete('captures')
 
       # splats that Sinatra provides aren't used by Deas - they are a
       # side-effect of using Sinatra.  remove them so they won't be relied upon
       # in Deas apps.  Remove all of this when Sinatra is removed.
-      request_data.params.delete(:splat)
-      request_data.params.delete('splat')
+      # request_data.params.delete(:splat)
+      # request_data.params.delete('splat')
 
       runner = DeasRunner.new(self.handler_class, {
         :logger          => server_data.logger,
@@ -34,6 +34,7 @@ module Deas
         :template_source => server_data.template_source,
         :request         => request_data.request,
         :params          => request_data.params,
+        :splat           => request_data.splat,
         :route_path      => request_data.route_path
       })
 

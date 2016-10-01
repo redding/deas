@@ -115,6 +115,10 @@ module Deas
       true
     end
 
+    def run(rack_request, server_data)
+      route, params, splat = self.routes.router_dispatch(request)
+    end
+
     private
 
     def apply_route(http_method, from_path, *args)

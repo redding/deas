@@ -1,5 +1,4 @@
 require 'benchmark'
-require 'sinatra/base'
 
 module Deas
 

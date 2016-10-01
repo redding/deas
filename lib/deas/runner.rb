@@ -15,7 +15,7 @@ module Deas
 
     attr_reader :handler_class, :handler
     attr_reader :logger, :router, :template_source
-    attr_reader :request, :params, :route_path
+    attr_reader :request, :params, :splat, :route_path
 
     def initialize(handler_class, args = nil)
       @status, @headers, @body = nil, Rack::Utils::HeaderHash.new, nil
@@ -26,15 +26,16 @@ module Deas
       @template_source = args[:template_source] || Deas::NullTemplateSource.new
       @request         = args[:request]
       @params          = args[:params]          || {}
+      @splat           = args[:splat]
       @route_path      = args[:route_path].to_s
 
       @handler_class = handler_class
       @handler = @handler_class.new(self)
     end
 
-    def splat
-      @splat ||= parse_splat_value
-    end
+    # def splat
+    #   @splat ||= parse_splat_value
+    # end
 
     def run
       raise NotImplementedError
@@ -141,45 +142,45 @@ module Deas
       File.join("#{request.env['rack.url_scheme']}://#{request.env['HTTP_HOST']}", url)
     end
 
-    def parse_splat_value
-      return nil if request.nil? || (path_info = request.env['PATH_INFO']).nil?
+    # def parse_splat_value
+    #   return nil if request.nil? || (path_info = request.env['PATH_INFO']).nil?
 
-      regex = splat_value_parse_regex
-      match = regex.match(path_info)
-      if match.nil?
-        raise SplatParseError, "could not parse the splat value: " \
-                               "the PATH_INFO, `#{path_info.inspect}`, " \
-                               "doesn't match " \
-                               "the route, `#{self.route_path.inspect}`, " \
-                               "using the route regex, `#{regex.inspect}`"
-      end
-      match.captures.first
-    end
+    #   regex = splat_value_parse_regex
+    #   match = regex.match(path_info)
+    #   if match.nil?
+    #     raise SplatParseError, "could not parse the splat value: " \
+    #                            "the PATH_INFO, `#{path_info.inspect}`, " \
+    #                            "doesn't match " \
+    #                            "the route, `#{self.route_path.inspect}`, " \
+    #                            "using the route regex, `#{regex.inspect}`"
+    #   end
+    #   match.captures.first
+    # end
 
-    SplatParseError = Class.new(RuntimeError)
+    # SplatParseError = Class.new(RuntimeError)
 
-    def splat_value_parse_regex
-      # `sub` should suffice as only a single trailing splat is allowed. Replace
-      # any splat with a capture placholder so we can extract the splat value.
-      /^#{route_path_with_regex_placeholders.sub('*', '(.+?)')}$/
-    end
+    # def splat_value_parse_regex
+    #   # `sub` should suffice as only a single trailing splat is allowed. Replace
+    #   # any splat with a capture placholder so we can extract the splat value.
+    #   /^#{route_path_with_regex_placeholders.sub('*', '(.+?)')}$/
+    # end
 
-    def route_path_with_regex_placeholders
-      # Replace param values with regex placeholders b/c we don't care what
-      # the values are just that "a param value goes here".  Use gsub in the odd
-      # case a placeholder is used more than once in a route.  This is to help
-      # ensure matching and capturing splats even on nonsense paths.
-      sorted_param_names.inject(self.route_path) do |path, name|
-        path.gsub(":#{name}", '.+?')
-      end
-    end
+    # def route_path_with_regex_placeholders
+    #   # Replace param values with regex placeholders b/c we don't care what
+    #   # the values are just that "a param value goes here".  Use gsub in the odd
+    #   # case a placeholder is used more than once in a route.  This is to help
+    #   # ensure matching and capturing splats even on nonsense paths.
+    #   sorted_param_names.inject(self.route_path) do |path, name|
+    #     path.gsub(":#{name}", '.+?')
+    #   end
+    # end
 
-    def sorted_param_names
-      # Sort longer key names first so they will be processed first.  This
-      # ensures that shorter param names that compose longer param names won't
-      # be subbed in the longer param name's place.
-      self.params.keys.sort{ |a, b| b.size <=> a.size }
-    end
+    # def sorted_param_names
+    #   # Sort longer key names first so they will be processed first.  This
+    #   # ensures that shorter param names that compose longer param names won't
+    #   # be subbed in the longer param name's place.
+    #   self.params.keys.sort{ |a, b| b.size <=> a.size }
+    # end
 
     class NormalizedParams
 

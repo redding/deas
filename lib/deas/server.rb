@@ -1,8 +1,12 @@
 require 'much-plugin'
+require 'sinatra/base'
+require 'deas/error_handler'
 require 'deas/exceptions'
 require 'deas/logger'
 require 'deas/logging'
+require 'deas/request_data'
 require 'deas/router'
+require 'deas/server_data'
 require 'deas/show_exceptions'
 require 'deas/sinatra_app'
 require 'deas/template_source'
@@ -12,6 +16,20 @@ module Deas
   module Server
     include MuchPlugin
 
+    DEFAULT_ERROR_RESPONSE_STATUS = 500.freeze
+
+    # these are standard error classes that we rescue, handle and don't reraise
+    # in the rack app, this keeps the app from shutting down unexpectedly;
+    # `LoadError`, `NotImplementedError` and `Timeout::Error` are common non
+    # `StandardError` exceptions that should be treated like a `StandardError`
+    # so we don't want one of these to shutdown the app
+    STANDARD_ERROR_CLASSES = [
+      StandardError,
+      LoadError,
+      NotImplementedError,
+      Timeout::Error
+    ].freeze
+
     plugin_included do
       extend ClassMethods
       include InstanceMethods
@@ -19,25 +37,170 @@ module Deas
 
     module InstanceMethods
 
-      # TODO: once Deas is no longer powered by Sinatra, this should define an
-      # `initialize` method that builds a server instance.  Right now there is
-      # a `new` class method that builds a SinatraApp which does this init
-      # behavior
+      attr_reader :deas_server_data
 
-    end
+      def initialize(rack_builder)
+        server_config = self.class.config
 
-    module ClassMethods
-
-      # TODO: needed while Deas is powered by Sinatra
-      # eventually do an initialize method more like Sanford does
-      def new
         begin
-          Deas::SinatraApp.new(self.config)
+          server_config.validate!
         rescue Router::InvalidSplatError => e
           # reset the exception backtrace to hide Deas internals
           raise e.class, e.message, caller
         end
+
+        @deas_server_data = ServerData.new({
+          :environment     => server_config.env,
+          :root            => server_config.root,
+          :error_procs     => server_config.error_procs,
+          :logger          => server_config.logger,
+          :router          => server_config.router,
+          :template_source => server_config.template_source
+        })
+
+        deas_build(server_config, rack_builder)
       end
+
+      def call!(env)
+        begin
+          request = Rack::Request.new(env)
+          route, params, splat = @deas_server_data.router_dispatch(request)
+          route.run(
+            @deas_server_data,
+            RequestData.new({
+              :request    => request,
+              # :response   => response,
+              :params     => params.merge(request.params),
+              :splat      => splat,
+              :route_path => route.path
+            })
+          )
+          @deas_server_data.router_run(request)
+        rescue [configured_not_found_errors] => err
+          request.env['deas.error'] = Deas::NotFound.new(env['PATH_INFO'])
+          request.env['deas.error'].set_backtrace(err.backtrace)
+          ErrorHandler.run(request.env['deas.error'], {
+            :server_data   => @deas_server_data,
+            :request       => request,
+            # :response      => response,
+            :handler_class => request.env['deas.handler_class'],
+            :handler       => request.env['deas.handler'],
+            :params        => request.env['deas.params'],
+            :splat         => request.env['deas.splat'],
+            :route_path    => request.env['deas.route_path']
+          })
+          # return not found rack array
+        rescue *STANDARD_ERROR_CLASSES => err
+          request.env['deas.error'] = err
+          # response.status = DEFAULT_ERROR_RESPONSE_STATUS
+          ErrorHandler.run(request.env['deas.error'], {
+            :server_data   => @deas_server_data,
+            :request       => request,
+            # :response      => response,
+            :handler_class => request.env['deas.handler_class'],
+            :handler       => request.env['deas.handler'],
+            :params        => request.env['deas.params'],
+            :splat         => request.env['deas.splat'],
+            :route_path    => request.env['deas.route_path']
+          })
+          # return not found rack array
+        end
+      end
+
+      private
+
+      def deas_build(server_config, builder)
+        # TODO: remove sinatra as a middleware and manually build middlewares
+        deas_setup_sinatra_middleware(server_config, @deas_server_data, builder)
+      end
+
+      def deas_setup_sinatra_middleware(server_config, server_data, builder)
+        builder.use Sinatra do
+          # static settings - Deas doesn't care about these anymore so just
+          # use some intelligent defaults
+          set :environment,      server_config.env
+          set :root,             server_config.root
+          set :views,            server_config.root
+          set :public_folder,    server_config.root
+          set :default_encoding, 'utf-8'
+          set :method_override,  false
+          set :reload_templates, false
+          set :static,           false
+          set :sessions,         false
+
+          # Turn this off b/c Deas won't auto provide it.
+          disable :protection
+
+          # raise_errors and show_exceptions prevent Deas error handlers from
+          # being called and Deas' logging doesn't finish. They should always
+          # be false.
+          set :raise_errors,     false
+          set :show_exceptions,  false
+
+          # turn off logging, dump_errors b/c Deas handles its own logging logic
+          set :logging,          false
+          set :dump_errors,      false
+
+          server_config.middlewares.each{ |use_args| use *use_args }
+
+          # routes
+          server_config.routes.each do |route|
+            send(route.method, route.path) do
+              begin
+                route.run(
+                  server_data,
+                  RequestData.new({
+                    :request    => request,
+                    :response   => response,
+                    :params     => params,
+                    :route_path => route.path
+                  })
+                )
+              rescue *STANDARD_ERROR_CLASSES => err
+                request.env['deas.error'] = err
+                response.status = DEFAULT_ERROR_RESPONSE_STATUS
+                ErrorHandler.run(request.env['deas.error'], {
+                  :server_data   => server_data,
+                  :request       => request,
+                  :response      => response,
+                  :handler_class => request.env['deas.handler_class'],
+                  :handler       => request.env['deas.handler'],
+                  :params        => request.env['deas.params'],
+                  :splat         => request.env['deas.splat'],
+                  :route_path    => request.env['deas.route_path']
+                })
+              end
+            end
+          end
+
+          not_found do
+            # `self` is the sinatra call in this context
+            if env['sinatra.error']
+              env['deas.error'] = if env['sinatra.error'].instance_of?(::Sinatra::NotFound)
+                Deas::NotFound.new(env['PATH_INFO']).tap do |e|
+                  e.set_backtrace(env['sinatra.error'].backtrace)
+                end
+              else
+                env['sinatra.error']
+              end
+              ErrorHandler.run(env['deas.error'], {
+                :server_data   => server_data,
+                :request       => request,
+                :response      => response,
+                :handler_class => request.env['deas.handler_class'],
+                :handler       => request.env['deas.handler'],
+                :params        => request.env['deas.params'],
+                :splat         => request.env['deas.splat'],
+                :route_path    => request.env['deas.route_path']
+              })
+            end
+          end
+        end
+      end
+
+    end
+
+    module ClassMethods
 
       def config
         @config ||= Config.new

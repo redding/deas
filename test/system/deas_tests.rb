@@ -2,6 +2,7 @@ require 'assert'
 require 'deas'
 
 require 'assert-rack-test'
+require 'rack'
 
 module Deas
 
@@ -14,7 +15,10 @@ module Deas
   class RackTests < RackTestsContext
     desc "a Deas server rack app"
     setup do
-      @app = DeasTestServer.new
+      # @app = DeasTestServer.new
+      @app = Rack::Builder.new do
+        run DeasTestServer.new(self)
+      end
     end
 
     should "return a 200 response with a GET to '/show'" do
@@ -141,28 +145,28 @@ module Deas
 
   end
 
-  class ShowExceptionsTests < RackTestsContext
-    desc "a Deas server rack app with show exceptions enabled"
-    setup do
-      @app = DeasDevServer.new
-    end
+  # class ShowExceptionsTests < RackTestsContext
+  #   desc "a Deas server rack app with show exceptions enabled"
+  #   setup do
+  #     @app = DeasDevServer.new
+  #   end
 
-    should "return a text/plain body when a 404 occurs" do
-      get '/not_defined'
+  #   should "return a text/plain body when a 404 occurs" do
+  #     get '/not_defined'
 
-      assert_equal 404, last_response.status
-      assert_equal "text/plain", last_response.headers['Content-Type']
-      assert_match "Deas::NotFound: /not_defined", last_response.body
-    end
+  #     assert_equal 404, last_response.status
+  #     assert_equal "text/plain", last_response.headers['Content-Type']
+  #     assert_match "Deas::NotFound: /not_defined", last_response.body
+  #   end
 
-    should "return a text/plain body when an exception occurs" do
-      get '/error'
+  #   should "return a text/plain body when an exception occurs" do
+  #     get '/error'
 
-      assert_equal 500, last_response.status
-      assert_equal "text/plain", last_response.headers['Content-Type']
-      assert_match "sinatra app standard error", last_response.body
-    end
+  #     assert_equal 500, last_response.status
+  #     assert_equal "text/plain", last_response.headers['Content-Type']
+  #     assert_match "sinatra app standard error", last_response.body
+  #   end
 
-  end
+  # end
 
 end
