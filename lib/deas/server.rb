@@ -92,6 +92,22 @@ module Deas
         self.config.error_procs
       end
 
+      def before_route_run(&block)
+        self.config.before_route_run_procs << block
+      end
+
+      def before_route_run_procs
+        self.config.before_route_run_procs
+      end
+
+      def after_route_run(&block)
+        self.config.after_route_run_procs << block
+      end
+
+      def after_route_run_procs
+        self.config.after_route_run_procs
+      end
+
       def template_source(value = nil)
         self.config.template_source = value if !value.nil?
         self.config.template_source
@@ -121,20 +137,23 @@ module Deas
       attr_accessor :env, :root
       attr_accessor :method_override, :show_exceptions, :verbose_logging
       attr_accessor :middlewares, :init_procs, :error_procs
+      attr_accessor :before_route_run_procs, :after_route_run_procs
       attr_accessor :template_source, :logger, :router
 
       def initialize
-        @env             = DEFAULT_ENV
-        @root            = ENV['PWD']
-        @method_override = true
-        @show_exceptions = false
-        @verbose_logging = true
-        @middlewares     = []
-        @init_procs      = []
-        @error_procs     = []
-        @template_source = nil
-        @logger          = Deas::NullLogger.new
-        @router          = Deas::Router.new
+        @env                    = DEFAULT_ENV
+        @root                   = ENV['PWD']
+        @method_override        = true
+        @show_exceptions        = false
+        @verbose_logging        = true
+        @middlewares            = []
+        @init_procs             = []
+        @error_procs            = []
+        @before_route_run_procs = []
+        @after_route_run_procs  = []
+        @template_source        = nil
+        @logger                 = Deas::NullLogger.new
+        @router                 = Deas::Router.new
 
         @valid = nil
       end

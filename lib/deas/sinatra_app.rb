@@ -27,10 +27,12 @@ module Deas
       # server's initialization logic more like Sanford does.
       server_config.validate!
       server_data = ServerData.new({
-        :error_procs     => server_config.error_procs,
-        :logger          => server_config.logger,
-        :router          => server_config.router,
-        :template_source => server_config.template_source
+        :error_procs            => server_config.error_procs,
+        :before_route_run_procs => server_config.before_route_run_procs,
+        :after_route_run_procs  => server_config.after_route_run_procs,
+        :logger                 => server_config.logger,
+        :router                 => server_config.router,
+        :template_source        => server_config.template_source
       })
 
       Sinatra.new do
