@@ -69,6 +69,18 @@ module Deas::Server
       assert_equal 1, config.error_procs.size
       assert_equal exp, config.error_procs.first
 
+      exp = proc{ }
+      assert_equal 0, config.before_route_run_procs.size
+      subject.before_route_run(&exp)
+      assert_equal 1, config.before_route_run_procs.size
+      assert_equal exp, config.before_route_run_procs.first
+
+      exp = proc{ }
+      assert_equal 0, config.after_route_run_procs.size
+      subject.after_route_run(&exp)
+      assert_equal 1, config.after_route_run_procs.size
+      assert_equal exp, config.after_route_run_procs.first
+
       exp = Deas::TemplateSource.new(Factory.path)
       subject.template_source exp
       assert_equal exp, config.template_source
@@ -127,6 +139,7 @@ module Deas::Server
     should have_accessors :env, :root
     should have_accessors :method_override, :show_exceptions, :verbose_logging
     should have_accessors :middlewares, :init_procs, :error_procs
+    should have_accessors :before_route_run_procs, :after_route_run_procs
     should have_accessors :template_source, :logger, :router
 
     should have_imeths :urls, :routes
@@ -150,6 +163,8 @@ module Deas::Server
       assert_equal [], subject.middlewares
       assert_equal [], subject.init_procs
       assert_equal [], subject.error_procs
+      assert_equal [], subject.before_route_run_procs
+      assert_equal [], subject.after_route_run_procs
 
       assert_instance_of Deas::NullTemplateSource, subject.template_source
       assert_equal subject.root, subject.template_source.path

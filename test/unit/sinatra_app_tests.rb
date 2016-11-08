@@ -36,8 +36,15 @@ module Deas::SinatraApp
       @router.get('/something', 'EmptyViewHandler')
       @router.validate!
 
-      @config = Deas::Server::Config.new
-      @config.router = @router
+      # set config attributes to make sure they are passed to the `ServerData`
+      @config = Deas::Server::Config.new.tap do |c|
+        c.error_procs            = Factory.integer(3).times.map{ proc{ Factory.string } },
+        c.before_route_run_procs = Factory.integer(3).times.map{ proc{ Factory.string } },
+        c.after_route_run_procs  = Factory.integer(3).times.map{ proc{ Factory.string } },
+        c.template_source        = Factory.string,
+        c.logger                 = Factory.string,
+        c.router                 = @router
+      end
 
       @sinatra_app = Deas::SinatraApp.new(@config)
     end
@@ -58,10 +65,12 @@ module Deas::SinatraApp
       assert_equal @config.root, s.root
 
       exp = Deas::ServerData.new({
-        :error_procs     => @config.error_procs,
-        :logger          => @config.logger,
-        :router          => @config.router,
-        :template_source => @config.template_source
+        :error_procs            => @config.error_procs,
+        :before_route_run_procs => @config.before_route_run_procs,
+        :after_route_run_procs  => @config.after_route_run_procs,
+        :logger                 => @config.logger,
+        :router                 => @config.router,
+        :template_source        => @config.template_source
       })
       assert_equal exp, s.deas_server_data
 
