@@ -188,7 +188,7 @@ module Deas
       def initialize(value)
         @value = if value.is_a?(::Array)
           value.map{ |i| self.class.new(i).value }
-        elsif Rack::Utils.params_hash_type?(value)
+        elsif self.hash_type?(value)
           value.inject({}){ |h, (k, v)| h[k.to_s] = self.class.new(v).value; h }
         elsif self.file_type?(value)
           value
@@ -199,6 +199,14 @@ module Deas
 
       def file_type?(value)
         raise NotImplementedError
+      end
+
+      def hash_type?(value)
+        # this supports older Rack versions (that don't have
+        # Utils#params_hash_type?)
+        ( Rack::Utils.respond_to?('params_hash_type?') &&
+          Rack::Utils.params_hash_type?(value)
+        ) || value.kind_of?(::Hash)
       end
 
     end
