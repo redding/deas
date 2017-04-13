@@ -22,7 +22,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency("assert-rack-test", ["~> 1.0.4"])
 
   gem.add_dependency("much-plugin", ["~> 0.2.0"])
-  gem.add_dependency("rack",        ["~> 1.6.4"])
+  gem.add_dependency("rack",        ["~> 1.1"])
   gem.add_dependency("sinatra",     ["~> 1.2"])
 
 end
