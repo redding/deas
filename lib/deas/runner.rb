@@ -223,7 +223,7 @@ module Deas
         @path_name = path_name
 
         file_size = @path_name.size? || Rack::Utils.bytesize(path_name.read)
-        ranges = Rack::Utils.byte_ranges(env, file_size)
+        ranges = byte_ranges(env, file_size)
         if ranges.nil? || ranges.empty? || ranges.length > 1
           # No ranges or multiple ranges are not supported
           @range         = 0..file_size-1
@@ -268,6 +268,16 @@ module Deas
         self.path_name.to_s == other_body.path_name.to_s &&
         self.range_begin    == other_body.range_begin    &&
         self.range_end      == other_body.range_end
+      end
+
+      private
+
+      def byte_ranges(env, file_size)
+        if Rack::Utils.respond_to?('byte_ranges')
+          Rack::Utils.byte_ranges(env, file_size)
+        else
+          nil
+        end
       end
 
     end
