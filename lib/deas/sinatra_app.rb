@@ -1,4 +1,5 @@
 require 'sinatra/base'
+require 'timeout'
 require 'deas/error_handler'
 require 'deas/exceptions'
 require 'deas/request_data'
