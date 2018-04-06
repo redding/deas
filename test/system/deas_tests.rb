@@ -152,7 +152,7 @@ module Deas
 
       assert_equal 404, last_response.status
       assert_equal "text/plain", last_response.headers['Content-Type']
-      assert_match "Deas::NotFound: /not_defined", last_response.body
+      assert_match "Deas::NotFound: GET /not_defined", last_response.body
     end
 
     should "return a text/plain body when an exception occurs" do

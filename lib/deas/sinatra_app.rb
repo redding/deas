@@ -109,7 +109,7 @@ module Deas
           # `self` is the sinatra call in this context
           if env['sinatra.error']
             env['deas.error'] = if env['sinatra.error'].instance_of?(::Sinatra::NotFound)
-              Deas::NotFound.new(env['PATH_INFO']).tap do |e|
+              Deas::NotFound.new("#{env['REQUEST_METHOD']} #{env['PATH_INFO']}").tap do |e|
                 e.set_backtrace(env['sinatra.error'].backtrace)
               end
             else
