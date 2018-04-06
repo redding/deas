@@ -201,6 +201,10 @@ class Deas::Runner
 
       subject.body exp.first
       assert_equal exp, subject.body
+
+      exp = [Factory.integer.to_s]
+      subject.body exp.first.to_i
+      assert_equal exp, subject.body
     end
 
     should "know and set its response content type header" do
