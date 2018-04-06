@@ -56,8 +56,10 @@ module Deas
 
     def body(value = nil)
       if !value.nil?
+        # http://www.rubydoc.info/github/rack/rack/master/file/SPEC#The_Body
+        # "The Body must respond to each and must only yield String values"
         # String#each is a thing in 1.8.7, so account for it here
-        @body = !value.respond_to?(:each) || value.kind_of?(String) ? [*value] : value
+        @body = !value.respond_to?(:each) || value.kind_of?(String) ? [*value.to_s] : value
       end
       @body
     end
