@@ -6,10 +6,20 @@ module Deas
 
   class Router
 
-    DEFAULT_REQUEST_TYPE_NAME = 'default'.freeze
+    DEFAULT_REQUEST_TYPE_NAME   = 'default'.freeze
+    ALLOW_TRAILING_SLASHES      = 'allow-either'.freeze
+    REQUIRE_TRAILING_SLASHES    = 'require'.freeze
+    REQUIRE_NO_TRAILING_SLASHES = 'require-none'.freeze
+    SLASH                       = '/'.freeze
+
+    VALID_TRAILING_SLASHES_VALUES = [
+      ALLOW_TRAILING_SLASHES,
+      REQUIRE_TRAILING_SLASHES,
+      REQUIRE_NO_TRAILING_SLASHES
+    ].freeze
 
     attr_reader :request_types, :urls, :routes, :definitions
-    attr_reader :escape_query_value_proc
+    attr_reader :trailing_slashes, :escape_query_value_proc
 
     def initialize(&block)
       @request_types = []
@@ -22,6 +32,22 @@ module Deas
     def view_handler_ns(value = nil)
       @view_handler_ns = value if !value.nil?
       @view_handler_ns
+    end
+
+    def allow_trailing_slashes
+      @trailing_slashes = ALLOW_TRAILING_SLASHES
+    end
+
+    def require_trailing_slashes
+      @trailing_slashes = REQUIRE_TRAILING_SLASHES
+    end
+
+    def require_no_trailing_slashes
+      @trailing_slashes = REQUIRE_NO_TRAILING_SLASHES
+    end
+
+    def trailing_slashes_set?
+      VALID_TRAILING_SLASHES_VALUES.include?(@trailing_slashes)
     end
 
     def escape_query_value(&block)
@@ -109,9 +135,37 @@ module Deas
       true
     end
 
+    def validate_trailing_slashes!
+      if self.trailing_slashes == REQUIRE_TRAILING_SLASHES
+        paths = []
+        all_have = self.routes.inject(true) do |result, route|
+          paths << route.path if route.path[-1..-1] != SLASH
+          result && route.path[-1..-1] == SLASH
+        end
+        if !all_have
+          msg = "all route paths must end with a \"/\", but these do not:\n"\
+                "#{paths.join("\n")}"
+          raise TrailingSlashesError, msg
+        end
+      elsif self.trailing_slashes == REQUIRE_NO_TRAILING_SLASHES
+        paths = []
+        all_missing = self.routes.inject(true) do |result, route|
+          paths << route.path if route.path[-1..-1] == SLASH
+          result && route.path[-1..-1] != SLASH
+        end
+        if !all_missing
+          msg = "all route paths must *not* end with a \"/\", but these do:\n"\
+                "#{paths.join("\n")}"
+          raise TrailingSlashesError, msg
+        end
+      end
+      true
+    end
+
     def validate!
       self.apply_definitions!
       self.routes.each(&:validate!)
+      self.validate_trailing_slashes!
       true
     end
 
@@ -192,7 +246,8 @@ module Deas
       Deas::Route.new(http_method, path, proxies).tap{ |r| self.routes.push(r) }
     end
 
-    InvalidSplatError = Class.new(ArgumentError)
+    InvalidSplatError    = Class.new(ArgumentError)
+    TrailingSlashesError = Class.new(RuntimeError)
 
     class HandlerProxies
 
