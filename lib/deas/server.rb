@@ -198,7 +198,11 @@ module Deas
         # that the logging and exception showing happens just before the app gets
         # the request and just after the app sends a response.
         self.middlewares << [Deas::ShowExceptions] if self.show_exceptions
-        self.middlewares << Deas::Logging.middleware_args(self.verbose_logging)
+        self.middlewares << [
+          Deas::Logging.middleware_type(self.verbose_logging),
+          self.logger
+        ]
+
         self.middlewares.freeze
 
         @valid = true # if it made it this far, its valid!
