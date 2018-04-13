@@ -248,7 +248,9 @@ module Deas::Server
       assert_equal (num_middlewares+3), subject.middlewares.size
       assert_equal [Rack::MethodOverride], subject.middlewares[0]
       assert_equal [Deas::ShowExceptions], subject.middlewares[-2]
-      assert_equal [Deas::VerboseLogging], subject.middlewares[-1]
+
+      exp = [Deas::VerboseLogging, subject.logger]
+      assert_equal exp, subject.middlewares[-1]
 
       assert_raises do
         subject.middlewares << [Factory.string]

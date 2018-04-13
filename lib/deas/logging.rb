@@ -4,16 +4,16 @@ require 'sinatra/base'
 module Deas
 
   module Logging
-    def self.middleware_args(verbose)
-      verbose ? [VerboseLogging] : [SummaryLogging]
+    def self.middleware_type(verbose)
+      verbose ? VerboseLogging : SummaryLogging
     end
   end
 
   class BaseLogging
 
-    def initialize(app)
+    def initialize(app, logger)
       @app    = app
-      @logger = @app.settings.deas_server_data.logger
+      @logger = logger
     end
 
     # The Rack call interface. The receiver acts as a prototype and runs

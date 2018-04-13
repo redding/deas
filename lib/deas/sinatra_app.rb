@@ -43,13 +43,6 @@ module Deas
         set :environment, server_config.env
         set :root,        server_config.root
 
-        # TODO: sucks to have to do this but b/c of Rack there is no better way
-        # to make the server data available to middleware.  We should remove this
-        # once we remove Sinatra.  Whatever rack app implemenation will needs to
-        # provide the server data or maybe the server data *will be* the rack app.
-        # Not sure right now, just jotting down notes.
-        set :deas_server_data, server_data
-
         # static settings - Deas doesn't care about these anymore so just
         # use some intelligent defaults
         set :views,            server_config.root

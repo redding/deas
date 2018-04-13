@@ -7,11 +7,11 @@ module Deas::Logging
     desc "Deas::Logging"
     subject{ Deas::Logging }
 
-    should have_imeths :middleware_args
+    should have_imeths :middleware_type
 
     should "return middleware args given a verbose flag" do
-      assert_equal [Deas::VerboseLogging], subject.middleware_args(true)
-      assert_equal [Deas::SummaryLogging], subject.middleware_args(false)
+      assert_equal Deas::VerboseLogging, subject.middleware_type(true)
+      assert_equal Deas::SummaryLogging, subject.middleware_type(false)
     end
 
   end
@@ -19,9 +19,7 @@ module Deas::Logging
   class CallSetupTests < UnitTests
     setup do
       @logger = SpyLogger.new
-      @app = Factory.sinatra_call({
-        :deas_server_data => Factory.server_data(:logger => @logger)
-      })
+      @app    = Factory.sinatra_call
 
       @app_call_env = nil
       @resp_status  = Factory.integer
@@ -60,7 +58,7 @@ module Deas::Logging
         @benchmark
       end
 
-      @middleware = @middleware_class.new(@app)
+      @middleware = @middleware_class.new(@app, @logger)
     end
     subject{ @middleware }
 
@@ -131,7 +129,7 @@ module Deas::Logging
       @resp_status = @middleware_class::RESPONSE_STATUS_NAMES.keys.sample
       @app_response[0] = @resp_status
 
-      @middleware = Deas::VerboseLogging.new(@app)
+      @middleware = Deas::VerboseLogging.new(@app, @logger)
     end
     subject{ @middleware }
 
@@ -213,7 +211,7 @@ module Deas::Logging
         'deas.handler_class' => @handler_class
       })
 
-      @middleware = Deas::SummaryLogging.new(@app)
+      @middleware = Deas::SummaryLogging.new(@app, @logger)
     end
     subject{ @middleware }
 

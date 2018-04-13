@@ -64,16 +64,6 @@ module Deas::SinatraApp
       assert_equal @config.env,  s.environment
       assert_equal @config.root, s.root
 
-      exp = Deas::ServerData.new({
-        :error_procs            => @config.error_procs,
-        :before_route_run_procs => @config.before_route_run_procs,
-        :after_route_run_procs  => @config.after_route_run_procs,
-        :logger                 => @config.logger,
-        :router                 => @config.router,
-        :template_source        => @config.template_source
-      })
-      assert_equal exp, s.deas_server_data
-
       assert_equal @config.root, s.views
       assert_equal @config.root, s.public_folder
       assert_equal 'utf-8',      s.default_encoding

@@ -26,7 +26,7 @@ module Deas
           error_proc.call(@exception, @context)
         rescue StandardError => proc_exception
           @exception = proc_exception
-          response = nil # reset response
+          response   = nil # reset response
         end
         response || result
       end

@@ -22,9 +22,7 @@ class FakeSinatraCall
     @status       = 200
     @headers      = {}
 
-    @settings = OpenStruct.new({
-      :deas_server_data => Factory.server_data
-    }.merge(settings || {}))
+    @settings = OpenStruct.new(settings || {})
   end
 
   def call(env)
