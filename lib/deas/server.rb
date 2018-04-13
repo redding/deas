@@ -6,6 +6,7 @@ require 'deas/router'
 require 'deas/show_exceptions'
 require 'deas/sinatra_app'
 require 'deas/template_source'
+require 'deas/trailing_slashes'
 
 module Deas
 
@@ -194,14 +195,26 @@ module Deas
         # it is run before any other middleware
         self.middlewares.unshift([Rack::MethodOverride]) if self.method_override
 
-        # append the show exceptions and logging middlewares last.  This ensures
-        # that the logging and exception showing happens just before the app gets
-        # the request and just after the app sends a response.
+        # append the show exceptions and logging middlewares next-to-last. This
+        # ensures the logging and exception showing happens just before the
+        # optional trailing slashes handling.  It should be just before the app
+        # gets the request and just after the app sends a response (except for
+        # trailing slashes - this should happen inside of the show exceptions
+        # and logging behavior).
         self.middlewares << [Deas::ShowExceptions] if self.show_exceptions
         self.middlewares << [
           Deas::Logging.middleware_type(self.verbose_logging),
           self.logger
         ]
+
+        # optionally add the trailing slashes middleware last b/c it should
+        # happen inside of show exceptions and logging.  we want the behavior
+        # to feel like app behavior to the rest of the middleware stack so it
+        # needs to be just before the app gest the request and just after the
+        # app sends a response.
+        if self.router.trailing_slashes_set?
+          self.middlewares << [Deas::TrailingSlashes, self.router]
+        end
 
         self.middlewares.freeze
 
