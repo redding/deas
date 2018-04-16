@@ -19,6 +19,12 @@ class Deas::Router
       assert_equal 'default', subject::DEFAULT_REQUEST_TYPE_NAME
     end
 
+    should "know its trailing slashes constants" do
+      assert_equal 'remove', subject::REMOVE_TRAILING_SLASHES
+      assert_equal 'allow',  subject::ALLOW_TRAILING_SLASHES
+      assert_equal '/',      subject::SLASH
+    end
+
   end
 
   class InitTests < UnitTests
@@ -32,9 +38,11 @@ class Deas::Router
     subject{ @router }
 
     should have_readers :request_types, :urls, :routes, :definitions
-    should have_readers :escape_query_value_proc
+    should have_readers :trailing_slashes, :escape_query_value_proc
 
-    should have_imeths :view_handler_ns, :escape_query_value
+    should have_imeths :view_handler_ns
+    should have_imeths :allow_trailing_slashes, :remove_trailing_slashes
+    should have_imeths :escape_query_value
     should have_imeths :base_url, :set_base_url, :prepend_base_url
     should have_imeths :url, :url_for
     should have_imeths :default_request_type_name, :add_request_type
@@ -42,10 +50,12 @@ class Deas::Router
     should have_imeths :get, :post, :put, :patch, :delete
     should have_imeths :route, :redirect, :not_found
     should have_imeths :apply_definitions!, :validate!
+    should have_imeths :validate_trailing_slashes!
 
     should "default its attrs" do
       router = @router_class.new
       assert_nil router.view_handler_ns
+      assert_nil router.trailing_slashes
       assert_nil router.base_url
       assert_empty router.request_types
       assert_empty router.urls
@@ -72,6 +82,14 @@ class Deas::Router
     should "set a view handler namespace" do
       subject.view_handler_ns(exp = Factory.string)
       assert_equal exp, subject.view_handler_ns
+    end
+
+    should "config trailing slash handling" do
+      subject.allow_trailing_slashes
+      assert_equal subject.class::ALLOW_TRAILING_SLASHES, subject.trailing_slashes
+
+      subject.remove_trailing_slashes
+      assert_equal subject.class::REMOVE_TRAILING_SLASHES, subject.trailing_slashes
     end
 
     should "allow configuring a custom escape query value proc" do
@@ -158,21 +176,91 @@ class Deas::Router
       assert_equal path1, nf.path
     end
 
+    should "validate trailing slashes" do
+      router = @router_class.new
+      router.get('/something',  'EmptyViewHandler')
+      router.get('/something/', 'EmptyViewHandler')
+      router.apply_definitions!
+
+      assert_nothing_raised do
+        router.validate_trailing_slashes!
+      end
+
+      router.allow_trailing_slashes
+      assert_nothing_raised do
+        router.validate_trailing_slashes!
+      end
+
+      router.remove_trailing_slashes
+      err = assert_raises(TrailingSlashesError) do
+        router.validate_trailing_slashes!
+      end
+      exp = "all route paths must *not* end with a \"/\", but these do:\n/something/"
+      assert_includes exp, err.message
+
+      router = @router_class.new
+      router.get('/something/',      'EmptyViewHandler')
+      router.get('/something-else/', 'EmptyViewHandler')
+      router.apply_definitions!
+
+      assert_nothing_raised do
+        router.validate_trailing_slashes!
+      end
+
+      router.allow_trailing_slashes
+      assert_nothing_raised do
+        router.validate_trailing_slashes!
+      end
+
+      router.remove_trailing_slashes
+      err = assert_raises(TrailingSlashesError) do
+        router.validate_trailing_slashes!
+      end
+      exp = "all route paths must *not* end with a \"/\", but these do:\n"\
+            "/something/\n/something-else/"
+      assert_includes exp, err.message
+
+      router = @router_class.new
+      router.get('/something',      'EmptyViewHandler')
+      router.get('/something-else', 'EmptyViewHandler')
+      router.apply_definitions!
+
+      assert_nothing_raised do
+        router.validate_trailing_slashes!
+      end
+
+      router.allow_trailing_slashes
+      assert_nothing_raised do
+        router.validate_trailing_slashes!
+      end
+
+      router.remove_trailing_slashes
+      assert_nothing_raised do
+        router.validate_trailing_slashes!
+      end
+    end
+
     should "apply definitions and validate each route when validating" do
       subject.get('/something', 'EmptyViewHandler')
       subject.apply_definitions!
+      subject.validate_trailing_slashes!
       route = subject.routes.last
       proxy = route.handler_proxies[subject.default_request_type_name]
 
       apply_def_called = false
       Assert.stub(subject, :apply_definitions!){ apply_def_called = true }
 
+      val_trailing_called = false
+      Assert.stub(subject, :validate_trailing_slashes!){ val_trailing_called = true }
+
       assert_false apply_def_called
+      assert_false val_trailing_called
       assert_nil proxy.handler_class
 
       subject.validate!
 
       assert_true apply_def_called
+      assert_true val_trailing_called
       assert_equal EmptyViewHandler, proxy.handler_class
     end
 

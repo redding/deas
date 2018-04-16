@@ -69,6 +69,40 @@ class DeasDevServer
 
 end
 
+class RemoveTrailingSlashesServer
+  include Deas::Server
+
+  root            TEST_SUPPORT_ROOT
+  logger          TEST_LOGGER
+  verbose_logging true
+  show_exceptions true
+
+  router do
+    remove_trailing_slashes
+
+    get '/show', 'ShowHandler'
+  end
+
+end
+
+class AllowTrailingSlashesServer
+  include Deas::Server
+
+  root            TEST_SUPPORT_ROOT
+  logger          TEST_LOGGER
+  verbose_logging true
+  show_exceptions true
+
+  router do
+    allow_trailing_slashes
+
+    get '/show',       'ShowHandler'
+    get '/show-text/', 'ShowTextHandler'
+
+  end
+
+end
+
 class ShowHandler
   include Deas::ViewHandler
 
