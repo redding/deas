@@ -183,12 +183,15 @@ class Deas::Url
       })
     end
 
-    should "'squash' duplicate forward-slashes" do
-      exp_path = '/a/goose/cooked'
+    should "'squash' duplicate forward-slashes in the path only" do
+      exp_path = '/a/goose/cooked?aye=a&bee=b&u=http://example.com'
       assert_equal exp_path, subject.path_for({
         'some'  => '/a',
         :thing  => '/goose',
-        'splat' => '///cooked'
+        'splat' => '///cooked',
+        'bee'   => 'b',
+        :aye    => 'a',
+        'u'     => 'http://example.com'
       })
     end
 

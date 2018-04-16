@@ -28,7 +28,7 @@ module Deas
 
       # ignore captures when setting params
       # remove duplicate forward slashes
-      set_anchor(set_extra(set_named(set_splat(@path, s), h), h), a).gsub(/\/\/+/, '/')
+      set_anchor(set_extra(set_named(set_splat(@path, s), h).gsub(/\/\/+/, '/'), h), a)
     end
 
     private
