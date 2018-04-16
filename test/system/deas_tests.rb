@@ -165,10 +165,10 @@ module Deas
 
   end
 
-  class RequireNoTrailingSlashesTests < RackTestsContext
+  class RemoveTrailingSlashesTests < RackTestsContext
     desc "a Deas server rack app with a router that requires no trailing slashes"
     setup do
-      @app = RequireNoTrailingSlashesServer.new
+      @app = RemoveTrailingSlashesServer.new
     end
 
     should "redirect any paths that end in a slash" do

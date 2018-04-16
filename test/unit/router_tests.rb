@@ -20,9 +20,9 @@ class Deas::Router
     end
 
     should "know its trailing slashes constants" do
-      assert_equal 'require-none', subject::REQUIRE_NO_TRAILING_SLASHES
-      assert_equal 'allow-either', subject::ALLOW_TRAILING_SLASHES
-      assert_equal '/',            subject::SLASH
+      assert_equal 'remove', subject::REMOVE_TRAILING_SLASHES
+      assert_equal 'allow',  subject::ALLOW_TRAILING_SLASHES
+      assert_equal '/',      subject::SLASH
     end
 
   end
@@ -41,7 +41,7 @@ class Deas::Router
     should have_readers :trailing_slashes, :escape_query_value_proc
 
     should have_imeths :view_handler_ns
-    should have_imeths :allow_trailing_slashes, :require_no_trailing_slashes
+    should have_imeths :allow_trailing_slashes, :remove_trailing_slashes
     should have_imeths :escape_query_value
     should have_imeths :base_url, :set_base_url, :prepend_base_url
     should have_imeths :url, :url_for
@@ -88,8 +88,8 @@ class Deas::Router
       subject.allow_trailing_slashes
       assert_equal subject.class::ALLOW_TRAILING_SLASHES, subject.trailing_slashes
 
-      subject.require_no_trailing_slashes
-      assert_equal subject.class::REQUIRE_NO_TRAILING_SLASHES, subject.trailing_slashes
+      subject.remove_trailing_slashes
+      assert_equal subject.class::REMOVE_TRAILING_SLASHES, subject.trailing_slashes
     end
 
     should "allow configuring a custom escape query value proc" do
@@ -191,7 +191,7 @@ class Deas::Router
         router.validate_trailing_slashes!
       end
 
-      router.require_no_trailing_slashes
+      router.remove_trailing_slashes
       err = assert_raises(TrailingSlashesError) do
         router.validate_trailing_slashes!
       end
@@ -212,7 +212,7 @@ class Deas::Router
         router.validate_trailing_slashes!
       end
 
-      router.require_no_trailing_slashes
+      router.remove_trailing_slashes
       err = assert_raises(TrailingSlashesError) do
         router.validate_trailing_slashes!
       end
@@ -234,7 +234,7 @@ class Deas::Router
         router.validate_trailing_slashes!
       end
 
-      router.require_no_trailing_slashes
+      router.remove_trailing_slashes
       assert_nothing_raised do
         router.validate_trailing_slashes!
       end

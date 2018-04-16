@@ -11,8 +11,8 @@ module Deas
     module AllowHandler;     end
 
     HANDLERS = {
-      Deas::Router::REQUIRE_NO_TRAILING_SLASHES => RequireNoHandler,
-      Deas::Router::ALLOW_TRAILING_SLASHES      => AllowHandler
+      Deas::Router::REMOVE_TRAILING_SLASHES => RequireNoHandler,
+      Deas::Router::ALLOW_TRAILING_SLASHES  => AllowHandler
     }
 
     def initialize(app, router)

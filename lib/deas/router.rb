@@ -6,14 +6,14 @@ module Deas
 
   class Router
 
-    DEFAULT_REQUEST_TYPE_NAME   = 'default'.freeze
-    ALLOW_TRAILING_SLASHES      = 'allow-either'.freeze
-    REQUIRE_NO_TRAILING_SLASHES = 'require-none'.freeze
-    SLASH                       = '/'.freeze
+    DEFAULT_REQUEST_TYPE_NAME = 'default'.freeze
+    ALLOW_TRAILING_SLASHES    = 'allow'.freeze
+    REMOVE_TRAILING_SLASHES   = 'remove'.freeze
+    SLASH                     = '/'.freeze
 
     VALID_TRAILING_SLASHES_VALUES = [
       ALLOW_TRAILING_SLASHES,
-      REQUIRE_NO_TRAILING_SLASHES
+      REMOVE_TRAILING_SLASHES
     ].freeze
 
     attr_reader :request_types, :urls, :routes, :definitions
@@ -36,8 +36,8 @@ module Deas
       @trailing_slashes = ALLOW_TRAILING_SLASHES
     end
 
-    def require_no_trailing_slashes
-      @trailing_slashes = REQUIRE_NO_TRAILING_SLASHES
+    def remove_trailing_slashes
+      @trailing_slashes = REMOVE_TRAILING_SLASHES
     end
 
     def trailing_slashes_set?
@@ -130,7 +130,7 @@ module Deas
     end
 
     def validate_trailing_slashes!
-      if self.trailing_slashes == REQUIRE_NO_TRAILING_SLASHES
+      if self.trailing_slashes == REMOVE_TRAILING_SLASHES
         paths = []
         all_missing = self.routes.inject(true) do |result, route|
           paths << route.path if route.path[-1..-1] == SLASH

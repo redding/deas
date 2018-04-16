@@ -69,7 +69,7 @@ class DeasDevServer
 
 end
 
-class RequireNoTrailingSlashesServer
+class RemoveTrailingSlashesServer
   include Deas::Server
 
   root            TEST_SUPPORT_ROOT
@@ -78,7 +78,7 @@ class RequireNoTrailingSlashesServer
   show_exceptions true
 
   router do
-    require_no_trailing_slashes
+    remove_trailing_slashes
 
     get '/show', 'ShowHandler'
   end
