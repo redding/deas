@@ -44,9 +44,9 @@ class Deas::Runner
     subject{ @runner }
 
     should have_readers :handler_class, :handler
+    should have_readers :request, :params, :route_path
     should have_readers :logger, :router, :template_source
-    should have_readers :request, :params, :route_path, :splat
-    should have_imeths :run, :to_rack
+    should have_imeths :splat, :run, :to_rack
     should have_imeths :status, :headers, :body, :content_type
     should have_imeths :halt, :redirect, :send_file
     should have_imeths :render, :source_render, :partial, :source_partial
@@ -58,36 +58,37 @@ class Deas::Runner
 
     should "default its attrs" do
       runner = @runner_class.new(@handler_class)
-      assert_kind_of Deas::NullLogger,         runner.logger
-      assert_kind_of Deas::Router,             runner.router
-      assert_kind_of Deas::NullTemplateSource, runner.template_source
 
       assert_nil runner.request
 
-      assert_equal Hash.new, runner.params
       assert_equal '',       runner.route_path
+      assert_equal Hash.new, runner.params
+
+      assert_kind_of Deas::NullLogger,         runner.logger
+      assert_kind_of Deas::Router,             runner.router
+      assert_kind_of Deas::NullTemplateSource, runner.template_source
 
       assert_nil runner.splat
     end
 
     should "know its attrs" do
       args = {
+        :request         => Factory.request,
+        :route_path      => Factory.string,
+        :params          => { Factory.string => Factory.string },
         :logger          => Factory.string,
         :router          => Factory.string,
-        :template_source => Factory.string,
-        :request         => Factory.request,
-        :params          => { Factory.string => Factory.string },
-        :route_path      => Factory.string
+        :template_source => Factory.string
       }
 
       runner = @runner_class.new(@handler_class, args)
 
+      assert_equal args[:request],         runner.request
+      assert_equal args[:route_path],      runner.route_path
+      assert_equal args[:params],          runner.params
       assert_equal args[:logger],          runner.logger
       assert_equal args[:router],          runner.router
       assert_equal args[:template_source], runner.template_source
-      assert_equal args[:request],         runner.request
-      assert_equal args[:params],          runner.params
-      assert_equal args[:route_path],      runner.route_path
     end
 
     should "know its splat value" do
@@ -103,8 +104,8 @@ class Deas::Runner
 
       args = {
         :request    => Factory.request(:env => request_env),
-        :params     => params,
-        :route_path => route_path
+        :route_path => route_path,
+        :params     => params
       }
 
       runner = @runner_class.new(@handler_class, args)
@@ -119,8 +120,8 @@ class Deas::Runner
 
       args = {
         :request    => Factory.request(:env => request_env),
+        :route_path => route_path,
         :params     => params,
-        :route_path => route_path
       }
 
       runner = @runner_class.new(@handler_class, args)
@@ -136,8 +137,8 @@ class Deas::Runner
 
       args = {
         :request    => Factory.request(:env => request_env),
+        :route_path => route_path,
         :params     => params,
-        :route_path => route_path
       }
 
       runner = @runner_class.new(@handler_class, args)

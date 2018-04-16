@@ -41,8 +41,8 @@ module Factory
     Deas::RequestData.new({
       :request    => args[:request]    || Factory.request,
       :response   => args[:response]   || Factory.response,
-      :params     => args[:params]     || { Factory.string => Factory.string },
-      :route_path => args[:route_path] || Factory.string
+      :route_path => args[:route_path] || Factory.string,
+      :params     => args[:params]     || { Factory.string => Factory.string }
     })
   end
 

@@ -35,18 +35,18 @@ module Deas
     class Context
 
       attr_reader :server_data
-      attr_reader :request, :response, :handler_class, :handler
-      attr_reader :params, :splat, :route_path
+      attr_reader :request, :response
+      attr_reader :route_path, :handler_class, :handler, :params, :splat
 
       def initialize(args)
         @server_data   = args.fetch(:server_data)
         @request       = args.fetch(:request)
         @response      = args.fetch(:response)
+        @route_path    = args.fetch(:route_path)
         @handler_class = args.fetch(:handler_class)
         @handler       = args.fetch(:handler)
         @params        = args.fetch(:params)
         @splat         = args.fetch(:splat)
-        @route_path    = args.fetch(:route_path)
       end
 
       def ==(other)
@@ -55,10 +55,10 @@ module Deas
           self.handler_class == other.handler_class &&
           self.request       == other.request       &&
           self.response      == other.response      &&
+          self.route_path    == other.route_path    &&
           self.handler       == other.handler       &&
           self.params        == other.params        &&
-          self.splat         == other.splat         &&
-          self.route_path    == other.route_path
+          self.splat         == other.splat
         else
           super
         end

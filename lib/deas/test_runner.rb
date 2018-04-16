@@ -27,8 +27,8 @@ module Deas
         :router          => a.delete(:router),
         :template_source => a.delete(:template_source),
         :request         => a.delete(:request),
-        :params          => NormalizedParams.new(a.delete(:params) || {}).value,
-        :route_path      => a.delete(:route_path)
+        :route_path      => a.delete(:route_path),
+        :params          => NormalizedParams.new(a.delete(:params) || {}).value
       })
       @splat = a.delete(:splat)
       a.each{|key, value| self.handler.send("#{key}=", value) }

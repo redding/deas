@@ -14,22 +14,22 @@ module Deas
     DEFAULT_BODY      = [].freeze
 
     attr_reader :handler_class, :handler
+    attr_reader :request, :route_path, :params
     attr_reader :logger, :router, :template_source
-    attr_reader :request, :params, :route_path
 
     def initialize(handler_class, args = nil)
       @status, @headers, @body = nil, Rack::Utils::HeaderHash.new, nil
 
+      @handler_class = handler_class
+      @handler = @handler_class.new(self)
+
       args ||= {}
+      @request         = args[:request]
+      @route_path      = args[:route_path].to_s
+      @params          = args[:params]          || {}
       @logger          = args[:logger]          || Deas::NullLogger.new
       @router          = args[:router]          || Deas::Router.new
       @template_source = args[:template_source] || Deas::NullTemplateSource.new
-      @request         = args[:request]
-      @params          = args[:params]          || {}
-      @route_path      = args[:route_path].to_s
-
-      @handler_class = handler_class
-      @handler = @handler_class.new(self)
     end
 
     def splat

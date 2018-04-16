@@ -8,21 +8,21 @@ module Deas
     # decouple the rack app from the handlers (we can use any rack app as long
     # as they provide this data).
 
-    attr_reader :request, :response, :params, :route_path
+    attr_reader :request, :response, :route_path, :params
 
     def initialize(args)
       @request    = args[:request]
       @response   = args[:response]
-      @params     = args[:params]
       @route_path = args[:route_path]
+      @params     = args[:params]
     end
 
     def ==(other_request_data)
       if other_request_data.kind_of?(RequestData)
         self.request    == other_request_data.request    &&
         self.response   == other_request_data.response   &&
-        self.params     == other_request_data.params     &&
-        self.route_path == other_request_data.route_path
+        self.route_path == other_request_data.route_path &&
+        self.params     == other_request_data.params
       else
         super
       end
