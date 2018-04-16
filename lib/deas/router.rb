@@ -8,13 +8,11 @@ module Deas
 
     DEFAULT_REQUEST_TYPE_NAME   = 'default'.freeze
     ALLOW_TRAILING_SLASHES      = 'allow-either'.freeze
-    REQUIRE_TRAILING_SLASHES    = 'require'.freeze
     REQUIRE_NO_TRAILING_SLASHES = 'require-none'.freeze
     SLASH                       = '/'.freeze
 
     VALID_TRAILING_SLASHES_VALUES = [
       ALLOW_TRAILING_SLASHES,
-      REQUIRE_TRAILING_SLASHES,
       REQUIRE_NO_TRAILING_SLASHES
     ].freeze
 
@@ -36,10 +34,6 @@ module Deas
 
     def allow_trailing_slashes
       @trailing_slashes = ALLOW_TRAILING_SLASHES
-    end
-
-    def require_trailing_slashes
-      @trailing_slashes = REQUIRE_TRAILING_SLASHES
     end
 
     def require_no_trailing_slashes
@@ -136,18 +130,7 @@ module Deas
     end
 
     def validate_trailing_slashes!
-      if self.trailing_slashes == REQUIRE_TRAILING_SLASHES
-        paths = []
-        all_have = self.routes.inject(true) do |result, route|
-          paths << route.path if route.path[-1..-1] != SLASH
-          result && route.path[-1..-1] == SLASH
-        end
-        if !all_have
-          msg = "all route paths must end with a \"/\", but these do not:\n"\
-                "#{paths.join("\n")}"
-          raise TrailingSlashesError, msg
-        end
-      elsif self.trailing_slashes == REQUIRE_NO_TRAILING_SLASHES
+      if self.trailing_slashes == REQUIRE_NO_TRAILING_SLASHES
         paths = []
         all_missing = self.routes.inject(true) do |result, route|
           paths << route.path if route.path[-1..-1] == SLASH

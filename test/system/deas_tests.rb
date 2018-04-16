@@ -165,21 +165,6 @@ module Deas
 
   end
 
-  class RequireTrailingSlashesTests < RackTestsContext
-    desc "a Deas server rack app with a router that requires trailing slashes"
-    setup do
-      @app = RequireTrailingSlashesServer.new
-    end
-
-    should "redirect any paths that don't end in a slash" do
-      get '/show'
-
-      assert_equal 302,      last_response.status
-      assert_equal '/show/', last_response.headers['Location']
-    end
-
-  end
-
   class RequireNoTrailingSlashesTests < RackTestsContext
     desc "a Deas server rack app with a router that requires no trailing slashes"
     setup do

@@ -7,12 +7,10 @@ module Deas
 
   class TrailingSlashes
 
-    module RequireHandler;   end
     module RequireNoHandler; end
     module AllowHandler;     end
 
     HANDLERS = {
-      Deas::Router::REQUIRE_TRAILING_SLASHES    => RequireHandler,
       Deas::Router::REQUIRE_NO_TRAILING_SLASHES => RequireNoHandler,
       Deas::Router::ALLOW_TRAILING_SLASHES      => AllowHandler
     }
@@ -46,33 +44,11 @@ module Deas
       HANDLERS[@router.trailing_slashes].run(env){ @app.call(env) }
     end
 
-    module Handler
-
-      def redirect(location)
-        [302, { 'Location' => location }, ['']]
-      end
-
-    end
-
-    module RequireHandler
-      extend Handler
-
-      def self.run(env)
-        if env['PATH_INFO'][-1..-1] != Deas::Router::SLASH
-          self.redirect(env['PATH_INFO']+Deas::Router::SLASH)
-        else
-          yield
-        end
-      end
-
-    end
-
     module RequireNoHandler
-      extend Handler
 
       def self.run(env)
         if env['PATH_INFO'][-1..-1] == Deas::Router::SLASH
-          self.redirect(env['PATH_INFO'][0..-2])
+          [302, { 'Location' => env['PATH_INFO'][0..-2] }, ['']]
         else
           yield
         end
@@ -81,7 +57,6 @@ module Deas
     end
 
     module AllowHandler
-      extend Handler
 
       def self.run(env)
         status, headers, body = yield

@@ -86,38 +86,11 @@ class Deas::TrailingSlashes
     end
   end
 
-  class RequireHandlerTests < HandlerSetupTests
-    desc "RequireHandler"
-    subject{ RequireHandler }
-
-    should have_readers :run, :redirect
-
-    should "return the apps response if the path info ends in a slash" do
-      @env['PATH_INFO'] = @slash_path
-
-      status, headers, body = subject.run(@env, &@proc)
-      assert_equal @app.response.status,  status
-      assert_equal @app.response.headers, headers
-      assert_equal [@app.response.body],  body
-    end
-
-    should "redirect with a trailing slash if the path info does not end in a slash" do
-      @env['PATH_INFO'] = @no_slash_path
-
-      status, headers, body = subject.run(@env, &@proc)
-      exp = { 'Location' => @slash_path }
-      assert_equal exp,  headers
-      assert_equal 302,  status
-      assert_equal [''], body
-    end
-
-  end
-
   class RequireNoHandlerTests < HandlerSetupTests
     desc "RequireNoHandler"
     subject{ RequireNoHandler }
 
-    should have_readers :run, :redirect
+    should have_readers :run
 
     should "return the apps response if the path info does not end in a slash" do
       @env['PATH_INFO'] = @no_slash_path
@@ -144,7 +117,7 @@ class Deas::TrailingSlashes
     desc "AllowHandler"
     subject{ AllowHandler }
 
-    should have_readers :run, :redirect
+    should have_readers :run
 
     should "return the apps response if no Deas::NotFound error" do
       paths = [@no_slash_path, @slash_path].shuffle

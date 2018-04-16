@@ -69,22 +69,6 @@ class DeasDevServer
 
 end
 
-class RequireTrailingSlashesServer
-  include Deas::Server
-
-  root            TEST_SUPPORT_ROOT
-  logger          TEST_LOGGER
-  verbose_logging true
-  show_exceptions true
-
-  router do
-    require_trailing_slashes
-
-    get '/show/', 'ShowHandler'
-  end
-
-end
-
 class RequireNoTrailingSlashesServer
   include Deas::Server
 
