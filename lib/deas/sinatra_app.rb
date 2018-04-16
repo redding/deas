@@ -77,8 +77,8 @@ module Deas
                 RequestData.new({
                   :request    => request,
                   :response   => response,
-                  :params     => params,
-                  :route_path => route.path
+                  :route_path => route.path,
+                  :params     => params
                 })
               )
             rescue *STANDARD_ERROR_CLASSES => err
@@ -88,11 +88,11 @@ module Deas
                 :server_data   => server_data,
                 :request       => request,
                 :response      => response,
+                :route_path    => request.env['deas.route_path'],
                 :handler_class => request.env['deas.handler_class'],
                 :handler       => request.env['deas.handler'],
                 :params        => request.env['deas.params'],
-                :splat         => request.env['deas.splat'],
-                :route_path    => request.env['deas.route_path']
+                :splat         => request.env['deas.splat']
               })
             end
           end
@@ -112,11 +112,11 @@ module Deas
               :server_data   => server_data,
               :request       => request,
               :response      => response,
+              :route_path    => request.env['deas.route_path'],
               :handler_class => request.env['deas.handler_class'],
               :handler       => request.env['deas.handler'],
               :params        => request.env['deas.params'],
-              :splat         => request.env['deas.splat'],
-              :route_path    => request.env['deas.route_path']
+              :splat         => request.env['deas.splat']
             })
           end
         end

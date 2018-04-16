@@ -33,8 +33,8 @@ module Deas
         :router          => server_data.router,
         :template_source => server_data.template_source,
         :request         => request_data.request,
-        :params          => request_data.params,
-        :route_path      => request_data.route_path
+        :route_path      => request_data.route_path,
+        :params          => request_data.params
       })
 
       runner.request.env.tap do |env|
@@ -42,17 +42,17 @@ module Deas
         # this is specifically needed by the Logging middleware
         # this is also needed by the Sinatra error handlers so they can provide
         # error context.  This may change when we eventually remove Sinatra.
+        env['deas.route_path']    = runner.route_path
         env['deas.handler_class'] = self.handler_class
         env['deas.handler']       = runner.handler
         env['deas.params']        = runner.params
         env['deas.splat']         = runner.splat
-        env['deas.route_path']    = runner.route_path
 
         # this handles the verbose logging (it is a no-op if summary logging)
+        env['deas.logging'].call "  Route:   #{runner.route_path.inspect}"
         env['deas.logging'].call "  Handler: #{self.handler_class.name}"
         env['deas.logging'].call "  Params:  #{runner.params.inspect}"
         env['deas.logging'].call "  Splat:   #{runner.splat.inspect}" if !runner.splat.nil?
-        env['deas.logging'].call "  Route:   #{runner.route_path.inspect}"
       end
 
       runner.run

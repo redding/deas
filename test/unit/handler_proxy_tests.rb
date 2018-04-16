@@ -62,8 +62,8 @@ class Deas::HandlerProxy
         :router          => @server_data.router,
         :template_source => @server_data.template_source,
         :request         => @request_data.request,
-        :params          => @request_data.params,
-        :route_path      => @request_data.route_path
+        :route_path      => @request_data.route_path,
+        :params          => @request_data.params
       }
       assert_equal exp_args, @runner_spy.args
 
@@ -71,6 +71,9 @@ class Deas::HandlerProxy
     end
 
     should "add data to the request env to make it available to Rack" do
+      exp = @runner_spy.route_path
+      assert_equal exp, @request_data.request.env['deas.route_path']
+
       exp = subject.handler_class
       assert_equal exp, @request_data.request.env['deas.handler_class']
 
@@ -82,17 +85,14 @@ class Deas::HandlerProxy
 
       exp = @runner_spy.splat
       assert_equal exp, @request_data.request.env['deas.splat']
-
-      exp = @runner_spy.route_path
-      assert_equal exp, @request_data.request.env['deas.route_path']
     end
 
     should "log the handler class name and the params" do
       exp_msgs = [
+        "  Route:   #{@runner_spy.route_path.inspect}",
         "  Handler: #{subject.handler_class.name}",
         "  Params:  #{@runner_spy.params.inspect}",
-        "  Splat:   #{@runner_spy.splat.inspect}",
-        "  Route:   #{@runner_spy.route_path.inspect}"
+        "  Splat:   #{@runner_spy.splat.inspect}"
       ]
       assert_equal exp_msgs, @request_data.request.logging_msgs
     end
