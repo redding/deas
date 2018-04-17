@@ -73,6 +73,7 @@ module Deas
       def headers(*args);      @deas_runner.headers(*args);      end
       def body(*args);         @deas_runner.body(*args);         end
       def content_type(*args); @deas_runner.content_type(*args); end
+      def set_cookie(*args);   @deas_runner.set_cookie(*args);   end
       def halt(*args);         @deas_runner.halt(*args);         end
       def redirect(*args);     @deas_runner.redirect(*args);     end
       def send_file(*args);    @deas_runner.send_file(*args);    end

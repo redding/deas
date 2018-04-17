@@ -68,6 +68,14 @@ module Deas
       self.headers['Content-Type'] = get_content_type(extname, params)
     end
 
+    def set_cookie(name, value, opts = nil)
+      Rack::Utils.set_cookie_header!(
+        self.headers,
+        name,
+        (opts || {}).merge(:value => value)
+      )
+    end
+
     def halt(*args)
       self.status(args.shift)  if args.first.instance_of?(::Fixnum)
       self.headers(args.shift) if args.first.kind_of?(::Hash)

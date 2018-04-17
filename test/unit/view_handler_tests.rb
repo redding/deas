@@ -278,6 +278,15 @@ module Deas::ViewHandler
       assert_nil @meth_block
     end
 
+    should "call to the runner for its set cookie helper" do
+      capture_runner_meth_args_for(:set_cookie)
+      exp_args = @args
+      subject.instance_eval{ set_cookie(*exp_args) }
+
+      assert_equal exp_args, @meth_args
+      assert_nil @meth_block
+    end
+
     should "call to the runner for its halt helper" do
       capture_runner_meth_args_for(:halt)
       exp_args = @args

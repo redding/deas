@@ -47,7 +47,7 @@ class Deas::Runner
     should have_readers :request, :params, :route_path
     should have_readers :logger, :router, :template_source
     should have_imeths :splat, :run, :to_rack
-    should have_imeths :status, :headers, :body, :content_type
+    should have_imeths :status, :headers, :body, :content_type, :set_cookie
     should have_imeths :halt, :redirect, :send_file
     should have_imeths :render, :source_render, :partial, :source_partial
 
@@ -230,6 +230,35 @@ class Deas::Runner
       subject.content_type(extname, params)
       exp = "#{mime_type};#{params.map{ |k,v| k + '=' + v }.join(',')}"
       assert_equal exp, subject.headers['Content-Type']
+    end
+
+    should "set a cookie header with `set_cookie`" do
+      name, value = Factory.string, Factory.string
+      opts        = { Factory.string => Factory.string }
+      exp_headers = {}
+      Rack::Utils.set_cookie_header!(
+        exp_headers,
+        name,
+        (opts || {}).merge(:value => value)
+      )
+
+      rack_utils_set_cookie_header_called_with = nil
+      Assert.stub(Rack::Utils, :set_cookie_header!) do |*args|
+        rack_utils_set_cookie_header_called_with = args
+        Assert.stub_send(Rack::Utils, :set_cookie_header!, *args)
+      end
+
+      subject.set_cookie(name, value, opts)
+
+      exp = [subject.headers, name, opts.merge(:value => value)]
+      assert_equal exp, rack_utils_set_cookie_header_called_with
+      exp = exp_headers['Set-Cookie']
+      assert_includes exp, @runner.headers['Set-Cookie']
+
+      subject.set_cookie(name, value)
+
+      exp = [subject.headers, name, { :value => value }]
+      assert_equal exp, rack_utils_set_cookie_header_called_with
     end
 
   end
