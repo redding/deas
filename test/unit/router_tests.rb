@@ -41,7 +41,9 @@ class Deas::Router
     should have_readers :trailing_slashes, :escape_query_value_proc
 
     should have_imeths :view_handler_ns
-    should have_imeths :allow_trailing_slashes, :remove_trailing_slashes
+    should have_imeths :allow_trailing_slashes, :allow_trailing_slashes_set?
+    should have_imeths :remove_trailing_slashes, :remove_trailing_slashes_set?
+    should have_imeths :trailing_slashes_set?
     should have_imeths :escape_query_value
     should have_imeths :base_url, :set_base_url, :prepend_base_url
     should have_imeths :url, :url_for
@@ -85,11 +87,23 @@ class Deas::Router
     end
 
     should "config trailing slash handling" do
+      assert_false subject.allow_trailing_slashes_set?
+      assert_false subject.remove_trailing_slashes_set?
+      assert_false subject.trailing_slashes_set?
+
       subject.allow_trailing_slashes
+
       assert_equal subject.class::ALLOW_TRAILING_SLASHES, subject.trailing_slashes
+      assert_true  subject.allow_trailing_slashes_set?
+      assert_false subject.remove_trailing_slashes_set?
+      assert_true  subject.trailing_slashes_set?
 
       subject.remove_trailing_slashes
+
       assert_equal subject.class::REMOVE_TRAILING_SLASHES, subject.trailing_slashes
+      assert_false subject.allow_trailing_slashes_set?
+      assert_true  subject.remove_trailing_slashes_set?
+      assert_true  subject.trailing_slashes_set?
     end
 
     should "allow configuring a custom escape query value proc" do

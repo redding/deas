@@ -36,8 +36,16 @@ module Deas
       @trailing_slashes = ALLOW_TRAILING_SLASHES
     end
 
+    def allow_trailing_slashes_set?
+      @trailing_slashes == ALLOW_TRAILING_SLASHES
+    end
+
     def remove_trailing_slashes
       @trailing_slashes = REMOVE_TRAILING_SLASHES
+    end
+
+    def remove_trailing_slashes_set?
+      @trailing_slashes == REMOVE_TRAILING_SLASHES
     end
 
     def trailing_slashes_set?
