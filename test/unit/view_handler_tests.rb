@@ -18,6 +18,7 @@ module Deas::ViewHandler
     end
     subject{ @handler_class }
 
+    should have_imeths :default_status, :default_headers, :default_body
     should have_imeths :layout, :layouts
     should have_imeths :before_callbacks, :after_callbacks
     should have_imeths :before_init_callbacks, :after_init_callbacks
@@ -31,6 +32,50 @@ module Deas::ViewHandler
 
     should "use much-plugin" do
       assert_includes MuchPlugin, Deas::ViewHandler
+    end
+
+    should "know its default status" do
+      assert_equal 200, subject::DEFAULT_STATUS
+    end
+
+    should "know its default headers" do
+      assert_equal({}, subject::DEFAULT_HEADERS)
+    end
+
+    should "know its default body" do
+      assert_equal [''], subject::DEFAULT_BODY
+    end
+
+    should "know and set its default status" do
+      assert_equal subject::DEFAULT_STATUS, subject.default_status
+
+      exp = Factory.integer
+      subject.default_status exp
+      assert_equal exp, subject.default_status
+    end
+
+    should "know and merge values on its response headers" do
+      assert_equal subject::DEFAULT_HEADERS, subject.default_headers
+
+      new_header_values = { Factory.string => Factory.string }
+      subject.default_headers(new_header_values)
+      assert_equal new_header_values, subject.default_headers
+
+      location = Factory.string
+      subject.default_headers['Location'] = location
+      exp = new_header_values.merge('Location' => location)
+      assert_equal exp, subject.default_headers
+    end
+
+    should "know and set its response body" do
+      assert_equal subject::DEFAULT_BODY, subject.default_body
+
+      subject.default_body [nil, ''].sample
+      assert_equal subject::DEFAULT_BODY, subject.default_body
+
+      value = [[Factory.string], Factory.string, Factory.integer].sample
+      exp   = Deas::Runner.body_value(value)
+      assert_equal exp, subject.default_body(value)
     end
 
     should "specify layouts" do

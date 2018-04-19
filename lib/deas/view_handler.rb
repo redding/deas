@@ -11,6 +11,10 @@ module Deas
       include InstanceMethods
     end
 
+    DEFAULT_STATUS  = 200.freeze
+    DEFAULT_HEADERS = {}.freeze
+    DEFAULT_BODY    = [''].freeze
+
     module InstanceMethods
 
       def initialize(runner)
@@ -87,6 +91,23 @@ module Deas
     end
 
     module ClassMethods
+
+      def default_status(value = nil)
+        @default_status = value if !value.nil?
+        @default_status || DEFAULT_STATUS
+      end
+
+      def default_headers(value = nil)
+        @default_headers = value if !value.nil? && value.kind_of?(::Hash)
+        @default_headers || DEFAULT_HEADERS
+      end
+
+      def default_body(value = nil)
+        if !value.nil?
+          @default_body = Deas::Runner.body_value(value)
+        end
+        @default_body || DEFAULT_BODY
+      end
 
       def layout(path = nil, &block)
         value = !path.nil? ? Proc.new{ path } : block
