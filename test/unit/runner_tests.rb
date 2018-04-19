@@ -12,10 +12,12 @@ class Deas::Runner
   class UnitTests < Assert::Context
     desc "Deas::Runner"
     setup do
-      @handler_class = EmptyViewHandler
+      @handler_class = Class.new{ include Deas::ViewHandler }
       @runner_class  = Deas::Runner
     end
     subject{ @runner_class }
+
+    should have_imeth :body_value
 
     should "know its default mime type" do
       assert_equal 'application/octet-stream', subject::DEFAULT_MIME_TYPE
@@ -25,12 +27,15 @@ class Deas::Runner
       assert_equal 'utf-8', subject::DEFAULT_CHARSET
     end
 
-    should "know its default status" do
-      assert_equal 200, subject::DEFAULT_STATUS
-    end
+    should "know how to build appropriate body values" do
+      assert_nil subject.body_value([nil, ''].sample)
 
-    should "know its default body" do
-      assert_equal [''], subject::DEFAULT_BODY
+      exp = [Factory.string]
+      assert_equal exp, subject.body_value(exp)
+      assert_equal exp, subject.body_value(exp.first)
+
+      exp = [Factory.integer.to_s]
+      assert_equal exp, subject.body_value(exp.first.to_i)
     end
 
   end
@@ -38,6 +43,10 @@ class Deas::Runner
   class InitTests < UnitTests
     desc "when init"
     setup do
+      @handler_class.default_status(Factory.integer)
+      @handler_class.default_headers(Factory.string => Factory.string)
+      @handler_class.default_body(Factory.string)
+
       @request = Factory.request
       @runner  = @runner_class.new(@handler_class, :request => @request)
     end
@@ -151,9 +160,9 @@ class Deas::Runner
 
     should "know its `to_rack` representation" do
       exp = [
-        subject.class::DEFAULT_STATUS,
+        @handler_class.default_status,
         subject.headers.to_hash,
-        subject.class::DEFAULT_BODY
+        @handler_class.default_body
       ]
       assert_equal exp, subject.to_rack
 
@@ -180,35 +189,31 @@ class Deas::Runner
 
     should "know and merge values on its response headers" do
       assert_kind_of Rack::Utils::HeaderHash, subject.headers
-      assert_equal({}, subject.headers)
+      assert_equal @handler_class.default_headers, subject.headers
 
       new_header_values = { Factory.string => Factory.string }
       subject.headers(new_header_values)
       assert_kind_of Rack::Utils::HeaderHash, subject.headers
-      assert_equal new_header_values, subject.headers
+      exp = @handler_class.default_headers.merge(new_header_values)
+      assert_equal exp, subject.headers
 
       location = Factory.string
       subject.headers['Location'] = location
-      exp = new_header_values.merge('Location' => location)
+      exp = @handler_class.default_headers.merge(
+        new_header_values.merge('Location' => location)
+      )
       assert_equal exp, subject.headers
     end
 
     should "know and set its response body" do
       assert_nil subject.body
 
-      subject.body [nil, ''].sample
+      subject.body(nil)
       assert_nil subject.body
 
-      exp = [Factory.string]
-      subject.body exp
-      assert_equal exp, subject.body
-
-      subject.body exp.first
-      assert_equal exp, subject.body
-
-      exp = [Factory.integer.to_s]
-      subject.body exp.first.to_i
-      assert_equal exp, subject.body
+      value = ['', [Factory.string], Factory.string, Factory.integer].sample
+      exp   = Deas::Runner.body_value(value)
+      assert_equal exp, subject.body(value)
     end
 
     should "know and set its response content type header" do
@@ -266,7 +271,7 @@ class Deas::Runner
 
   end
 
-  class HaltTests < InitTests
+  class HaltTests < UnitTests
     desc "the `halt` method"
     setup do
       @status  = Factory.integer
@@ -331,11 +336,15 @@ class Deas::Runner
 
   end
 
-  class HaltCalledWithTests < InitTests
+  class HaltCalledWithTests < UnitTests
     setup do
+      @request = Factory.request
+      @runner  = @runner_class.new(@handler_class, :request => @request)
+
       @halt_called_with = nil
       Assert.stub(@runner, :halt){ |*args| @halt_called_with = args; throw :halt }
     end
+    subject{ @runner }
 
   end
 

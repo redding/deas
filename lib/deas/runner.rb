@@ -10,17 +10,23 @@ module Deas
 
     DEFAULT_MIME_TYPE = 'application/octet-stream'.freeze
     DEFAULT_CHARSET   = 'utf-8'.freeze
-    DEFAULT_STATUS    = 200.freeze
-    DEFAULT_BODY      = [''].freeze
+
+    def self.body_value(value)
+      # http://www.rubydoc.info/github/rack/rack/master/file/SPEC#The_Body
+      # "The Body must respond to each and must only yield String values"
+      # String#each is a thing in 1.8.7, so account for it here
+      return nil if value.to_s.empty?
+      !value.respond_to?(:each) || value.kind_of?(String) ? [*value.to_s] : value
+    end
 
     attr_reader :handler_class, :handler
     attr_reader :request, :route_path, :params
     attr_reader :logger, :router, :template_source
 
     def initialize(handler_class, args = nil)
-      @status, @headers, @body = nil, Rack::Utils::HeaderHash.new, nil
-
       @handler_class = handler_class
+      @status, @body = nil, nil
+      @headers = Rack::Utils::HeaderHash.new.merge(@handler_class.default_headers)
       @handler = @handler_class.new(self)
 
       args ||= {}
@@ -41,7 +47,10 @@ module Deas
     end
 
     def to_rack
-      [self.status || DEFAULT_STATUS, self.headers.to_hash, self.body || DEFAULT_BODY]
+      [ self.status || @handler_class.default_status,
+        self.headers.to_hash,
+        self.body   || @handler_class.default_body
+      ]
     end
 
     def status(value = nil)
@@ -55,11 +64,8 @@ module Deas
     end
 
     def body(value = nil)
-      if !value.to_s.empty?
-        # http://www.rubydoc.info/github/rack/rack/master/file/SPEC#The_Body
-        # "The Body must respond to each and must only yield String values"
-        # String#each is a thing in 1.8.7, so account for it here
-        @body = !value.respond_to?(:each) || value.kind_of?(String) ? [*value.to_s] : value
+      if !value.nil?
+        @body = self.class.body_value(value)
       end
       @body
     end
