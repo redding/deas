@@ -30,7 +30,7 @@ class Deas::Runner
     end
 
     should "know its default body" do
-      assert_equal [], subject::DEFAULT_BODY
+      assert_equal [''], subject::DEFAULT_BODY
     end
 
   end
@@ -196,6 +196,9 @@ class Deas::Runner
     should "know and set its response body" do
       assert_nil subject.body
 
+      subject.body [nil, ''].sample
+      assert_nil subject.body
+
       exp = [Factory.string]
       subject.body exp
       assert_equal exp, subject.body
@@ -293,6 +296,11 @@ class Deas::Runner
       assert_equal @body, runner.body
 
       runner = runner_halted_with(@status, @headers)
+      assert_equal @status,  runner.status
+      assert_equal @headers, runner.headers
+      assert_nil runner.body
+
+      runner = runner_halted_with(@status, @headers, '')
       assert_equal @status,  runner.status
       assert_equal @headers, runner.headers
       assert_nil runner.body

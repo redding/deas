@@ -11,7 +11,7 @@ module Deas
     DEFAULT_MIME_TYPE = 'application/octet-stream'.freeze
     DEFAULT_CHARSET   = 'utf-8'.freeze
     DEFAULT_STATUS    = 200.freeze
-    DEFAULT_BODY      = [].freeze
+    DEFAULT_BODY      = [''].freeze
 
     attr_reader :handler_class, :handler
     attr_reader :request, :route_path, :params
@@ -55,7 +55,7 @@ module Deas
     end
 
     def body(value = nil)
-      if !value.nil?
+      if !value.to_s.empty?
         # http://www.rubydoc.info/github/rack/rack/master/file/SPEC#The_Body
         # "The Body must respond to each and must only yield String values"
         # String#each is a thing in 1.8.7, so account for it here
@@ -79,7 +79,7 @@ module Deas
     def halt(*args)
       self.status(args.shift)  if args.first.instance_of?(::Fixnum)
       self.headers(args.shift) if args.first.kind_of?(::Hash)
-      self.body(args.shift)
+      self.body(args.shift)    if !args.first.to_s.empty?
       throw :halt
     end
 
