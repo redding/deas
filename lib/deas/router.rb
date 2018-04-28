@@ -140,11 +140,12 @@ module Deas
     def validate_trailing_slashes!
       if self.trailing_slashes == REMOVE_TRAILING_SLASHES
         paths = []
-        all_missing = self.routes.inject(true) do |result, route|
-          paths << route.path if route.path[-1..-1] == SLASH
-          result && route.path[-1..-1] != SLASH
+        has_trailing = self.routes.inject(false) do |result, route|
+          route_has = route.path[-1,1] == SLASH && route.path != SLASH
+          paths << route.path if route_has
+          result || route_has
         end
-        if !all_missing
+        if has_trailing
           msg = "all route paths must *not* end with a \"/\", but these do:\n"\
                 "#{paths.join("\n")}"
           raise TrailingSlashesError, msg

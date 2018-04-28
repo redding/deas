@@ -80,6 +80,7 @@ class RemoveTrailingSlashesServer
   router do
     remove_trailing_slashes
 
+    get '/',     'ShowHandler'
     get '/show', 'ShowHandler'
   end
 
@@ -96,6 +97,7 @@ class AllowTrailingSlashesServer
   router do
     allow_trailing_slashes
 
+    get '/',           'ShowHandler'
     get '/show',       'ShowHandler'
     get '/show-text/', 'ShowTextHandler'
 

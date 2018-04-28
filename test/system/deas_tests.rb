@@ -171,11 +171,21 @@ module Deas
       @app = RemoveTrailingSlashesServer.new
     end
 
-    should "redirect any paths that end in a slash" do
+    should "redirect any paths that end with a slash" do
       get '/show/'
 
-      assert_equal 302,      last_response.status
+      assert_equal 302,     last_response.status
       assert_equal '/show', last_response.headers['Location']
+    end
+
+    should "serve any found paths that do not end with a slash" do
+      get '/'
+      assert_equal 200, last_response.status
+      assert_equal 'text/html;charset=utf-8', last_response.headers['Content-Type']
+
+      get '/show'
+      assert_equal 200, last_response.status
+      assert_equal 'text/html;charset=utf-8', last_response.headers['Content-Type']
     end
 
   end
@@ -187,6 +197,10 @@ module Deas
     end
 
     should "serve any found paths regardless of whether they end with a slash" do
+      get '/'
+      assert_equal 200, last_response.status
+      assert_equal 'text/html;charset=utf-8', last_response.headers['Content-Type']
+
       get '/show'
       assert_equal 200, last_response.status
       assert_equal 'text/html;charset=utf-8', last_response.headers['Content-Type']

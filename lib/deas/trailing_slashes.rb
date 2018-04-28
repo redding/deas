@@ -7,11 +7,11 @@ module Deas
 
   class TrailingSlashes
 
-    module RequireNoHandler; end
-    module AllowHandler;     end
+    module RemoveHandler; end
+    module AllowHandler;  end
 
     HANDLERS = {
-      Deas::Router::REMOVE_TRAILING_SLASHES => RequireNoHandler,
+      Deas::Router::REMOVE_TRAILING_SLASHES => RemoveHandler,
       Deas::Router::ALLOW_TRAILING_SLASHES  => AllowHandler
     }
 
@@ -44,10 +44,19 @@ module Deas
       HANDLERS[@router.trailing_slashes].run(env){ @app.call(env) }
     end
 
-    module RequireNoHandler
+    module BaseHandler
+
+      def path_has_trailing_slash?(env)
+        (p = env['PATH_INFO'])[-1, 1] == Deas::Router::SLASH && p != Deas::Router::SLASH
+      end
+
+    end
+
+    module RemoveHandler
+      extend BaseHandler
 
       def self.run(env)
-        if env['PATH_INFO'][-1..-1] == Deas::Router::SLASH
+        if path_has_trailing_slash?(env)
           [302, { 'Location' => env['PATH_INFO'][0..-2] }, ['']]
         else
           yield
@@ -57,6 +66,7 @@ module Deas
     end
 
     module AllowHandler
+      extend BaseHandler
 
       def self.run(env)
         status, headers, body = yield
@@ -65,7 +75,7 @@ module Deas
           env['deas.error'] = nil
 
           # switching the trailing slash of the path info
-          env['PATH_INFO'] = if env['PATH_INFO'][-1..-1] == Deas::Router::SLASH
+          env['PATH_INFO'] = if path_has_trailing_slash?(env)
             env['PATH_INFO'][0..-2]
           else
             env['PATH_INFO']+Deas::Router::SLASH
