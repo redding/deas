@@ -86,9 +86,9 @@ class Deas::TrailingSlashes
     end
   end
 
-  class RequireNoHandlerTests < HandlerSetupTests
-    desc "RequireNoHandler"
-    subject{ RequireNoHandler }
+  class RemoveHandlerTests < HandlerSetupTests
+    desc "RemoveHandler"
+    subject{ RemoveHandler }
 
     should have_readers :run
 

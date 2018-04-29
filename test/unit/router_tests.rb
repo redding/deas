@@ -192,6 +192,7 @@ class Deas::Router
 
     should "validate trailing slashes" do
       router = @router_class.new
+      router.get('/',           'EmptyViewHandler')
       router.get('/something',  'EmptyViewHandler')
       router.get('/something/', 'EmptyViewHandler')
       router.apply_definitions!
@@ -213,6 +214,7 @@ class Deas::Router
       assert_includes exp, err.message
 
       router = @router_class.new
+      router.get('/',                'EmptyViewHandler')
       router.get('/something/',      'EmptyViewHandler')
       router.get('/something-else/', 'EmptyViewHandler')
       router.apply_definitions!
@@ -235,6 +237,7 @@ class Deas::Router
       assert_includes exp, err.message
 
       router = @router_class.new
+      router.get('/',               'EmptyViewHandler')
       router.get('/something',      'EmptyViewHandler')
       router.get('/something-else', 'EmptyViewHandler')
       router.apply_definitions!
